@@ -69,7 +69,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)  # shut up requests!
 # Basic App Settings
 ##############################
 
-CENTRAL_SERVER = getattr(local_settings, "CENTRAL_SERVER", False)
+CENTRAL_SERVER = True
 
 # the default encoding for strings read from various IO sources
 DEFAULT_ENCODING = getattr(local_settings, "DEFAULT_ENCODING", 'utf-8')
@@ -178,7 +178,7 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     "django.core.context_processors.media",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
-    "%s.custom_context_processors.custom" % ("central" if CENTRAL_SERVER else "distributed"),
+    "central.custom_context_processors.custom",
 )
 
 
