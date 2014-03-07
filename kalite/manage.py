@@ -12,8 +12,9 @@ PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 PROJECT_PYTHON_PATHS = [
     os.path.join(PROJECT_PATH, "..", "python-packages"),
     PROJECT_PATH,
-    os.path.join(PROJECT_PATH, ".."),
+    os.path.join(PROJECT_PATH, "..", "python-packages", 'ka-lite', 'kalite'),
 ]
+print PROJECT_PYTHON_PATHS
 sys.path = PROJECT_PYTHON_PATHS + sys.path
 
 # Now we can get started.
@@ -26,15 +27,6 @@ from settings import LOG as logging
 ########################
 # kaserve
 ########################
-
-# Force all commands to run through our own serve command, which does auto-config if necessary
-# TODO(bcipolli): simplify start scripts, just force everything through kaserve directly.
-if "runserver" in sys.argv:
-    logging.info("You requested to run runserver; instead, we're funneling you through our 'kaserve' command.")
-    sys.argv[sys.argv.index("runserver")] = "kaserve"
-elif "runcherrypyserver" in sys.argv and "stop" not in sys.argv:
-    logging.info("You requested to run runcherrypyserver; instead, we're funneling you through our 'kaserve' command.")
-    sys.argv[sys.argv.index("runcherrypyserver")] = "kaserve"
 
 if settings.DEBUG:
     # In debug mode, add useful debugging flags
