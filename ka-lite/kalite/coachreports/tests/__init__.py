@@ -1,1 +1,0 @@
-from browser_tests import *
