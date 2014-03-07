@@ -12,6 +12,8 @@ PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 PROJECT_PYTHON_PATHS = [
     os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),
     PROJECT_PATH,
+    os.path.join(PROJECT_PATH, ".."),
+    os.path.join(PROJECT_PATH, "..", 'ka-lite'),
     os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),
 ]
 print PROJECT_PYTHON_PATHS

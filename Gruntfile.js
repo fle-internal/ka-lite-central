@@ -3,43 +3,38 @@ module.exports = function(grunt) {
   // Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'), //To read the values of the package.json file
-		
+
 		less: {
 			compile: {
 				options: {
-					paths:["./kalite/static/less"], //Directory to check for @imports
+					paths:["./code/static/less"], //Directory to check for @imports
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
 				files: {
-					"./kalite/static/css/style.css": "./kalite/static/less/style.less",
+					"./code/static/css/style.css": "./code/static/less/style.less",
 				},
 
 			},
-			
+
 			bootstrap: {
 				options: {
-					paths:["./kalite/static/less/bootstrap"],
+					paths:["./code/static/less/bootstrap"],
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
 				files: {
-					"./kalite/static/css/bootstrap/bootstrap.css": "./kalite/static/less/bootstrap/bootstrap.less",
-					"./kalite/static/css/bootstrap/responsive.css": "./kalite/static/less/bootstrap/responsive.less"
+					"./code/static/css/bootstrap/bootstrap.css": "./code/static/less/bootstrap/bootstrap.less",
+					"./code/static/css/bootstrap/responsive.css": "./code/static/less/bootstrap/responsive.less"
 				},
 			}
 		},
 		jshint: {
 			files: [
 				'Gruntfile.js',
-				'kalite/static/js/coachreports/',
-				'kalite/static/js/securesync/',
-				'kalite/static/js/updates/',
-				'kalite/static/js/exercises.js',
-				'kalite/static/js/khan-lite.js',
-				'kalite/static/js/kmap-editor.js',
-				'kalite/static/js/search_autocomplete.js',
-				'kalite/static/js/videoplayer.js'
+				'code/static/js/coachreports/',
+				'code/static/js/securesync/',
+				'code/static/js/khan-lite.js',
 			],
 			// http://www.jshint.com/docs/options/
 			options: {

@@ -8,5 +8,5 @@ sys.path = [PROJECT_PATH, os.path.join(PROJECT_PATH, "../"), os.path.join(PROJEC
 
 from django.core.handlers.wsgi import WSGIHandler
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'kalite.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'code.settings'
 application = WSGIHandler()
