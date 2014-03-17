@@ -11,11 +11,11 @@ This is the code for the KA Lite Central Server: [https://kalite.learningequalit
  
 3. Install the dependencies listed in packages.json: `sudo npm install`
 
-4. Install grunt: 'sudo npm install -g grunt-cli'
+4. Install grunt: `sudo npm install -g grunt-cli`
 
-5. Run grunt in the root directory: 'grunt'
+5. Run grunt in the root directory: `grunt`
 
-6. Go into the code directory: 'cd code'
+6. Go into the code directory: `cd code`
 
 7. Set up the database: `python manage.py syncdb --migrate`
 
