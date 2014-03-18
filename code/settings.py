@@ -164,7 +164,7 @@ SECRET_KEY     = getattr(local_settings, "SECRET_KEY", "8qq-!fa$92i=s1gjjitd&%s@
 
 TEMPLATE_DIRS  = (PROJECT_PATH + "/templates", KALITE_PATH + "/kalite/templates")
 TEMPLATE_DIRS  = tuple([os.path.realpath(td) + "/" for td in TEMPLATE_DIRS])
-print TEMPLATE_DIRS
+
 HTTP_PROXY     = getattr(local_settings, "HTTP_PROXY", None)
 HTTPS_PROXY     = getattr(local_settings, "HTTPS_PROXY", None)
 
@@ -191,7 +191,6 @@ TEMPLATE_LOADERS = (
 #    if USE_I18N:
 TEMPLATE_CONTEXT_PROCESSORS += ("i18n.custom_context_processors.languages",)
 
-MIDDLEWARE_CLASSES = getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
 MIDDLEWARE_CLASSES = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -199,9 +198,8 @@ MIDDLEWARE_CLASSES = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "fle_utils.django_utils.middleware.GetNextParam",
     "django.middleware.csrf.CsrfViewMiddleware",
-) + MIDDLEWARE_CLASSES  # append local_settings middleware, in case of dependencies
+) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())  # append local_settings middleware, in case of dependencies
 
-INSTALLED_APPS = getattr(local_settings, 'INSTALLED_APPS', tuple())
 INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -211,29 +209,35 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions", # needed for clean_pyc (testing)
+    "announcements",
+    "postmark",
     "south",
     "fle_utils.config",
     "fle_utils.chronograph",
     "django_cherrypy_wsgiserver",
     "securesync",
-    "facility",
-    "main", # in order for securesync to work, this needs to be here.
-    "control_panel",  # in both apps
-    "coachreports",  # in both apps; reachable on central via control_panel
-    "khanload",  # khan academy interactions
-    "updates",  #
-    "i18n",  #
+    "kalite.facility",
+    "kalite.main", # in order for securesync to work, this needs to be here.
+    "kalite.control_panel",  # in both apps
+    "kalite.coachreports",  # in both apps; reachable on central via control_panel
+    "kalite.khanload",  # khan academy interactions
+    "kalite.updates",  #
+    "kalite.i18n",  #
     "kalite",
-    "distributed",
+    "kalite.distributed",  # TODO: remove this undesired dependency.
+    "central",
+    "contact",
+    "faq",
     "i18n_central",
-) + INSTALLED_APPS  # append local_settings installed_apps, in case of dependencies
+    "registration",
+    "stats",
+) + getattr(local_settings, 'INSTALLED_APPS', tuple())  # append local_settings installed_apps, in case of dependencies
 
 INSTALLED_APPS += ("django_snippets",)   # used in contact form and (debug) profiling middleware
 
 ROOT_URLCONF = "central.urls"
 ACCOUNT_ACTIVATION_DAYS = getattr(local_settings, "ACCOUNT_ACTIVATION_DAYS", 7)
 DEFAULT_FROM_EMAIL      = getattr(local_settings, "DEFAULT_FROM_EMAIL", CENTRAL_FROM_EMAIL)
-INSTALLED_APPS         += ("postmark", "registration", "central", "faq", "contact", "stats", "announcements",)
 EMAIL_BACKEND           = getattr(local_settings, "EMAIL_BACKEND", "postmark.backends.PostmarkBackend")
 AUTH_PROFILE_MODULE     = "central.UserProfile"
 CSRF_COOKIE_NAME        = "csrftoken_central"
@@ -242,6 +246,8 @@ SESSION_COOKIE_NAME     = "sessionid_central"
 
 CROWDIN_PROJECT_ID      = getattr(local_settings, "CROWDIN_PROJECT_ID", None)
 CROWDIN_PROJECT_KEY     = getattr(local_settings, "CROWDIN_PROJECT_KEY", None)
+KA_CROWDIN_PROJECT_ID      = getattr(local_settings, "KA_CROWDIN_PROJECT_ID", None)
+KA_CROWDIN_PROJECT_KEY     = getattr(local_settings, "KA_CROWDIN_PROJECT_KEY", None)
 AMARA_USERNAME          = getattr(local_settings, "AMARA_USERNAME", None)
 AMARA_API_KEY           = getattr(local_settings, "AMARA_API_KEY", None)
 
