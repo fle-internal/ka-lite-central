@@ -16,7 +16,6 @@ PROJECT_PYTHON_PATHS = [
     os.path.join(PROJECT_PATH, "..", 'ka-lite'),
     os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),
 ]
-print PROJECT_PYTHON_PATHS
 sys.path = PROJECT_PYTHON_PATHS + sys.path
 
 # Now we can get started.
