@@ -225,6 +225,7 @@ INSTALLED_APPS = (
     "i18n",  #
     "kalite",
     "distributed",
+    "i18n_central",
 ) + INSTALLED_APPS  # append local_settings installed_apps, in case of dependencies
 
 INSTALLED_APPS += ("django_snippets",)   # used in contact form and (debug) profiling middleware
