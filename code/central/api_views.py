@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 
-import version
+import kalite.version  # for kalite software version
 from .views import get_central_server_host
 from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonpResponse
 
@@ -17,13 +17,13 @@ from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResp
 @allow_jsonp
 @api_handle_error_with_json
 def get_kalite_version(request):
-    assert version.VERSION in version.VERSION_INFO
+    assert kalite.version.VERSION in kalite.version.VERSION_INFO
 
     request_version = request.GET.get("current_version", "0.10.0")  # default to first version that can understand this.
-    needed_updates = [v for v in sorted(version.VERSION_INFO.keys()) if request_version < v]    # versions are nice--they sort by string
+    needed_updates = [v for v in sorted(kalite.version.VERSION_INFO.keys()) if request_version < v]    # versions are nice--they sort by string
     return JsonResponse({
-        "version": version.VERSION,
-        "version_info": OrderedDict([(v, version.VERSION_INFO[v]) for v in needed_updates]),
+        "version": kalite.version.VERSION,
+        "version_info": OrderedDict([(v, kalite.version.VERSION_INFO[v]) for v in needed_updates]),
     })
 
 
@@ -41,7 +41,7 @@ def get_download_urls(request):
     downloads = {}
     for locale, size in download_sizes.iteritems():
         urlargs = {
-            "version": version.VERSION,
+            "version": kalite.version.VERSION,
             "platform": "all",
             "locale": locale
         }
