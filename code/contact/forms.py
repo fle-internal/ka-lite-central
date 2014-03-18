@@ -1,8 +1,9 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, RadioSelect
 
-from contact.models import Contact, Deployment, Support, Info, Contribute
 from django_snippets.empty_choice_field import EmptyChoiceField
+
+from .models import Contact, Deployment, Support, Info, Contribute
 
 
 class Html5EmailInput(forms.TextInput):
