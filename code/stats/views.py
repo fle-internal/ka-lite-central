@@ -185,7 +185,7 @@ def show_logs(request, ndays=None):
 
                     # Validate that this date is within the accepted range
                     parsed_date = datetime.datetime.strptime(dat, "%Y-%m-%d")
-                    logging.debug("%s %s" % (parsed_date, (datetime.datetime.now() - timedelta(days=ndays))))
+                    #logging.debug("%s %s" % (parsed_date, (datetime.datetime.now() - timedelta(days=ndays))))
                     if ndays is not None and datetime.datetime.now() - timedelta(days=ndays) > parsed_date:
                         last_loop = True
                         old_data = ""
