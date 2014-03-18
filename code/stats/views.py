@@ -7,12 +7,12 @@ from datetime import timedelta  # this is OK; central server code can be 2.7+
 from django.db.models import Sum, Max, Count, F, Q, Min
 
 from . import stats_logger
-from fle_utils.securesync.models import SyncSession, Device
 from kalite.i18n import get_video_language, get_video_id
 from kalite.settings import LOG as logging
 from kalite.main.models import ExerciseLog, VideoLog
 from kalite.main.topic_tools import get_id2slug_map
-from shared.decorators import require_authorized_admin
+from kalite.shared.decorators import require_authorized_admin
+from securesync.models import SyncSession, Device
 
 
 @require_authorized_admin
