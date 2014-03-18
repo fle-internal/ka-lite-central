@@ -18,15 +18,14 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
-from django.views.decorators.csrf import csrf_exempt
 
-import kalite
+import kalite  # for version
 from central.forms import OrganizationForm, OrganizationInvitationForm
-from central.models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile, FeedListing, Subscription
-from fle_utils.django_utils import get_request_ip
+from central.models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
+from fle_utils.feeds.models import FeedListing
+from kalite.shared.decorators import require_authorized_admin
 from securesync.engine.api_client import SyncClient
 from securesync.models import Zone
-from shared.decorators import require_authorized_admin
 
 
 def get_central_server_host(request):
@@ -94,16 +93,6 @@ def org_management(request, org_id=None):
             .order_by("organization__name")),
         "download_url": reverse("install"),
     }
-
-
-@csrf_exempt # because we want the front page to cache properly
-def add_subscription(request):
-    if request.method == "POST":
-        sub = Subscription(email=request.POST.get("email"))
-        sub.ip = get_request_ip(request) or ""
-        sub.save()
-        messages.success(request, _("A subscription for '%s' was added.") % request.POST.get("email"))
-    return HttpResponseRedirect(reverse("homepage"))
 
 
 @login_required

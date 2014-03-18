@@ -6,16 +6,15 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
-import main.api_urls
 import central.api_urls
-import coachreports.urls
 import contact.urls
-import control_panel.urls
 import faq.urls
+import fle_utils.feeds.urls
+import kalite.coachreports.urls
+import kalite.control_panel.urls
 import registration.urls
 import securesync.urls
 import stats.api_urls, stats.urls
-from feeds import RssSiteNewsFeed, AtomSiteNewsFeed
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
 
 
@@ -31,6 +30,9 @@ urlpatterns = patterns('stats.api_views',
     url(r'^', include(stats.api_urls)),  # add at root
 )
 
+urlpatterns += patterns('',
+    url('r^' ,include(fle_utils.feeds.urls)),
+)
 
 urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
@@ -64,15 +66,12 @@ urlpatterns += patterns('central.views',
     url(r'^organization/(?P<org_id>\w+)/zone/(?P<zone_id>\w+)/delete$', 'delete_zone', {}, 'delete_zone'),
 
     # Zone, facility, device
-    url(r'^organization/(?P<org_id>\w+)/', include(control_panel.urls)),
+    url(r'^organization/(?P<org_id>\w+)/', include(kalite.control_panel.urls)),
 
     # Reporting
-    url(r'^coachreports/', include(coachreports.urls)),
+    url(r'^coachreports/', include(kalite.coachreports.urls)),
 
     url(r'^glossary/$', 'glossary', {}, 'glossary'),
-    url(r'^addsubscription/$', 'add_subscription', {}, 'add_subscription'),
-    url(r'^feeds/rss/$', RssSiteNewsFeed(), {}, 'rss_feed'),
-    url(r'^feeds/atom/$', AtomSiteNewsFeed(), {}, 'atom_feed'),
     url(r'^faq/', include(faq.urls)),
 
     # The install wizard app has two views: both options available (here)
