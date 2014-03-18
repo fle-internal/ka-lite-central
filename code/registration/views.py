@@ -21,10 +21,8 @@ from contact.views import contact_subscribe
 from fle_utils.internet import set_query_params
 from registration.backends import get_backend
 from securesync.models import Zone
-from testing.asserts import central_server_only
 
 
-@central_server_only
 def complete(request, *args, **kwargs):
     messages.success(request, "Congratulations! Your account is now active. To get started, "
         + "login to the central server below, to administer organizations and zones.")
@@ -34,7 +32,6 @@ def complete(request, *args, **kwargs):
         return redirect("auth_login")
 
 
-@central_server_only
 def activate(request, backend,
              template_name='registration/activate.html',
              success_url=None, extra_context=None, **kwargs):
@@ -118,7 +115,6 @@ def activate(request, backend,
                               kwargs,
                               context_instance=context)
 
-@central_server_only
 @transaction.commit_on_success
 def register(request, backend, success_url=None, form_class=None,
              disallowed_url='registration_disallowed',
@@ -274,7 +270,6 @@ def register(request, backend, success_url=None, form_class=None,
     )
 
 
-@central_server_only
 def login_view(request, *args, **kwargs):
     """
     Force lowercase of the username.
@@ -314,7 +309,6 @@ def login_view(request, *args, **kwargs):
     return auth_views.login(request, *args, **kwargs)
 
 
-@central_server_only
 def logout_view(request):
     auth_logout(request)
     return redirect("homepage")

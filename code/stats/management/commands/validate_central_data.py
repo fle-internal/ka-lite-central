@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Count, Max, Sum, Avg, Q, F
 
-from main.models import *
+from kalite.main.models import *
 from securesync.models import *
 
 
