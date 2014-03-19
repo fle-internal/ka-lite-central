@@ -214,8 +214,8 @@ INSTALLED_APPS = (
     "south",
     "fle_utils.config",
     "fle_utils.chronograph",
-    "django_cherrypy_wsgiserver",
     "securesync",
+    "kalite.django_cherrypy_wsgiserver",
     "kalite.facility",
     "kalite.main", # in order for securesync to work, this needs to be here.
     "kalite.control_panel",  # in both apps
@@ -229,6 +229,7 @@ INSTALLED_APPS = (
     "contact",
     "faq",
     "i18n_central",
+    "khanload_central",
     "registration",
     "stats",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())  # append local_settings installed_apps, in case of dependencies
