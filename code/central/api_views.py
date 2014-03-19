@@ -10,7 +10,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 
 import kalite.version  # for kalite software version
-from .views import get_central_server_host
 from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonpResponse
 
 
@@ -30,7 +29,7 @@ def get_kalite_version(request):
 @allow_jsonp
 @api_handle_error_with_json
 def get_download_urls(request):
-    base_url = "%s://%s" % ("https" if request.is_secure() else "http", get_central_server_host(request))
+    base_url = "%s://%s" % ("https" if request.is_secure() else "http", request.get_host())
 
     # TODO: once Dylan makes all subtitle languages available,
     #   don't hard-code this.
