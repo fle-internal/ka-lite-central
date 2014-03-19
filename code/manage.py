@@ -10,11 +10,11 @@ warnings.filterwarnings('ignore', message=r'Module .*? is being added to sys\.pa
 # Now build the paths that point to all of the project pieces
 PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 PROJECT_PYTHON_PATHS = [
-    os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),
-    PROJECT_PATH,
-    os.path.join(PROJECT_PATH, ".."),
-    os.path.join(PROJECT_PATH, "..", 'ka-lite'),
-    os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),
+    os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),  # libraries (python-packages)
+    PROJECT_PATH,  # central apps
+    os.path.join(PROJECT_PATH, ".."),  # code.settings
+    os.path.join(PROJECT_PATH, "..", 'ka-lite'),  #kalite.*
+    os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),  # for kalite internal refs
 ]
 sys.path = PROJECT_PYTHON_PATHS + sys.path
 
