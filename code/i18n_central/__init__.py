@@ -28,8 +28,6 @@ from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf
 from kalite.settings import LANG_LOOKUP_FILEPATH, LOG as logging
 from version import VERSION
 
-CACHE_VARS = []
-
 
 AMARA_HEADERS = {
     "X-api-username": getattr(settings, "AMARA_USERNAME", None),
@@ -112,7 +110,6 @@ def get_language_pack_metadata_filepath(lang_code, version=VERSION):
 
 
 SUPPORTED_LANGUAGE_MAP = None
-CACHE_VARS.append("SUPPORTED_LANGUAGE_MAP")
 def get_supported_language_map(lang_code=None):
     lang_code = lcode_to_ietf(lang_code)
     global SUPPORTED_LANGUAGE_MAP
@@ -138,9 +135,7 @@ def get_supported_languages():
 
 
 DUBBED_VIDEO_MAP_RAW = None
-CACHE_VARS.append("DUBBED_VIDEO_MAP_RAW")
 DUBBED_VIDEO_MAP = None
-CACHE_VARS.append("DUBBED_VIDEO_MAP")
 def get_dubbed_video_map(lang_code=None, force=False):
     """
     Stores a key per language.  Value is a dictionary between video_id and (dubbed) youtube_id
