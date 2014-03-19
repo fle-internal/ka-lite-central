@@ -246,9 +246,9 @@ class RegistrationProfile(models.Model):
             String containing the hostname of the KA Lite central server
         """
         cdict = {
-            'activation_key': self.activation_key,
+             'activation_key': self.activation_key,
              'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
-             'central_server_host': getattr(site, "domain", settings.CENTRAL_SERVER_HOST),# try to get dynamically
+             'central_server_host': getattr(site, "domain"),  # try to get dynamically
              'site': site,
              'next': next,
         }
