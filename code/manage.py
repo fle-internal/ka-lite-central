@@ -1,36 +1,54 @@
 #!/usr/bin/env python
+import glob
+import logging
 import os
 import sys
 import warnings
 
-# We are overriding a few packages (like Django) from the system path.
-#   Suppress those warnings
-warnings.filterwarnings('ignore', message=r'Module .*? is being added to sys\.path', append=True)
-
-# Now build the paths that point to all of the project pieces
-PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
-PROJECT_PYTHON_PATHS = [
-    os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),  # libraries (python-packages)
-    PROJECT_PATH,  # central apps
-    os.path.join(PROJECT_PATH, ".."),  # code.settings
-    os.path.join(PROJECT_PATH, "..", 'ka-lite'),  #kalite.*
-    os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),  # for kalite internal refs
-]
-sys.path = PROJECT_PYTHON_PATHS + sys.path
-
-# Now we can get started.
-
-from django.core.management import execute_manager
-import settings
-from settings import LOG as logging
-
-########################
-# Static files
-########################
-
-if "runserver" in sys.argv and "--nostatic" not in sys.argv:
-    sys.argv += ["--nostatic"]
-
-
 if __name__ == "__main__":
-    execute_manager(settings)
+    import warnings
+
+    # We are overriding a few packages (like Django) from the system path.
+    #   Suppress those warnings
+    warnings.filterwarnings('ignore', message=r'Module .*? is being added to sys\.path', append=True)
+
+    # Now build the paths that point to all of the project pieces
+    PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
+    PROJECT_PYTHON_PATHS = [
+        os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),  # libraries (python-packages)
+        PROJECT_PATH,  # central apps
+        os.path.join(PROJECT_PATH, ".."),  # code.settings
+        os.path.join(PROJECT_PATH, "..", 'ka-lite'),  #kalite.*
+        os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),  # for kalite internal refs
+    ]
+    sys.path = PROJECT_PYTHON_PATHS + sys.path
+
+
+    ########################
+    # runserver
+    ########################
+
+    if "runserver" in sys.argv and "--nostatic" not in sys.argv:
+        sys.argv += ["--nostatic"]
+
+    ########################
+    # manual clean_pyc
+    ########################
+
+    # Manually clean all pyc files before entering any real codepath
+    for root, dirs, files in os.walk(os.path.join(PROJECT_PATH, "..")):
+        for pyc_file in glob.glob(os.path.join(root, "*.pyc")):
+            try:
+                os.remove(pyc_file)
+            except:
+                pass
+
+
+    ########################
+    # Run it.
+    ########################
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "code.settings")
+
+    from django.core.management import execute_from_command_line
+    execute_from_command_line(sys.argv)
