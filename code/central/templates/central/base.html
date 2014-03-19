@@ -10,7 +10,7 @@
 
           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
           {% block titletag %}
-          <title>{% block title %}{{ title }}{% endblock title %} | KA Lite</title>
+          <title>{% block title %}{{ title }} |{% endblock title %} {% block title_tagline %}KA Lite: An Offline, Installable Version of Khan Academy{% endblock title_tagline %}</title>
           {% endblock %}
 
           {% if debug  %}
