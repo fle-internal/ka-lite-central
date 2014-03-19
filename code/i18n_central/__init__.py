@@ -24,8 +24,8 @@ from django.views.i18n import javascript_catalog
 ###                                          ###
 ################################################
 from fle_utils.general import ensure_dir, softload_json
-from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_language_names, get_langcode_map, get_code2lang_map
-from kalite.settings import LANG_LOOKUP_FILEPATH, LOG as logging
+from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_langcode_map, get_code2lang_map
+from kalite.settings import LOG as logging
 from version import VERSION
 
 
