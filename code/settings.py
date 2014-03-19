@@ -228,6 +228,7 @@ INSTALLED_APPS = (
     "central",
     "contact",
     "faq",
+    "i18n_central",
     "registration",
     "stats",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())  # append local_settings installed_apps, in case of dependencies

@@ -41,11 +41,11 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.core.mail import mail_admins
 
-from .update_po import compile_po_files
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
-from i18n import *
+from i18n_central import *
+from kalite.i18n import *
 from kalite.settings import LOG as logging
-from updates import get_all_remote_video_sizes
+from kalite.updates import get_all_remote_video_sizes
 from version import VERSION
 
 
@@ -369,37 +369,6 @@ def upgrade_old_schema():
 
     #refactor_central_locale_folders(src_dir=LOCALE_ROOT, dest_dir=LANGUAGE_PACK_BUILD_DIR)
 
-def handle_po_compile_errors(lang_codes=None, out=None, err=None, rc=None):
-    """
-    Return list of languages to not rezip due to errors in compile process.
-    Then email admins errors.
-    """
-
-    broken_codes = re.findall(r'(?<=ka-lite/locale/)\w+(?=/LC_MESSAGES)', err) or []
-
-    if lang_codes:
-        # Only show the errors relevant to the list of language codes passed in.
-        lang_codes = set([lcode_to_django_dir(lc) for lc in lang_codes])
-        broken_codes = list(set(broken_codes).intersection(lang_codes))
-
-    if broken_codes:
-        logging.warning("Found %d errors while compiling in codes %s. Mailing admins report now."  % (len(broken_codes), ', '.join(broken_codes)))
-        subject = "Error while compiling po files"
-        commands = "\n".join(["python manage.py compilemessages -l %s" % lc for lc in broken_codes])
-        message =  """The following codes had errors when compiling their po files: %s.
-                   Please rerun the following commands to see specific line numbers
-                   that need to be corrected on CrowdIn, before we can update the language packs.
-                   %s""" % (
-            ', '.join([lcode_to_ietf(lc) for lc in broken_codes]),
-            commands,
-        )
-        if not settings.DEBUG:
-            mail_admins(subject=subject, message=message)
-            logging.info("Report sent.")
-        else:
-            logging.info("DEBUG is True so not sending email, but would have sent the following: SUBJECT: %s; MESSAGE: %s"  % (subject, message))
-
-    return broken_codes
 
 def download_latest_translations(project_id=None,
                                  project_key=None,
@@ -632,6 +601,7 @@ def remove_nonmetadata(pofilename, METADATA_MARKER):
     os.remove(pofilename)
     clean_pofile.save(fpath=pofilename)
 
+
 def get_exercise_po_files(po_files):
     return fnmatch.filter(po_files, '*.exercises-*.po')
 
@@ -762,6 +732,7 @@ def download_crowdin_metadata(project_id=None, project_key=None):
         logging.error("Error getting crowdin metadata: %s" % e)
         crowdin_meta_dict = {}
     return crowdin_meta_dict
+
 
 def increment_language_pack_version(stored_meta, updated_meta):
     """Increment language pack version if translations have been updated

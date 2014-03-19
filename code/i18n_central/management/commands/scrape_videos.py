@@ -24,9 +24,10 @@ from django.utils.translation import ugettext as _
 
 from fle_utils.general import ensure_dir
 from fle_utils.videos import get_outside_video_urls
-from i18n import get_dubbed_video_map, lcode_to_ietf
+from i18n_central import get_dubbed_video_map
+from kalite.i18n import lcode_to_ietf
+from kalite.main.topic_tools import get_topic_videos, get_node_cache
 from kalite.settings import LOG as logging
-from main.topic_tools import get_topic_videos, get_node_cache
 
 
 class Command(BaseCommand):
