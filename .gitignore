@@ -28,6 +28,5 @@ writeup/
 /code/kalite-*.zip
 /code/local_settings.py
 /code/media
-/code/static/srt
-/code/static/data/subtitles/languages
+/code/static
 /scripts/youtube-dl
