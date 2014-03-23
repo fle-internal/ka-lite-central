@@ -216,10 +216,11 @@ class Command(BaseCommand):
             raise CommandError("Unrecognized platform: %s; will include ALL files." % options['platform'])
 
         # Step 0: refresh all resources
-        get_dubbed_video_map(force=True)  # force a remote download
+        if not settings.DEBUG:
+            get_dubbed_video_map(force=True)  # force a remote download
 
         # Step 1: recursively add all static files
-        kalite_base = os.path.realpath(settings.PROJECT_PATH + "/../")
+        kalite_base = os.path.realpath(settings.KALITE_PATH)
         files_dict = recursively_add_files(dirpath=kalite_base, **options)
 
         # Step 2: Add a local_settings.py file.
