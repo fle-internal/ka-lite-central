@@ -272,7 +272,7 @@ class Command(BaseCommand):
             with open(install_files[self.install_py_file], "w") as fp:
                 for srcline in inspect.getsourcelines(install_from_package)[0]:
                     fp.write(srcline)
-                fp.write("\n%s\n" % open(get_module_source_file("utils.platforms"), "r").read())
+                fp.write("\n%s\n" % open(get_module_source_file("fle_utils.platforms"), "r").read())
                 fp.write("\ninstall_from_package(\n")
                 fp.write("    zip_file='%s',\n" % UpdateCommand.inner_zip_filename)
                 fp.write("    signature_file='%s',\n" % UpdateCommand.signature_filename)
