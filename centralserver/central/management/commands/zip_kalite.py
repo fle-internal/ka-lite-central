@@ -209,8 +209,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if not settings.CENTRAL_SERVER:
-            raise CommandError("Disabled for distributed servers, until we can figure out what to do with ")
 
         options['platform'] = options['platform'].lower() # normalize
 
