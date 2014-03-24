@@ -23,11 +23,10 @@ from django.views.i18n import javascript_catalog
 ###   we CANNOT import main.models in here.  ###
 ###                                          ###
 ################################################
+from centralserver.version import VERSION
 from fle_utils.general import ensure_dir, softload_json
 from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_langcode_map, get_code2lang_map
 from kalite.settings import LOG as logging
-from version import VERSION
-
 
 AMARA_HEADERS = {
     "X-api-username": getattr(settings, "AMARA_USERNAME", None),
@@ -46,6 +45,7 @@ CROWDIN_CACHE_DIR = os.path.join(settings.PROJECT_PATH, "..", "_crowdin_cache")
 LANGUAGE_PACK_BUILD_DIR = os.path.join(settings.DATA_PATH, "i18n", "build")
 
 LOCALE_ROOT = settings.LOCALE_PATHS[0]
+
 
 def get_lang_map_filepath(lang_code):
     return os.path.join(SUBTITLES_DATA_ROOT, "languages", lang_code + LANGUAGE_SRT_SUFFIX)

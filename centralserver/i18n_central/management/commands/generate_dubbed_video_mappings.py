@@ -12,16 +12,16 @@ from StringIO import StringIO
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from ... import DUBBED_VIDEOS_MAPPING_FILEPATH
 from fle_utils.general import ensure_dir, datediff
-from i18n_central import DUBBED_VIDEOS_MAPPING_FILEPATH
 from kalite.main.topic_tools import get_node_cache
 from kalite.settings import LOG as logging
-
 
 SPREADSHEET_ID ="0AhvqOn88FUVedEJXM1ZhMG1XdGJuVTE4OEZ3WkNxYUE"
 SPREADSHEET_EXPORT_FORMAT = "csv"
 SPREADSHEET_GID = 0
 SPREADSHEET_BASE_URL = "https://docs.google.com/spreadsheet/ccc"
+
 
 def generate_dubbed_video_mappings(download_url=None, csv_data=None):
     """
