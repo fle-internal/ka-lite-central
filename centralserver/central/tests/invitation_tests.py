@@ -6,11 +6,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.test import LiveServerTestCase, TestCase, Client
 
-from central.models import Organization, OrganizationInvitation
-from testing import central_server_test
+from ..models import Organization, OrganizationInvitation
 
 
-@central_server_test
 class InvitationTestCases(LiveServerTestCase):
     """Walk through a set of URLs, and validate very basic properties (status code, some text)
     A good test to weed out untested view/template errors"""

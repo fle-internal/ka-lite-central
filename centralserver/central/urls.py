@@ -6,15 +6,15 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
-import central.api_urls
-import contact.urls
-import faq.urls
+import centralserver.contact.urls
+import centralserver.faq.urls
+import centralserver.registration.urls
+import centralserver.stats.api_urls, stats.urls
 import fle_utils.feeds.urls
 import kalite.coachreports.urls
 import kalite.control_panel.urls
-import registration.urls
 import securesync.urls
-import stats.api_urls, stats.urls
+from .import api_urls
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
 
 
@@ -26,8 +26,8 @@ def redirect_to(self, base_url, path=""):
 # This must be prioritized, to make sure stats are recorded for all necessary urls.
 #   If removed, all apps should still function, as appropriate URL confs for each
 #   app still exist
-urlpatterns = patterns('stats.api_views',
-    url(r'^', include(stats.api_urls)),  # add at root
+urlpatterns = patterns('',
+    url(r'^', include(centralserver.stats.api_urls)),  # add at root
 )
 
 urlpatterns += patterns('',
@@ -45,14 +45,13 @@ urlpatterns += patterns('',
     }),
 )
 
-urlpatterns += patterns('central.views',
+urlpatterns += patterns('centralserver.central.views',
     url(r'^$', 'homepage', {}, 'homepage'),
     url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
     url(r'^wiki/(?P<path>.*)$', 'content_page', {"page": "wiki_page", "wiki_site": settings.CENTRAL_WIKI_URL}, 'wiki'),
 
     url(r'^delete_admin/(?P<org_id>\w+)/(?P<user_id>\w+)/$', 'delete_admin', {}, 'delete_admin'),
     url(r'^delete_invite/(?P<org_id>\w+)/(?P<invite_id>\w+)/$', 'delete_invite', {}, 'delete_invite'),
-    url(r'^accounts/', include(registration.urls)),
 
     # Organization
     url(r'^organization/$', 'org_management', {}, 'org_management'),
@@ -61,14 +60,7 @@ urlpatterns += patterns('central.views',
     url(r'^organization/delete/(?P<org_id>\w+)/$', 'delete_organization', {}, 'delete_organization'),
     url(r'^organization/(?P<org_id>\w+)/zone/(?P<zone_id>\w+)/delete$', 'delete_zone', {}, 'delete_zone'),
 
-    # Zone, facility, device
-    url(r'^organization/(?P<org_id>\w+)/', include(kalite.control_panel.urls)),
-
-    # Reporting
-    url(r'^coachreports/', include(kalite.coachreports.urls)),
-
     url(r'^glossary/$', 'glossary', {}, 'glossary'),
-    url(r'^faq/', include(faq.urls)),
 
     # The install wizard app has two views: both options available (here)
     #   or an "edition" selected (to get more info, or redirect to download, below)
@@ -90,7 +82,6 @@ urlpatterns += patterns('central.views',
 
     url(r'^wiki/installation/$', 'content_page', {"page": "wiki_page", "wiki_site": settings.CENTRAL_WIKI_URL, "path": "/installation/"}, 'install'),
 
-    url(r'^contact/', include(contact.urls)),
     url(r'^about/$', lambda request: HttpResponseRedirect('http://learningequality.org/'), {}, 'about'),
 
     # Endpoint for remote admin
@@ -98,12 +89,26 @@ urlpatterns += patterns('central.views',
 
 )
 
-urlpatterns += patterns('central.api_views',
-    url(r'^api/', include(central.api_urls)),
+urlpatterns += patterns(__package__ + '.api_views',
+    url(r'^api/', include(api_urls)),
 )
 
-urlpatterns += patterns('stats.views',
-    url(r'^stats/', include(stats.urls)),
+urlpatterns += patterns('',
+    # Zone, facility, device
+    url(r'^organization/(?P<org_id>\w+)/', include(kalite.control_panel.urls)),
+
+    # Reporting
+    url(r'^coachreports/', include(kalite.coachreports.urls)),
+)
+
+urlpatterns += patterns('',
+    url(r'^contact/', include(centralserver.contact.urls)),
+    url(r'^faq/', include(centralserver.faq.urls)),
+    url(r'^accounts/', include(centralserver.registration.urls)),
+)
+
+urlpatterns += patterns('',
+    url(r'^stats/', include(centralserver.stats.api_urls)),
 )
 
 handler403 = 'central.views.handler_403'

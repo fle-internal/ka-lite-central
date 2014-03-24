@@ -4,6 +4,7 @@ from django.utils.translation import ugettext as _
 
 from .models import Organization, OrganizationInvitation
 
+
 class OrganizationForm(ModelForm):
     class Meta:
         model = Organization
