@@ -30,7 +30,7 @@ import fle_utils.platforms
 from centralserver.settings import LOG as logging
 from fle_utils.general import get_module_source_file
 from fle_utils.platforms import is_windows, system_script_extension, system_specific_zipping, system_specific_unzipping
-from kalite.management.commands.zip_kalite import create_default_archive_filename, Command as ZipCommand
+from .zip_kalite import create_default_archive_filename, Command as ZipCommand
 from kalite.updates.management.commands.update import Command as UpdateCommand
 from securesync import engine
 from securesync.management.commands.initdevice import Command as InitCommand
@@ -233,7 +233,8 @@ class Command(BaseCommand):
             install_files[install_sh_file] = tempfile.mkstemp()[1]
             with open(install_files[install_sh_file], "w") as fp:
                 fp.write("echo 'Searching for python path...'\n")
-                fp.write(open(os.path.realpath(settings.PROJECT_PATH + "/../scripts/python.sh"), "r").read())
+                with open(os.path.realpath(os.path.join(settings.KALITE_PATH, "scripts/python.sh")), "r") as pythonfp:
+                    fp.write(pythonfp.read())
                 fp.write('\ncurrent_dir=`dirname "${BASH_SOURCE[0]}"`')
                 fp.write('\n$PYEXEC "$current_dir/%s"' % self.install_py_file)
 
@@ -271,7 +272,7 @@ class Command(BaseCommand):
             with open(install_files[self.install_py_file], "w") as fp:
                 for srcline in inspect.getsourcelines(install_from_package)[0]:
                     fp.write(srcline)
-                fp.write("\n%s\n" % open(get_module_source_file("utils.platforms"), "r").read())
+                fp.write("\n%s\n" % open(get_module_source_file("fle_utils.platforms"), "r").read())
                 fp.write("\ninstall_from_package(\n")
                 fp.write("    zip_file='%s',\n" % UpdateCommand.inner_zip_filename)
                 fp.write("    signature_file='%s',\n" % UpdateCommand.signature_filename)

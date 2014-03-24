@@ -12,7 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
 from centralserver.i18n import CROWDIN_CACHE_DIR, get_dubbed_video_map
-from centralserver.khanload import KHANLOAD_CACHE_DIR
+from kalite.khanload import KHANLOAD_CACHE_DIR
 from fle_utils.general import ensure_dir
 from fle_utils.platforms import is_windows, not_system_specific_scripts, system_specific_zipping, _default_callback_zip
 from securesync.models import Device
@@ -209,8 +209,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if not settings.CENTRAL_SERVER:
-            raise CommandError("Disabled for distributed servers, until we can figure out what to do with ")
 
         options['platform'] = options['platform'].lower() # normalize
 
@@ -218,10 +216,11 @@ class Command(BaseCommand):
             raise CommandError("Unrecognized platform: %s; will include ALL files." % options['platform'])
 
         # Step 0: refresh all resources
-        get_dubbed_video_map(force=True)  # force a remote download
+        if not settings.DEBUG:
+            get_dubbed_video_map(force=True)  # force a remote download
 
         # Step 1: recursively add all static files
-        kalite_base = os.path.realpath(settings.PROJECT_PATH + "/../")
+        kalite_base = os.path.realpath(settings.KALITE_PATH)
         files_dict = recursively_add_files(dirpath=kalite_base, **options)
 
         # Step 2: Add a local_settings.py file.
