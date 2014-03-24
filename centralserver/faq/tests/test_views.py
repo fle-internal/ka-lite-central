@@ -9,7 +9,7 @@ import os
 import django.test
 from django.conf import settings
 
-from faq.models import Topic, Question
+from ..models import Topic, Question
 
 
 class FAQViewTests(django.test.TestCase):
