@@ -17,7 +17,7 @@ if __name__ == "__main__":
     PROJECT_PYTHON_PATHS = [
         os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),  # libraries (python-packages)
         PROJECT_PATH,  # central apps
-        os.path.join(PROJECT_PATH, ".."),  # code.settings
+        os.path.join(PROJECT_PATH, ".."),  # centralserver.settings
         os.path.join(PROJECT_PATH, "..", 'ka-lite'),  #kalite.*
         os.path.join(PROJECT_PATH, "..", 'ka-lite', 'kalite'),  # for kalite internal refs
     ]
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # Run it.
     ########################
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "code.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "centralserver.settings")
 
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)
