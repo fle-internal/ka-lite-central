@@ -21,9 +21,10 @@ up your own URL patterns for these views instead.
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 
-from registration.views import activate
-from registration.views import register
-from registration.views import complete
+from ... import auth_urls
+from ...views import activate
+from ...views import register
+from ...views import complete
 
 urlpatterns = patterns('',
                        url(r'^activate/complete/$', complete, {},
@@ -34,11 +35,11 @@ urlpatterns = patterns('',
                        # confusing 404.
                        url(r'^activate/(?P<activation_key>\w+)/$',
                            activate,
-                           { 'backend': 'registration.backends.custom.DefaultBackend' },
+                           { 'backend': __package__ + '.DefaultBackend' },
                            name='registration_activate'),
                        url(r'^register/$',
                            register,
-                           { 'backend': 'registration.backends.custom.DefaultBackend' },
+                           { 'backend': __package__ + '.DefaultBackend' },
                            name='registration_register'),
                        url(r'^register/complete/$',
                            direct_to_template,
@@ -48,5 +49,5 @@ urlpatterns = patterns('',
                            direct_to_template,
                            { 'template': 'registration/registration_closed.html' },
                            name='registration_disallowed'),
-                       (r'', include('registration.auth_urls')),
+                       (r'', include(auth_urls)),
                        )

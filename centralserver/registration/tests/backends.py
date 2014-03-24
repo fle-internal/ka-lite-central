@@ -12,12 +12,12 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.test import Client
 from django.test import TestCase
 
-from registration import forms
-from registration import signals
-from registration.admin import RegistrationAdmin
-from registration.backends import get_backend
-from registration.backends.default import DefaultBackend
-from registration.models import RegistrationProfile
+from .. import forms
+from .. import signals
+from ..admin import RegistrationAdmin
+from ..backends import get_backend
+from ..backends.default import DefaultBackend
+from ..models import RegistrationProfile
 
 
 class _MockRequestClient(Client):

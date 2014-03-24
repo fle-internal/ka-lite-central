@@ -3,7 +3,7 @@ from django.contrib.sites.models import RequestSite
 from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 
-from registration.models import RegistrationProfile
+from .models import RegistrationProfile
 
 
 class RegistrationAdmin(admin.ModelAdmin):
@@ -16,7 +16,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         """
         Activates the selected users, if they are not alrady
         activated.
-        
+
         """
         for profile in queryset:
             RegistrationProfile.objects.activate_user(profile.activation_key)
@@ -30,7 +30,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         who are eligible to activate; emails will not be sent to users
         whose activation keys have expired or who have already
         activated.
-        
+
         """
         if Site._meta.installed:
             site = Site.objects.get_current()

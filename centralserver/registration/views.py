@@ -15,11 +15,11 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
-from central.forms import OrganizationForm
-from central.models import Organization
-from contact.views import contact_subscribe
+from .backends import get_backend
+from centralserver.central.forms import OrganizationForm
+from centralserver.central.models import Organization
+from centralserver.contact.views import contact_subscribe
 from fle_utils.internet import set_query_params
-from registration.backends import get_backend
 from securesync.models import Zone
 
 
