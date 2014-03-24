@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 
 import centralserver.i18n_central.api_urls
-import centralserver.khanload_central.api_urls
+import centralserver.khanload.api_urls
 import kalite.coachreports.api_urls
 
 
@@ -15,8 +15,8 @@ urlpatterns += patterns('kalite.coachreports.api_views',
 urlpatterns += patterns('centralserver.i18n_central.api_views',
     url(r'^i18n/', include(centralserver.i18n_central.api_urls)),
 )
-urlpatterns += patterns('centralserver.khanload_central.api_views',
-    url(r'^khanload/', include(centralserver.khanload_central.api_urls)),
+urlpatterns += patterns('centralserver.khanload.api_views',
+    url(r'^khanload/', include(centralserver.khanload.api_urls)),
 )
 
 

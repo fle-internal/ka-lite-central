@@ -67,7 +67,7 @@ INSTALLED_APPS = (
     "centralserver.contact",
     "centralserver.faq",
     "centralserver.i18n_central",
-    "centralserver.khanload_central",
+    "centralserver.khanload",
     "centralserver.registration",
     "centralserver.stats",
 ) + INSTALLED_APPS  # append local_settings installed_apps, in case of dependencies
