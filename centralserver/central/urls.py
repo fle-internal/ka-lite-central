@@ -63,12 +63,12 @@ urlpatterns += patterns(__package__ + '.views',
     #url(r'^download/thankyou/$', 'download_thankyou', {}, 'download_thankyou'),
 
     # Downloads: public
-    #url(r'^download/kalite/(?P<version>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
-    #url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
-    #url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
+    url(r'^download/kalite/(?P<version>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
+    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
+    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
     # Downloads: private
-    #url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/(?P<zone_id>[^\/]+)/$', 'download_kalite_private', {}, 'download_kalite_private'),
-    #url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/(?P<zone_id>[^\/]+)/(?P<include_data>[^\/]+)/$', 'download_kalite_private', {}, 'download_kalite_private'),
+    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/(?P<zone_id>[^\/]+)/$', 'download_kalite_private', {}, 'download_kalite_private'),
+    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/(?P<zone_id>[^\/]+)/(?P<include_data>[^\/]+)/$', 'download_kalite_private', {}, 'download_kalite_private'),
 
     # The following has been superceded by the stats app, but we
     #   keep it here so that things will function even if that app is removed.
