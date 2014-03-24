@@ -5,10 +5,9 @@ These require a test server to be running, and multiple ports
 ./manage.py test central --liveserver=localhost:8004-8010
 ".
 """
-from central.tests import KALiteCentralBrowserTestCase
-from testing import central_server_test
+from centralserver.central.tests import KALiteCentralBrowserTestCase
 
-@central_server_test
+
 class ContactEmptyFormSubmitCaseTest(KALiteCentralBrowserTestCase):
     """
     Submit forms with no values, make sure there are no errors.
