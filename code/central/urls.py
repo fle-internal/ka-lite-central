@@ -36,16 +36,12 @@ urlpatterns += patterns('',
 
 urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^images/.*$', lambda request: HttpResponseRedirect(settings.STATIC_URL[:-1] + request.path)),
     url(r'^securesync/', include(securesync.urls)),
 )
 
 urlpatterns += patterns('',
     url(r'^%s(?P<path>.*)$' % settings.MEDIA_URL[1:], 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT,
-    }),
-    url(r'^%s(?P<path>.*)$' % settings.STATIC_URL[1:], 'django.views.static.serve', {
-        'document_root': settings.STATIC_ROOT,
     }),
 )
 

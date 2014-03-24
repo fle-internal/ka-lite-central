@@ -25,13 +25,6 @@ if __name__ == "__main__":
 
 
     ########################
-    # runserver
-    ########################
-
-    if "runserver" in sys.argv and "--nostatic" not in sys.argv:
-        sys.argv += ["--nostatic"]
-
-    ########################
     # manual clean_pyc
     ########################
 
