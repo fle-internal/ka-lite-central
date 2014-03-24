@@ -128,7 +128,6 @@ def contact_wizard(request, type=""):
 
     return {
         "central_contact_email": settings.CENTRAL_CONTACT_EMAIL,
-        "wiki_url": settings.CENTRAL_WIKI_URL,
         'deployment_form' : deployment_form,
         'support_form' : support_form,
         'contribute_form' : contribute_form,
@@ -147,7 +146,6 @@ def handle_contact(request, contact_form, details_form, list_email, email_templa
         context = {
             'contact':    contact_form.instance,
             'details': details_form.instance,
-            'central_server_host': settings.CENTRAL_SERVER_HOST,
         }
         subject = '[KA Lite] %s'%render_to_string('contact/%s_subject.txt' % email_template_prefix, context)
         body = render_to_string('contact/%s_body.txt' % email_template_prefix, context)

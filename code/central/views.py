@@ -28,15 +28,6 @@ from securesync.engine.api_client import SyncClient
 from securesync.models import Zone
 
 
-def get_central_server_host(request):
-    """
-    Nice to refer to the central server in a simple way.
-    Note that CENTRAL_SERVER_HOST usually isn't set for the central server,
-    so it's kind of a bogus fallback.
-    """
-    return request.get_host() or getattr(settings, CENTRAL_SERVER_HOST, "")
-
-
 @render_to("central/homepage.html")
 def homepage(request):
     feed = FeedListing.objects.order_by('-posted_date')[:5]
@@ -381,7 +372,7 @@ def download_kalite(request, *args, **kwargs):
     call_command(
         "package_for_download",
         file=zip_file,
-        central_server=get_central_server_host(request),
+        central_server=request.get_host(),
         **kwargs
     )
 

@@ -7,7 +7,7 @@ from django.conf import settings
 from fle_utils import videos  # keep access to all functions
 from fle_utils.general import softload_json
 from fle_utils.videos import *  # get all into the current namespace, override some.
-from i18n import get_srt_path, get_srt_url, get_id2oklang_map, get_youtube_id, get_langs_with_subtitle, get_language_code
+from i18n import get_srt_path, get_srt_url, get_id2oklang_map, get_youtube_id, get_langs_with_subtitle
 from kalite.settings import LOG as logging
 from main.topic_tools import get_topic_tree, get_videos
 
@@ -43,24 +43,31 @@ def download_video(youtube_id, format="mp4", callback=None):
     return videos.download_video(youtube_id, settings.CONTENT_ROOT, download_url, format, callback)
 
 
+def get_downloaded_youtube_ids(videos_path=None, format="mp4"):
+    videos_path = videos_path or settings.CONTENT_ROOT
+    return [path.split("/")[-1].split(".")[0] for path in glob.glob(os.path.join(videos_path, "*.%s" % format))]
+
+
 def delete_downloaded_files(youtube_id):
     return videos.delete_downloaded_files(youtube_id, settings.CONTENT_ROOT)
 
 
-def is_video_on_disk(youtube_id, format="mp4", videos_path=settings.CONTENT_ROOT):
+def is_video_on_disk(youtube_id, format="mp4", videos_path=None):
+    videos_path = videos_path or settings.CONTENT_ROOT
     video_file = os.path.join(videos_path, youtube_id + ".%s" % format)
     return os.path.isfile(video_file)
 
 
 _vid_last_updated = 0
 _vid_last_count = 0
-def do_video_counts_need_update_question_mark(videos_path=settings.CONTENT_ROOT, format="mp4"):
+def do_video_counts_need_update_question_mark(videos_path=None, format="mp4"):
     """
     Compare current state to global state variables to check whether video counts need updating.
     """
     global _vid_last_count
     global _vid_last_updated
 
+    videos_path = videos_path or settings.CONTENT_ROOT
     if not os.path.exists(videos_path):
         return False
 
@@ -82,18 +89,20 @@ def do_video_counts_need_update_question_mark(videos_path=settings.CONTENT_ROOT,
     return need_update
 
 
-def stamp_availability_on_video(video, format="mp4", force=False, stamp_urls=True, videos_path=settings.CONTENT_ROOT):
+def stamp_availability_on_video(video, format="mp4", force=False, stamp_urls=True, videos_path=None):
     """
     Stamp all relevant urls and availability onto a video object (if necessary), including:
     * whether the video is available (on disk or online)
     """
-    def compute_video_availability(youtube_id, format, videos_path=settings.CONTENT_ROOT):
+    videos_path = videos_path or settings.CONTENT_ROOT
+
+    def compute_video_availability(youtube_id, format, videos_path=videos_path):
         return {"on_disk": is_video_on_disk(youtube_id, format, videos_path=videos_path)}
 
     def compute_video_metadata(youtube_id, format):
         return {"stream_type": "video/%s" % format}
 
-    def compute_video_urls(youtube_id, format, lang_code, on_disk=None, thumb_format="png", videos_path=settings.CONTENT_ROOT):
+    def compute_video_urls(youtube_id, format, lang_code, on_disk=None, thumb_format="png", videos_path=videos_path):
         if on_disk is None:
             on_disk = is_video_on_disk(youtube_id, format, videos_path=videos_path)
 
@@ -151,7 +160,7 @@ def stamp_availability_on_video(video, format="mp4", force=False, stamp_urls=Tru
     return video
 
 
-def stamp_availability_on_topic(topic, videos_path=settings.CONTENT_ROOT, force=True, stamp_urls=True, update_counts_question_mark= None):
+def stamp_availability_on_topic(topic, videos_path=None, force=True, stamp_urls=True, update_counts_question_mark= None):
     """ Uses the (json) topic tree to query the django database for which video files exist
 
     Returns the original topic dictionary, with two properties added to each NON-LEAF node:
@@ -163,6 +172,7 @@ def stamp_availability_on_topic(topic, videos_path=settings.CONTENT_ROOT, force=
     Input Parameters:
     * videos_path: the path to video files
     """
+    videos_path = videos_path or settings.CONTENT_ROOT
     if update_counts_question_mark is None:
         update_counts_question_mark = do_video_counts_need_update_question_mark()
 
@@ -191,7 +201,7 @@ def stamp_availability_on_topic(topic, videos_path=settings.CONTENT_ROOT, force=
             nvideos_known += child["nvideos_known"]
 
     # BASE CASE:
-    # All my children are leaves, so we'll query here (a bit more efficient than 1 query per leaf)
+    #  Got a topic node, get immediate video children and figure out what to do.
     videos = get_videos(topic)
     for video in videos:
         if force or update_counts_question_mark or "availability" not in video:
@@ -205,6 +215,9 @@ def stamp_availability_on_topic(topic, videos_path=settings.CONTENT_ROOT, force=
     topic["nvideos_local"] = nvideos_local
     topic["nvideos_known"] = nvideos_known
     topic["nvideos_available"] = nvideos_available
-    topic["available"] = bool(nvideos_local) or bool(settings.BACKUP_VIDEO_SOURCE)
+    # Topic is available if it contains a downloaded video, or any other resource type (other resources assumed to be downloaded)
+    topic["available"] = bool(nvideos_local)
+    topic["available"] = topic["available"] or bool(settings.BACKUP_VIDEO_SOURCE)
+    topic["available"] = topic["available"] or bool(set(topic.get("contains", [])) - set(["Topic", "Video"]))
 
     return (topic, nvideos_local, nvideos_known, nvideos_available, changed)
