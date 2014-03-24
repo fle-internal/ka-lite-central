@@ -20,8 +20,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 import kalite.version  # for software version
-from central.forms import OrganizationForm, OrganizationInvitationForm
-from central.models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
+from .forms import OrganizationForm, OrganizationInvitationForm
+from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
 from kalite.shared.decorators import require_authorized_admin
 from securesync.engine.api_client import SyncClient

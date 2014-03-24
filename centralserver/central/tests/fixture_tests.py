@@ -8,10 +8,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.test import LiveServerTestCase, TestCase
 
-from testing import central_server_test
 
-
-@central_server_test
 class FixtureTestCases(TestCase):
     """Test the basic ability to load and dump data to a fixture.  Very basic."""
 

@@ -17,14 +17,14 @@ class FaqListNode(template.Node):
             topic = self.topic.resolve(context) if self.topic else None
         except template.VariableDoesNotExist:
             return ''
-        
+
         if isinstance(topic, Topic):
             qs = Question.objects.filter(topic=topic)
         elif topic is not None:
             qs = Question.objects.filter(topic__slug=topic)
         else:
             qs = Question.objects.all()
-            
+
         context[self.varname] = qs.filter(status=Question.ACTIVE)[:num]
         return ''
 
@@ -33,9 +33,9 @@ def faqs_for_topic(parser, token):
     """
     Returns a list of 'count' faq's that belong to the given topic
     the supplied topic argument must be in the slug format 'topic-name'
-    
+
     Example usage::
-    
+
         {% faqs_for_topic 5 "my-slug" as faqs %}
     """
 
@@ -51,11 +51,11 @@ def faqs_for_topic(parser, token):
 @register.tag
 def faq_list(parser, token):
     """
-    returns a generic list of 'count' faq's to display in a list 
+    returns a generic list of 'count' faq's to display in a list
     ordered by the faq sort order.
 
     Example usage::
-    
+
         {% faq_list 15 as faqs %}
     """
     args = token.split_contents()

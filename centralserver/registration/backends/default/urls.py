@@ -21,9 +21,9 @@ up your own URL patterns for these views instead.
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 
-from registration.views import activate
-from registration.views import register
-from registration.views import complete
+from ...views import activate
+from ...views import register
+from ...views import complete
 
 urlpatterns = patterns('',
                        url(r'^activate/complete/$', complete, {},

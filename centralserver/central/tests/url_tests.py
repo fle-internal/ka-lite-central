@@ -10,10 +10,7 @@ from django.conf import settings
 from django.test import LiveServerTestCase, TestCase, Client
 from django.core.management import call_command
 
-from testing import central_server_test
 
-
-@central_server_test
 class UrlTestCases(LiveServerTestCase):
     """Walk through a set of URLs, and validate very basic properties (status code, some text)
     A good test to weed out untested view/template errors"""

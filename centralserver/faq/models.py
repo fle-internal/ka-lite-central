@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
-from managers import QuestionManager
+from .managers import QuestionManager
 
 class Topic(models.Model):
     """
@@ -34,20 +34,20 @@ class Question(models.Model):
         (INACTIVE,  _('Inactive')),
         (HEADER,    _('Group Header')),
     )
-    
+
     text = models.TextField(_('question'), help_text=_('The actual question itself.'))
     answer = models.TextField(_('answer'), blank=True, help_text=_('The answer text.'))
     topic = models.ForeignKey(Topic, verbose_name=_('topic'), related_name='questions')
     slug = models.SlugField(_('slug'), max_length=100)
     status = models.IntegerField(_('status'),
-        choices=STATUS_CHOICES, default=INACTIVE, 
+        choices=STATUS_CHOICES, default=INACTIVE,
         help_text=_("Only questions with their status set to 'Active' will be "
                     "displayed. Questions marked as 'Group Header' are treated "
                     "as such by views and templates that are set up to use them."))
-    
+
     protected = models.BooleanField(_('is protected'), default=False,
         help_text=_("Set true if this question is only visible by authenticated users."))
-        
+
     sort_order = models.IntegerField(_('sort order'), default=0,
         help_text=_('The order you would like the question to be displayed.'))
 
@@ -56,10 +56,10 @@ class Question(models.Model):
     created_by = models.ForeignKey(User, verbose_name=_('created by'),
         null=True, related_name="+")
     updated_by = models.ForeignKey(User, verbose_name=_('updated by'),
-        null=True, related_name="+")  
-    
+        null=True, related_name="+")
+
     objects = QuestionManager()
-    
+
     def get_absolute_url(self):
         return self.topic.get_absolute_url() + "/" + self.slug
 
@@ -74,7 +74,7 @@ class Question(models.Model):
     def save(self, *args, **kwargs):
         # Set the date updated.
         self.updated_on = datetime.datetime.now()
-        
+
         # Create a unique slug, if needed.
         if not self.slug:
             suffix = 0
@@ -86,7 +86,7 @@ class Question(models.Model):
                     self.slug = potential
                 # We hit a conflicting slug; increment the suffix and try again.
                 suffix += 1
-        
+
         super(Question, self).save(*args, **kwargs)
 
     def is_header(self):

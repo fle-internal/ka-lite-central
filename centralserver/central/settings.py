@@ -23,7 +23,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
-    "central.custom_context_processors.custom",
+    "centralserver.central.custom_context_processors.custom",
 )
 
 # List of callables that know how to import templates from various sources.
@@ -57,19 +57,19 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions", # needed for clean_pyc (testing)
+    "announcements",
     "south",
     "fle_utils.config",
     "securesync",
-    "control_panel",  # in both apps
-    "coachreports",  # in both apps; reachable on central via control_panel
+    "kalite.control_panel",  # in both apps
+    "kalite.coachreports",  # in both apps; reachable on central via control_panel
     # central-only apps
-    "announcements",
-    "contact",
-    "faq",
-    "i18n_central",
-    "khanload_central",
-    "registration",
-    "stats",
+    "centralserver.contact",
+    "centralserver.faq",
+    "centralserver.i18n",
+    "centralserver.khanload",
+    "centralserver.registration",
+    "centralserver.stats",
 ) + INSTALLED_APPS  # append local_settings installed_apps, in case of dependencies
 
 if DEBUG:

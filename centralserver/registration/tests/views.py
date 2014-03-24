@@ -8,8 +8,8 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from registration import forms
-from registration.models import RegistrationProfile
+from .. import forms
+from ..models import RegistrationProfile
 
 
 class RegistrationViewTests(TestCase):

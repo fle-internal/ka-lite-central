@@ -11,10 +11,10 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
+from centralserver.i18n import CROWDIN_CACHE_DIR, get_dubbed_video_map
+from centralserver.khanload import KHANLOAD_CACHE_DIR
 from fle_utils.general import ensure_dir
 from fle_utils.platforms import is_windows, not_system_specific_scripts, system_specific_zipping, _default_callback_zip
-from i18n import CROWDIN_CACHE_DIR, get_dubbed_video_map  # change to i18n_central
-from khanload import KHANLOAD_CACHE_DIR  # change to khanload_central
 from securesync.models import Device
 
 

@@ -13,11 +13,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
-from central.models import Organization
-from facility.models import Facility
-from registration.models import RegistrationProfile
+from ..models import Organization
+from centralserver.registration.models import RegistrationProfile
+from kalite.facility.models import Facility
+from kalite.testing import BrowserTestCase
 from securesync.models import Zone, Device, DeviceZone
-from testing import central_server_test, BrowserTestCase
 
 
 @central_server_test

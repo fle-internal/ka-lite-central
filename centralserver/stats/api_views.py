@@ -6,9 +6,9 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 
 from . import stats_logger
+from centralserver.i18n import get_language_pack_filepath, get_srt_path
 from fle_utils.django_utils import get_request_ip
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
-from i18n_central import get_language_pack_filepath, get_srt_path
 
 
 # central server

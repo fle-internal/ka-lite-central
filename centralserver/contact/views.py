@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 
 from .forms  import ContactForm, DeploymentForm, SupportForm, InfoForm, ContributeForm
 from .models import *
-from central.models import Organization
+from centralserver.central.models import Organization
 from fle_utils.django_utils import get_request_ip
 from fle_utils.mailchimp import mailchimp_subscribe
 

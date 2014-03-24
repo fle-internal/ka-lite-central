@@ -5,7 +5,7 @@ import django.test
 from ..models import Topic, Question
 
 class FAQModelTests(django.test.TestCase):
-    
+
     def test_model_save(self):
         t = Topic.objects.create(name='t', slug='t')
         q = Question.objects.create(
@@ -16,7 +16,7 @@ class FAQModelTests(django.test.TestCase):
         self.assertEqual(q.created_on.date(), datetime.date.today())
         self.assertEqual(q.updated_on.date(), datetime.date.today())
         self.assertEqual(q.slug, "what-is-your-quest")
-        
+
     def test_model_save_duplicate_slugs(self):
         t = Topic.objects.create(name='t', slug='t')
         q = Question.objects.create(
