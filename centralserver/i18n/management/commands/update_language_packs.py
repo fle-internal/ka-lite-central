@@ -41,7 +41,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.core.mail import mail_admins
 
-from ...i18n_central import *
+from ... import *
 from centralserver.version import VERSION
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
 from kalite.i18n import *

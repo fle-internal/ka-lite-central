@@ -84,13 +84,10 @@ class Command(BaseCommand):
 
         logging.info("Process complete.")
 
-def get_exercise_filepath(exercise_id, lang_code=None, is_central_server=settings.CENTRAL_SERVER):
-    if settings.CENTRAL_SERVER:
-        exercise_filename = "%s.%s" % (exercise_id, "html")
-        exercise_localized_root = get_localized_exercise_dirpath(lang_code)
-        exercise_dest_filepath = os.path.join(exercise_localized_root, exercise_filename)
-    else:
-        raise NotImplementedError
+def get_exercise_filepath(exercise_id, lang_code=None):
+    exercise_filename = "%s.%s" % (exercise_id, "html")
+    exercise_localized_root = get_localized_exercise_dirpath(lang_code)
+    exercise_dest_filepath = os.path.join(exercise_localized_root, exercise_filename)
 
     return exercise_dest_filepath
 

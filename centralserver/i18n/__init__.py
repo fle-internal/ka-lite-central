@@ -60,9 +60,9 @@ def get_localized_exercise_dirpath(lang_code):
     return os.path.join(get_lp_build_dir(ka_lang_code), "exercises")
 
 
-def get_localized_exercise_count(lang_code, is_central_server=settings.CENTRAL_SERVER):
+def get_localized_exercise_count(lang_code):
     # Used by update_language_packs
-    exercise_dir = get_localized_exercise_dirpath(lang_code, is_central_server=is_central_server)
+    exercise_dir = get_localized_exercise_dirpath(lang_code)
     all_exercises = glob.glob(os.path.join(exercise_dir, "*.html"))
     return len(all_exercises)
 

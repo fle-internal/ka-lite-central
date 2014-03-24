@@ -22,7 +22,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import ugettext as _
 
-from ...i18n_central import get_dubbed_video_map
+from ... import get_dubbed_video_map
 from fle_utils.general import ensure_dir
 from fle_utils.videos import get_outside_video_urls
 from kalite.i18n import lcode_to_ietf
