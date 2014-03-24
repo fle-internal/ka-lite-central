@@ -22,11 +22,10 @@ writeup/
 /run_command.*
 /start.*
 /stop.*
+/centralserver/kalite-*.zip
+/centralserver/local_settings.py
+/centralserver/media
+/centralserver/static
 /data/logs
 /data/i18n
 /data/subtitles
-/code/kalite-*.zip
-/code/local_settings.py
-/code/media
-/code/static
-/scripts/youtube-dl
