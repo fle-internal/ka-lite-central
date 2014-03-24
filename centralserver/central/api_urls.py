@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
 
-import centralserver.i18n_central.api_urls
+import centralserver.i18n.api_urls
 import centralserver.khanload.api_urls
 import kalite.coachreports.api_urls
 
@@ -12,8 +12,8 @@ urlpatterns = patterns(__package__ + '.api_views',
 urlpatterns += patterns('kalite.coachreports.api_views',
     url(r'^coachreports/', include(kalite.coachreports.api_urls)),
 )
-urlpatterns += patterns('centralserver.i18n_central.api_views',
-    url(r'^i18n/', include(centralserver.i18n_central.api_urls)),
+urlpatterns += patterns('centralserver.i18n.api_views',
+    url(r'^i18n/', include(centralserver.i18n.api_urls)),
 )
 urlpatterns += patterns('centralserver.khanload.api_views',
     url(r'^khanload/', include(centralserver.khanload.api_urls)),
@@ -26,7 +26,7 @@ urlpatterns += patterns('centralserver.khanload.api_views',
 # NOTE: This has been superceded by the same call within the 'stats' app,
 #   but this call remains so that if the stats app is removed,
 #   this app still functions.
-urlpatterns += patterns('centralserver.i18n_central.api_views',
+urlpatterns += patterns('centralserver.i18n.api_views',
     # note: this will also be the canonical endpoint for this, since only old versions need get_subtitle_counts anyway
     url(r'^subtitles/counts/$', 'get_subtitle_counts', {}), # v0.10.0: fetching subtitles.
 )

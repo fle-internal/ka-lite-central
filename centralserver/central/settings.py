@@ -66,7 +66,7 @@ INSTALLED_APPS = (
     # central-only apps
     "centralserver.contact",
     "centralserver.faq",
-    "centralserver.i18n_central",
+    "centralserver.i18n",
     "centralserver.khanload",
     "centralserver.registration",
     "centralserver.stats",
