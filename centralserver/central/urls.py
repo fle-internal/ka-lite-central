@@ -9,7 +9,8 @@ from django.views.generic import TemplateView
 import centralserver.contact.urls
 import centralserver.faq.urls
 import centralserver.registration.urls
-import centralserver.stats.api_urls, stats.urls
+import centralserver.stats.api_urls
+import centralserver.stats.urls
 import fle_utils.feeds.urls
 import kalite.coachreports.urls
 import kalite.control_panel.urls
@@ -108,7 +109,7 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
-    url(r'^stats/', include(centralserver.stats.api_urls)),
+    url(r'^stats/', include(centralserver.stats.urls)),
 )
 
 handler403 = 'central.views.handler_403'
