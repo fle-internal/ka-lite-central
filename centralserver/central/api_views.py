@@ -3,7 +3,8 @@
 import datetime
 import json
 import os
-from collections_local_copy import OrderedDict
+from collections import OrderedDict
+from distutils.version import StrictVersion
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -19,7 +20,7 @@ def get_kalite_version(request):
     assert kalite.version.VERSION in kalite.version.VERSION_INFO
 
     request_version = request.GET.get("current_version", "0.10.0")  # default to first version that can understand this.
-    needed_updates = [v for v in sorted(kalite.version.VERSION_INFO.keys()) if request_version < v]    # versions are nice--they sort by string
+    needed_updates = [v for v in sorted(kalite.version.VERSION_INFO.keys(), key=lambda vs: StrictVersion(vs)) if StrictVersion(request_version) < StrictVersion(v)]    # versions are nice--they sort by string
     return JsonResponse({
         "version": kalite.version.VERSION,
         "version_info": OrderedDict([(v, kalite.version.VERSION_INFO[v]) for v in needed_updates]),
