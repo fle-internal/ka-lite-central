@@ -32,7 +32,7 @@ import sys
 import tempfile
 import zipfile
 import StringIO
-from collections import Iterable, defaultdict
+from collections_local_copy import Iterable, defaultdict
 from itertools import chain, ifilter
 from optparse import make_option
 

@@ -2,7 +2,7 @@
 """
 import random
 import datetime
-from collections import OrderedDict
+from collections_local_copy import OrderedDict
 
 from django.conf import settings
 from django.contrib.auth.models import User

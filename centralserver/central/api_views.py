@@ -3,7 +3,7 @@
 import datetime
 import json
 import os
-from collections import OrderedDict
+from collections_local_copy import OrderedDict
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
