@@ -1,0 +1,1 @@
+from kalite.distributed.management.commands.setup import Command
