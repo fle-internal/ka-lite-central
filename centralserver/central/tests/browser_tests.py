@@ -20,7 +20,6 @@ from kalite.testing import BrowserTestCase
 from securesync.models import Zone, Device, DeviceZone
 
 
-@central_server_test
 class KALiteCentralBrowserTestCase(BrowserTestCase):
     """
     Base class for browser-based central server test cases.
@@ -126,8 +125,6 @@ class KALiteCentralBrowserTestCase(BrowserTestCase):
             return elements[0].text.startswith(username + " ")
 
 
-
-@central_server_test
 class SuperUserTest(KALiteCentralBrowserTestCase):
     """Log in the super user"""
 
@@ -139,7 +136,6 @@ class SuperUserTest(KALiteCentralBrowserTestCase):
         self.browser_login_user(self.admin_user.username, "test")
 
 
-#@central_server_test
 class OrgUserRegistrationTest(KALiteCentralBrowserTestCase):
     user_email = "test_user@nowhere.com"
     password   = "password"
@@ -150,7 +146,6 @@ class OrgUserRegistrationTest(KALiteCentralBrowserTestCase):
         self.browser_register_user(username=self.user_email, password=self.password)
 
 
-@central_server_test
 class UserRegistrationCaseTest(KALiteCentralBrowserTestCase):
     user_email = "test_user@nowhere.com"
     password   = "password"
@@ -245,7 +240,6 @@ class UserRegistrationCaseTest(KALiteCentralBrowserTestCase):
         self.assertIn(_("Incorrect user name or password"), errors[0].text, "Error text on failed login.")
 
 
-@central_server_test
 class CentralEmptyFormSubmitCaseTest(KALiteCentralBrowserTestCase):
     """
     Submit forms with no values, make sure there are no errors.
