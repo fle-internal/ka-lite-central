@@ -13,8 +13,8 @@ import centralserver.stats.api_urls
 import centralserver.stats.urls
 import fle_utils.feeds.urls
 import kalite.coachreports.urls
-import kalite.facility.urls
 import kalite.control_panel.urls
+import kalite.facility.urls
 import securesync.urls
 from .import api_urls
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
@@ -53,16 +53,6 @@ urlpatterns += patterns(__package__ + '.views',
     url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
     url(r'^wiki/(?P<path>.*)$', 'content_page', {"page": "wiki_page", "wiki_site": settings.CENTRAL_WIKI_URL}, 'wiki'),
 
-    url(r'^delete_admin/(?P<org_id>\w+)/(?P<user_id>\w+)/$', 'delete_admin', {}, 'delete_admin'),
-    url(r'^delete_invite/(?P<org_id>\w+)/(?P<invite_id>\w+)/$', 'delete_invite', {}, 'delete_invite'),
-
-    # Organization
-    url(r'^organization/$', 'org_management', {}, 'org_management'),
-    url(r'^organization/(?P<org_id>\w+)/$', 'organization_form', {}, 'organization_form'),
-    url(r'^organization/invite_action/(?P<invite_id>\w+)/$', 'org_invite_action', {}, 'org_invite_action'),
-    url(r'^organization/delete/(?P<org_id>\w+)/$', 'delete_organization', {}, 'delete_organization'),
-    url(r'^organization/(?P<org_id>\w+)/zone/(?P<zone_id>\w+)/delete$', 'delete_zone', {}, 'delete_zone'),
-
     url(r'^glossary/$', 'glossary', {}, 'glossary'),
 
     # The install wizard app has two views: both options available (here)
@@ -89,17 +79,31 @@ urlpatterns += patterns(__package__ + '.views',
 
     # Endpoint for remote admin
     url(r'^cryptologin/$', 'crypto_login', {}, 'crypto_login'),
+)
 
+urlpatterns += patterns(__package__ + '.views',
+    # Organization-related stuff.
+    url(r'^delete_admin/(?P<org_id>\w+)/(?P<user_id>\w+)/$', 'delete_admin', {}, 'delete_admin'),
+    url(r'^delete_invite/(?P<org_id>\w+)/(?P<invite_id>\w+)/$', 'delete_invite', {}, 'delete_invite'),
+
+    url(r'^organization/$', 'org_management', {}, 'org_management'),
+    url(r'^organization/(?P<org_id>\w+)/$', 'organization_form', {}, 'organization_form'),
+    url(r'^organization/invite_action/(?P<invite_id>\w+)/$', 'org_invite_action', {}, 'org_invite_action'),
+    url(r'^organization/delete/(?P<org_id>\w+)/$', 'delete_organization', {}, 'delete_organization'),
+
+    url(r'organization/(?P<org_id>\w+)/zone/(?P<zone_id>\w+)$', 'zone_add_to_org', {}, 'zone_add_to_org'),
 )
 
 urlpatterns += patterns(__package__ + '.api_views',
     url(r'^api/', include(api_urls)),
 )
 
-urlpatterns += patterns('',
+urlpatterns += patterns('kalite.control_panel.views',
     # Zone, facility, device
-    url(r'^organization/(?P<org_id>\w+)/', include(kalite.control_panel.urls)),
+    url(r'^', include(kalite.control_panel.urls)),
+)
 
+urlpatterns += patterns('',
     # Reporting
     url(r'^coachreports/', include(kalite.coachreports.urls)),
 )
