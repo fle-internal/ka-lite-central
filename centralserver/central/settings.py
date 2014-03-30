@@ -65,7 +65,6 @@ INSTALLED_APPS = (
     "kalite.control_panel",  # in both apps
     "kalite.coachreports",  # in both apps; reachable on central via control_panel
     "kalite.facility",
-    "kalite.testing",  # needed to run tests
     # central-only apps
     "centralserver.contact",
     "centralserver.faq",
@@ -73,6 +72,7 @@ INSTALLED_APPS = (
     "centralserver.khanload",
     "centralserver.registration",
     "centralserver.stats",
+    "centralserver.testing",  # needed to run tests
 ) + INSTALLED_APPS  # append local_settings installed_apps, in case of dependencies
 
 if DEBUG:

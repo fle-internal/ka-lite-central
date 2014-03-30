@@ -20,5 +20,4 @@ class CentralTestRunner(KALiteTestRunner):
         if not test_labels:  # by default, come in as empty list
             test_labels = set(['central', 'securesync'])
 
-        import pdb; pdb.set_trace()
         return super(CentralTestRunner,self).run_tests(test_labels=test_labels, **kwargs)
