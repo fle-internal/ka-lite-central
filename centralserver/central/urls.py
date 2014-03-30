@@ -13,6 +13,7 @@ import centralserver.stats.api_urls
 import centralserver.stats.urls
 import fle_utils.feeds.urls
 import kalite.coachreports.urls
+import kalite.facility.urls
 import kalite.control_panel.urls
 import securesync.urls
 from .import api_urls
@@ -38,6 +39,7 @@ urlpatterns += patterns('',
 urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^securesync/', include(securesync.urls)),
+    url(r'^securesync/', include(kalite.facility.urls)),
 )
 
 urlpatterns += patterns('',
@@ -46,7 +48,7 @@ urlpatterns += patterns('',
     }),
 )
 
-urlpatterns += patterns('centralserver.central.views',
+urlpatterns += patterns(__package__ + '.views',
     url(r'^$', 'homepage', {}, 'homepage'),
     url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
     url(r'^wiki/(?P<path>.*)$', 'content_page', {"page": "wiki_page", "wiki_site": settings.CENTRAL_WIKI_URL}, 'wiki'),
@@ -112,6 +114,6 @@ urlpatterns += patterns('',
     url(r'^stats/', include(centralserver.stats.urls)),
 )
 
-handler403 = 'central.views.handler_403'
-handler404 = 'central.views.handler_404'
-handler500 = 'central.views.handler_500'
+handler403 = __package__ + '.views.handler_403'
+handler404 = __package__ + '.views.handler_404'
+handler500 = __package__ + '.views.handler_500'

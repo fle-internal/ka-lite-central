@@ -60,9 +60,12 @@ INSTALLED_APPS = (
     "announcements",
     "south",
     "fle_utils.config",
+    "fle_utils.django_utils",
     "securesync",
     "kalite.control_panel",  # in both apps
     "kalite.coachreports",  # in both apps; reachable on central via control_panel
+    "kalite.facility",
+    "kalite.testing",  # needed to run tests
     # central-only apps
     "centralserver.contact",
     "centralserver.faq",
