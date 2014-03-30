@@ -84,16 +84,19 @@ STATIC_ROOT    = os.path.realpath(getattr(local_settings, "STATIC_ROOT", PROJECT
  # Make this unique, and don't share it with anybody.
 SECRET_KEY     = getattr(local_settings, "SECRET_KEY", "8qq-!fa$92i=s1gjjitd&%s@4%ka9lj+=@n7a&fzjpwu%3kd#u")
 
-AUTH_PROFILE_MODULE     = "central.UserProfile"
+AUTH_PROFILE_MODULE     = "centralserver.central.UserProfile"
 CSRF_COOKIE_NAME        = "csrftoken_central"
 LANGUAGE_COOKIE_NAME    = "django_language_central"
 SESSION_COOKIE_NAME     = "sessionid_central"
 
-ROOT_URLCONF = "central.urls"
-INSTALLED_APPS = ("central",)
+ROOT_URLCONF = "centralserver.central.urls"
+INSTALLED_APPS = ("centralserver.central",)
 MIDDLEWARE_CLASSES = tuple()  # will be filled recursively via INSTALLED_APPS
 TEMPLATE_DIRS  = tuple()  # will be filled recursively via INSTALLED_APPS
-STATICFILES_DIRS = (os.path.join(PROJECT_PATH, '..', 'static'),)  # libraries common to all apps
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_PATH, '..', 'static'),
+    os.path.join(PROJECT_PATH, '..', 'ka-lite', 'static'),
+)  # libraries common to all apps
 
 DEFAULT_ENCODING = 'utf-8'
 
