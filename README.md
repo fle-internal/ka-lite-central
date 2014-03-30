@@ -17,6 +17,6 @@ This is the code for the KA Lite Central Server: [https://kalite.learningequalit
 
 6. Go into the code directory: `cd code`
 
-7. Set up the database: `python manage.py syncdb --migrate`
+7. Set up the server: `python manage.py setup`
 
 8. Run the server: `python manage.py runserver`
