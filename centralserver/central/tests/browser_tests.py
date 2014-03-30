@@ -92,7 +92,8 @@ class KALiteCentralBrowserTestCase(BrowserTestCase):
             self.assertTrue(self.wait_for_page_change(login_url), "RETURN causes page to change")
             self.assertIn(self.reverse("homepage"), self.browser.current_url, "Login browses to homepage (account admin)" )
             self.assertIn(_("Account administration"), self.browser.title, "Check account admin page title")
-
+        else:
+            time.sleep(1)
 
     def browser_logout_user(self, expect_success=True):
         """Logs a user account out of the central server (and performs relevant checks, unless expect_success=False)"""
@@ -189,8 +190,8 @@ class UserRegistrationCaseTest(KALiteCentralBrowserTestCase):
         self.assertIn(_("This email address is already in use."), error.text, "Check 'email is in use' error.")
 
 
-    def test_login_two_users_different_cases(self):
-        """Tests that a user cannot re-register with the uppercased version of an email address that was registered"""
+    def test_login_two_users_different_passwords(self):
+        """Tests that a user cannot login with another user's password."""
 
         user1_uname = self.user_email.lower()
         user2_uname = "a"+self.user_email.lower()
@@ -220,23 +221,23 @@ class UserRegistrationCaseTest(KALiteCentralBrowserTestCase):
         # First, make sure that user 1 can only log in with user 1's email/password
         self.browser_login_user( username=user1_uname, password=user1_password) # succeeds
         errors = self.browser.find_elements_by_class_name("errorlist")
-        self.assertEqual(len(errors), 0, "No login errors on successful login.")
+        self.assertEqual(len(errors), 0, "Found login errors (%d of 'em) on successful login." % len(errors))
         self.browser_logout_user()
 
         self.browser_login_user( username=user2_uname, password=user1_password, expect_success=False) # fails
         errors = self.browser.find_elements_by_class_name("errorlist")
-        self.assertEqual(len(errors), 1, "Login errors on failed login.")
+        self.assertEqual(len(errors), 1, "Expected one login error on failed login (got %d)." % len(errors))
         self.assertIn(_("Incorrect user name or password"), errors[0].text, "Error text on failed login.")
 
         # Now, check the same in the opposite direction.
         self.browser_login_user( username=user2_uname, password=user2_password) # succeeds
         errors = self.browser.find_elements_by_class_name("errorlist")
-        self.assertEqual(len(errors), 0, "No login errors on successful login.")
+        self.assertEqual(len(errors), 0, "Found login errors (%d of 'em) on successful login." % len(errors))
         self.browser_logout_user()
 
         self.browser_login_user( username=user1_uname, password=user2_password, expect_success=False) # fails
         errors = self.browser.find_elements_by_class_name("errorlist")
-        self.assertEqual(len(errors), 1, "Login errors on failed login.")
+        self.assertEqual(len(errors), 1, "Expected one login error on failed login (got %d)." % len(errors))
         self.assertIn(_("Incorrect user name or password"), errors[0].text, "Error text on failed login.")
 
 
