@@ -17,7 +17,7 @@ import sys
 import tempfile
 from optparse import make_option
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import AMARA_HEADERS, SRTS_JSON_FILEPATH, get_lang_map_filepath
@@ -25,7 +25,6 @@ from fle_utils.general import convert_date_input, ensure_dir, softload_json
 from fle_utils.internet import make_request
 from kalite.i18n import lcode_to_ietf
 from kalite.main.topic_tools import get_slug2id_map
-from kalite.settings import LOG as logging
 
 
 class OutDatedSchema(Exception):

@@ -18,7 +18,7 @@ import youtube_dl
 from optparse import make_option
 from youtube_dl.utils import DownloadError, ExtractorError
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import ugettext as _
 
@@ -27,7 +27,6 @@ from fle_utils.general import ensure_dir
 from fle_utils.videos import get_outside_video_urls
 from kalite.i18n import lcode_to_ietf
 from kalite.main.topic_tools import get_topic_videos, get_node_cache
-from kalite.settings import LOG as logging
 
 
 class Command(BaseCommand):

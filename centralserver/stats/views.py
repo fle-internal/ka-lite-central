@@ -4,11 +4,11 @@ from annoying.decorators import render_to
 from collections_local_copy import Counter, OrderedDict
 from datetime import timedelta  # this is OK; central server code can be 2.7+
 
+from django.conf import settings; logging = settings.LOG
 from django.db.models import Sum, Max, Count, F, Q, Min
 
 from . import stats_logger
 from kalite.i18n import get_video_language, get_video_id
-from kalite.settings import LOG as logging
 from kalite.main.models import ExerciseLog, VideoLog
 from kalite.main.topic_tools import get_id2slug_map
 from kalite.shared.decorators import require_authorized_admin

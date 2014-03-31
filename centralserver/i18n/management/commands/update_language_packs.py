@@ -36,7 +36,7 @@ from collections_local_copy import Iterable, defaultdict
 from itertools import chain, ifilter
 from optparse import make_option
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.core.mail import mail_admins
@@ -45,7 +45,6 @@ from ... import *
 from centralserver.version import VERSION
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
 from kalite.i18n import *
-from kalite.settings import LOG as logging
 from kalite.updates import get_all_remote_video_sizes
 
 

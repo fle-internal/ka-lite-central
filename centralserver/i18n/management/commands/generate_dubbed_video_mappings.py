@@ -9,13 +9,12 @@ import requests
 from optparse import make_option
 from StringIO import StringIO
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import DUBBED_VIDEOS_MAPPING_FILEPATH
 from fle_utils.general import ensure_dir, datediff
 from kalite.main.topic_tools import get_node_cache
-from kalite.settings import LOG as logging
 
 SPREADSHEET_ID ="0AhvqOn88FUVedEJXM1ZhMG1XdGJuVTE4OEZ3WkNxYUE"
 SPREADSHEET_EXPORT_FORMAT = "csv"

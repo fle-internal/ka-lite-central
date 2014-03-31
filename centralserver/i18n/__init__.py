@@ -10,7 +10,7 @@ import requests
 import shutil
 from collections_local_copy import OrderedDict, defaultdict
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.core.management import call_command
 from django.http import HttpRequest
 from django.utils import translation
@@ -26,7 +26,6 @@ from django.views.i18n import javascript_catalog
 from centralserver.version import VERSION
 from fle_utils.general import ensure_dir, softload_json
 from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_langcode_map, get_code2lang_map
-from kalite.settings import LOG as logging
 
 AMARA_HEADERS = {
     "X-api-username": getattr(settings, "AMARA_USERNAME", None),

@@ -14,13 +14,12 @@ import requests
 import shutil
 from optparse import make_option
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import get_dubbed_video_map, get_localized_exercise_dirpath
 from fle_utils.general import ensure_dir
 from kalite.i18n import lcode_to_ietf, lcode_to_django_lang
-from kalite.settings import LOG as logging
 from kalite.main.topic_tools import get_node_cache
 
 
