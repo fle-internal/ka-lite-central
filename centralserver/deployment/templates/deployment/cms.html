@@ -6,6 +6,11 @@
 
 {% block headcss %}{{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/control_panel/base.css' %}" />
+    <style>
+    th {
+        white-space: nowrap;
+    }
+    </style>
 {% endblock headcss %}
 
 {% block content %}
@@ -50,33 +55,35 @@
                         <tr>
                             <th class="headrowuser">{% trans "Contact Name" %}</th>
                             <th class="headrowuser">{% trans "Contact Email" %}</th>
-                            <th class="headrowuser">{% trans "Organizations" %}</th>
+                            <th class="headrowuser">{% trans "Org Name" %}</th>
                             <th class="headrowuser">{% trans "Facility Name" %}</th>
                             <th class="headrowuser">{% trans "Facility Location" %}</th>
                             <th class="headrowuser">{% trans "# Users" %}</th>
-                            <th class="headrowuser">{% trans "Data Syncing Status" %}</th>
                             <th class="headrowuser">{% trans "Last Contact" %}</th>
-                            <th class="headrowuser">{% trans "Zones" %}</th>
+                            <th class="headrowuser">{% trans "Synced Data" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for deployment in user_pages %}
-                        {% with org_email=deployment.signed_by__devicezone__zone__organization__users__email org_name=deployment.signed_by__devicezone__zone__organization__name zone_id=deployment.signed_by__devicezone__zone__id %}
+                        {% with org_email=deployment.signed_by__devicezone__zone__organization__users__email org_name=deployment.signed_by__devicezone__zone__organization__name first_name=deployment.signed_by__devicezone__zone__organization__users__first_name last_name=deployment.signed_by__devicezone__zone__organization__users__last_name zone_id=deployment.signed_by__devicezone__zone__id %}
                         <tr value="{{ org_email }}">
                             <td>
                                 <a title="{% blocktrans %}Email {{ org_name }}{% endblocktrans %}" href="mailto:{{ org_email }}">
-                                    {{ org_name }}
+                                    {{ first_name }} {{ last_name }}
                                     <span class="icon-pencil">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                 </a>
                             </td>
-                            <td>{{ org_email }}<br />{{ deployment.contact_email }}</td>
+                            <td nowrap="">
+                                Login email: <a href="mailto:{{ org_email }}">{{ org_email }}</a>
+                                <br />
+                                Facility email: <a href="{{ deployment.contact_email }}">{{ deployment.contact_email }}</a>
+                            </td>
                             <td>{{ org_name }}</td>
                             <td>{{ deployment.name }}</td>
                             <td>({{ deployment.latitude }}, {{ deployment.longitude }})<br/>{{ deployment.address }}</td>
+                            <td>{{ user_count }}</td>
                             <td>N/A</td>
-                            <td>N/A</td>
-                            <td>N/A</td>
-                            <td><a target="_blank" href="{% url zone_management zone_id=zone_id %}">Syncing details</a></td>
+                            <td><a target="_blank" href="{% url zone_management zone_id=zone_id %}">View data</a></td>
                         </tr>
                         {% endwith %}
                         {% endfor %}

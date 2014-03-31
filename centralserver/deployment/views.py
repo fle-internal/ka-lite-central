@@ -22,8 +22,11 @@ def show_deployment_cms(request):
             "name", "address", \
             "latitude", "longitude", \
             "contact_email", "contact_name", \
+            "user_count",
             "signed_by__devicezone__zone__id", \
             "signed_by__devicezone__zone__organization__users__email", \
+            "signed_by__devicezone__zone__organization__users__first_name",
+            "signed_by__devicezone__zone__organization__users__last_name",
             "signed_by__devicezone__zone__organization__name",)
         #.extra (select={ \
         #    "facility_name": "name", \
