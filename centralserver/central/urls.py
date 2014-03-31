@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
 import centralserver.contact.urls
+import centralserver.deployment.urls
 import centralserver.faq.urls
 import centralserver.registration.urls
 import centralserver.stats.api_urls
@@ -116,6 +117,7 @@ urlpatterns += patterns('',
 
 urlpatterns += patterns('',
     url(r'^stats/', include(centralserver.stats.urls)),
+    url(r'^deployments/', include(centralserver.deployment.urls)),
 )
 
 handler403 = __package__ + '.views.handler_403'
