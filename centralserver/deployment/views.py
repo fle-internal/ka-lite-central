@@ -8,7 +8,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Sum, Max, Count, F, Q, Min
 
 from kalite.facility.models import Facility
-from kalite.settings import LOG as logging
 from kalite.shared.decorators import require_authorized_admin
 
 
