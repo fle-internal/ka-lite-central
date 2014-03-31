@@ -65,7 +65,7 @@
                     </thead>
                     <tbody>
                         {% for deployment in user_pages %}
-                        {% with org_email=deployment.signed_by__devicezone__zone__organization__users__email org_name=deployment.signed_by__devicezone__zone__organization__name first_name=deployment.signed_by__devicezone__zone__organization__users__first_name last_name=deployment.signed_by__devicezone__zone__organization__users__last_name zone_id=deployment.signed_by__devicezone__zone__id %}
+                        {% with org_email=deployment.signed_by__devicezone__zone__organization__users__username org_name=deployment.signed_by__devicezone__zone__organization__name first_name=deployment.signed_by__devicezone__zone__organization__users__first_name last_name=deployment.signed_by__devicezone__zone__organization__users__last_name zone_id=deployment.signed_by__devicezone__zone__id %}
                         <tr value="{{ org_email }}">
                             <td>
                                 <a title="{% blocktrans %}Email {{ org_name }}{% endblocktrans %}" href="mailto:{{ org_email }}">
