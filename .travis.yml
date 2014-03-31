@@ -2,7 +2,9 @@ language: python
 python:
   - "2.7"
 # command to run tests
-script: python centralserver/manage.py test
+script:
+  - python centralserver/manage.py test
+  - python ka-lite/kalite/manage.py test
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
