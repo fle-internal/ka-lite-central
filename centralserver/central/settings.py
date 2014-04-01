@@ -68,6 +68,7 @@ INSTALLED_APPS = (
     "kalite.main",  # *Log objects
     # central-only apps
     "centralserver.contact",
+    "centralserver.deployment",
     "centralserver.faq",
     "centralserver.i18n",
     "centralserver.khanload",

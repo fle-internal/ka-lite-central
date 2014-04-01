@@ -1,0 +1,97 @@
+{% extends base_template %}
+{% load i18n %}
+{% load staticfiles %}
+{% load my_filters %}
+
+
+{% block headcss %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/control_panel/base.css' %}" />
+    <style>
+    th {
+        white-space: nowrap;
+    }
+    </style>
+{% endblock headcss %}
+
+{% block content %}
+        <div class="coaches" id="coaches">
+            <div class="title-div">
+                <span class="title" style="float: left">{% trans "Deployments" %}</span>
+                <a title="{% trans 'Add a new deployment.' %}">
+                    <span class="icon-add icon-medium">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                </a>
+            </div>
+            <div>
+                <span class="definition">
+                    {% trans "Deployments are people who bring one or more copies of KA Lite to a school, community, or country in an organized effort." %}
+                </span>
+            </div>
+
+            {% block coaches_table %}
+                {# Action row, including pagination #}
+                {% if user_pages.num_listed_pages > 1 %}
+                <div class="pagination">
+                        <a title="{% trans 'Browse to the previous page of deployments.' %}" {% if user_pages.has_previous %}href="{{ page_urls.prev_page }}"{% endif %}>&lt&lt</a>
+                        {% for listed_page in user_pages.listed_pages %}
+                            {% if listed_page == -1 %}
+                                <span class="disabled">&hellip;</span>
+                            {% elif listed_page == user_pages.number %}
+                                <span class="current">
+                                   {{ user_pages.number }}
+                                </span>
+                            {% else %}
+                                <a title="{% blocktrans %}Browse to page # {{ listed_page }} of user_pages.{% endblocktrans %}" href="{{ page_urls|get_item:listed_page }}">{{ listed_page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        <a title="{% trans 'Browse to the next page of deployments.' %}" {% if user_pages.has_next %}href="{{ page_url.next_page }}"{% endif %}>&gt&gt</a>
+                </div>
+                <div class="clear"></div>
+                {% endif %}
+
+
+                <table class="simple-table selectable-table">
+                {# Table header row #}
+                    <thead>
+                        <tr>
+                            <th class="headrowuser">{% trans "Contact Name" %}</th>
+                            <th class="headrowuser">{% trans "Contact Email" %}</th>
+                            <th class="headrowuser">{% trans "Org Name" %}</th>
+                            <th class="headrowuser">{% trans "Facility Name" %}</th>
+                            <th class="headrowuser">{% trans "Facility Location" %}</th>
+                            <th class="headrowuser">{% trans "# Users" %}</th>
+                            <th class="headrowuser">{% trans "Last Contact" %}</th>
+                            <th class="headrowuser">{% trans "Synced Data" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deployment in user_pages %}
+                        {% with org_email=deployment.signed_by__devicezone__zone__organization__users__username org_name=deployment.signed_by__devicezone__zone__organization__name first_name=deployment.signed_by__devicezone__zone__organization__users__first_name last_name=deployment.signed_by__devicezone__zone__organization__users__last_name zone_id=deployment.signed_by__devicezone__zone__id %}
+                        <tr value="{{ org_email }}">
+                            <td>
+                                <a title="{% blocktrans %}Email {{ org_name }}{% endblocktrans %}" href="mailto:{{ org_email }}">
+                                    {{ first_name }} {{ last_name }}
+                                    <span class="icon-pencil">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                </a>
+                            </td>
+                            <td nowrap="">
+                                Login email: <a href="mailto:{{ org_email }}">{{ org_email }}</a>
+                                <br />
+                                Facility email: <a href="{{ deployment.contact_email }}">{{ deployment.contact_email }}</a>
+                            </td>
+                            <td>{{ org_name }}</td>
+                            <td>{{ deployment.name }}</td>
+                            <td>({{ deployment.latitude }}, {{ deployment.longitude }})<br/>{{ deployment.address }}</td>
+                            <td>{{ user_count }}</td>
+                            <td>N/A</td>
+                            <td><a target="_blank" href="{% url zone_management zone_id=zone_id %}">View data</a></td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endblock %}
+            </div>
+            <div style="clear: both;"></div>
+
+
+{% endblock content %}
