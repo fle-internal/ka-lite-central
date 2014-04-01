@@ -7,34 +7,34 @@ module.exports = function(grunt) {
 		less: {
 			compile: {
 				options: {
-					paths:["./code/static/less"], //Directory to check for @imports
+					paths:["./centralserver/static/less"], //Directory to check for @imports
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
 				files: {
-					"./code/static/css/style.css": "./code/static/less/style.less",
+					"./centralserver/static/css/style.css": "./centralserver/static/less/style.less",
 				},
 
 			},
 
 			bootstrap: {
 				options: {
-					paths:["./code/static/less/bootstrap"],
+					paths:["./centralserver/static/less/bootstrap"],
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
 				files: {
-					"./code/static/css/bootstrap/bootstrap.css": "./code/static/less/bootstrap/bootstrap.less",
-					"./code/static/css/bootstrap/responsive.css": "./code/static/less/bootstrap/responsive.less"
+					"./centralserver/static/css/bootstrap/bootstrap.css": "./centralserver/static/less/bootstrap/bootstrap.less",
+					"./centralserver/static/css/bootstrap/responsive.css": "./centralserver/static/less/bootstrap/responsive.less"
 				},
 			}
 		},
 		jshint: {
 			files: [
 				'Gruntfile.js',
-				'code/static/js/coachreports/',
-				'code/static/js/securesync/',
-				'code/static/js/khan-lite.js',
+				'centralserver/static/js/coachreports/',
+				'centralserver/static/js/securesync/',
+				'centralserver/static/js/khan-lite.js',
 			],
 			// http://www.jshint.com/docs/options/
 			options: {
