@@ -62,8 +62,8 @@ INSTALLED_APPS = (
     "fle_utils.config",
     "fle_utils.django_utils",
     "securesync",
-    "kalite.control_panel",  # in both apps
     "kalite.coachreports",  # in both apps; reachable on central via control_panel
+    "kalite.control_panel",  # in both apps
     "kalite.facility",
     "kalite.main",  # *Log objects
     # central-only apps

@@ -23,6 +23,7 @@ import kalite.version  # for software version
 from .forms import OrganizationForm, OrganizationInvitationForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
+from kalite.control_panel import views as kalite_control_panel_views
 from kalite.shared.decorators import require_authorized_admin
 from securesync.engine.api_client import SyncClient
 from securesync.models import Zone
@@ -171,14 +172,19 @@ def delete_organization(request, org_id):
 
 
 @require_authorized_admin
-def delete_zone(request, org_id, zone_id):
-    zone = get_object_or_404(Zone, id=zone_id)
-    if not zone.has_dependencies(passable_classes=["Organization"]):
-        zone.delete()
-        messages.success(request, _("You have successfully deleted ") + zone.name + ".")
+@render_to("control_panel/zone_form.html")
+def zone_add_to_org(request, org_id=None, *args, **kwargs):
+    """Add a zone, then add that zone to an organization."""
+    org = get_object_or_404(Organization, id=org_id)
+    context = kalite_control_panel_views.process_zone_form(request, *args, **kwargs)
+    if request.method == "POST" and context["form"].is_valid():
+        zone = context["form"].instance
+        if zone not in org.zones.all():
+            org.zones.add(zone)
+        return HttpResponseRedirect(reverse("zone_management", kwargs={ "zone_id": zone.id }))
     else:
-        messages.warning(request, _("You cannot delete this zone because it is syncing data with with %d device(s)") % zone.devicezone_set.count())
-    return HttpResponseRedirect(reverse("org_management"))
+        return context
+    return context
 
 
 def content_page(request, page, **kwargs):
