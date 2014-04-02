@@ -59,7 +59,6 @@
                             <th class="headrowuser">{% trans "Facility Name" %}</th>
                             <th class="headrowuser">{% trans "Facility Location" %}</th>
                             <th class="headrowuser">{% trans "# Users" %}</th>
-                            <th class="headrowuser">{% trans "Last Contact" %}</th>
                             <th class="headrowuser">{% trans "Synced Data" %}</th>
                         </tr>
                     </thead>
@@ -81,8 +80,7 @@
                             <td>{{ org_name }}</td>
                             <td>{{ deployment.name }}</td>
                             <td>({{ deployment.latitude }}, {{ deployment.longitude }})<br/>{{ deployment.address }}</td>
-                            <td>{{ user_count }}</td>
-                            <td>N/A</td>
+                            <td>Registered: {{ deployment.n_actual_users }}<br/>Anticipated: {{ deployment.user_count }}</td>
                             <td><a target="_blank" href="{% url zone_management zone_id=zone_id %}">View data</a></td>
                         </tr>
                         {% endwith %}

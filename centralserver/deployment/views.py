@@ -16,17 +16,22 @@ from kalite.shared.decorators import require_authorized_admin
 def show_deployment_cms(request):
 
     logins_with_facilities = Facility.objects \
-        .filter(signed_by__devicemetadata__is_trusted=False) \
+        .filter(signed_by__devicemetadata__is_trusted=False, signed_by__devicemetadata__is_demo_device=False) \
+        .annotate( \
+            n_actual_users=Count("facilityuser")) \
         .values( \
+            "n_actual_users", \
             "name", "address", \
             "latitude", "longitude", \
             "contact_email", "contact_name", \
             "user_count",
             "signed_by__devicezone__zone__id", \
             "signed_by__devicezone__zone__organization__users__username", \
-            "signed_by__devicezone__zone__organization__users__first_name",
-            "signed_by__devicezone__zone__organization__users__last_name",
-            "signed_by__devicezone__zone__organization__name",)
+            "signed_by__devicezone__zone__organization__users__first_name", \
+            "signed_by__devicezone__zone__organization__users__last_name", \
+            "signed_by__devicezone__zone__organization__name",) \
+        .order_by("-n_actual_users")
+
         #.extra (select={ \
         #    "facility_name": "name", \
         #    "zone_id": "signed_by__devicezone__zone__id", \
