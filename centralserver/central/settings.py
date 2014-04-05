@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     "kalite.coachreports",  # in both apps; reachable on central via control_panel
     "kalite.control_panel",  # in both apps
     "kalite.facility",
+    "kalite.i18n",  #
     "kalite.main",  # *Log objects
     # central-only apps
     "centralserver.contact",
