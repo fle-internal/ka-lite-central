@@ -1,3 +1,5 @@
+import os
+
 try:
     import local_settings
 except ImportError:
@@ -17,3 +19,4 @@ KA_CROWDIN_PROJECT_KEY     = getattr(local_settings, "KA_CROWDIN_PROJECT_KEY", N
 AMARA_USERNAME          = getattr(local_settings, "AMARA_USERNAME", None)
 AMARA_API_KEY           = getattr(local_settings, "AMARA_API_KEY", None)
 
+I18N_CENTRAL_DATA_PATH = os.path.join(os.path.dirname(__file__), "data")

@@ -37,9 +37,9 @@ LANGUAGE_PACK_ROOT = os.path.join(settings.MEDIA_ROOT, "language_packs")
 
 LANGUAGE_SRT_SUFFIX = "_download_status.json"
 SRTS_JSON_FILEPATH = os.path.join(SUBTITLES_DATA_ROOT, "srts_remote_availability.json")
-DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.DATA_PATH, "i18n", "dubbed_video_mappings.json")
+DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "dubbed_video_mappings.json")
 SUBTITLE_COUNTS_FILEPATH = os.path.join(SUBTITLES_DATA_ROOT, "subtitle_counts.json")
-SUPPORTED_LANGUAGES_FILEPATH = os.path.join(settings.DATA_PATH, "i18n", "supported_languages.json")
+SUPPORTED_LANGUAGES_FILEPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "supported_languages.json")
 CROWDIN_CACHE_DIR = os.path.join(settings.PROJECT_PATH, "..", "_crowdin_cache")
 LANGUAGE_PACK_BUILD_DIR = os.path.join(settings.DATA_PATH, "i18n", "build")
 
