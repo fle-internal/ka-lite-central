@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/arnaudbenard/ka-lite.git"
+    "url": "https://github.com/fle-internal/ka-lite-central.git"
   },
   "author": "",
   "license": "BSD",
   "readmeFilename": "README.md",
   "gitHead": "2eeb596f6d76493bcfb957e0df6b83f2f1b036f0",
   "bugs": {
-    "url": "https://github.com/arnaudbenard/ka-lite/issues"
+    "url": "https://github.com/fle-internal/ka-lite-central/issues"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
