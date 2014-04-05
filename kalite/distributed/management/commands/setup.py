@@ -9,15 +9,16 @@ import tempfile
 from annoying.functions import get_object_or_None
 from optparse import make_option
 
-# This is necessary for this script to run before KA Lite has ever been installed.
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.realpath(CURRENT_DIR + "/../../../")
 
-sys.path = [
-    os.path.join(BASE_DIR, "python-packages"),
-    os.path.join(BASE_DIR, "kalite")
-] + sys.path
-os.environ["DJANGO_SETTINGS_MODULE"] = "kalite.settings"  # allows django commands to run
+# This is necessary for this script to run before KA Lite has ever been installed.
+if not os.environ.get("DJANGO_SETTINGS_MODULE"):
+    sys.path = [
+        os.path.join(BASE_DIR, "python-packages"),
+        os.path.join(BASE_DIR, "kalite")
+    ] + sys.path
+    os.environ["DJANGO_SETTINGS_MODULE"] = "kalite.settings"  # allows django commands to run
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -129,7 +130,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not options["interactive"]:
-            options["username"] = options["username"] or settings.INSTALL_ADMIN_USERNAME or getpass.getuser()
+            options["username"] = options["username"] or getattr(settings, "INSTALL_ADMIN_USERNAME", None) or getpass.getuser()
             options["hostname"] = options["hostname"] or get_host_name()
 
         sys.stdout.write("  _   __  ___    _     _ _        \n")
@@ -212,8 +213,8 @@ class Command(BaseCommand):
             (username, password) = get_username_password(options["username"], options["password"])
             (hostname, description) = get_hostname_and_description(options["hostname"], options["description"])
         else:
-            username = options["username"] or settings.INSTALL_ADMIN_USERNAME
-            password = options["password"] or settings.INSTALL_ADMIN_PASSWORD
+            username = options["username"] or getattr(settings, "INSTALL_ADMIN_USERNAME", None)
+            password = options["password"] or getattr(settings, "INSTALL_ADMIN_PASSWORD", None)
             hostname = options["hostname"]
             description = options["description"]
 
@@ -267,35 +268,34 @@ class Command(BaseCommand):
             admin.set_password(password)
             admin.save()
 
-
-        # Move scripts
-        for script_name in ["start", "stop", "run_command"]:
-            script_file = script_name + system_script_extension()
-            dest_dir = os.path.join(settings.PROJECT_PATH, "..")
-            src_dir = os.path.join(dest_dir, "scripts")
-            shutil.copyfile(os.path.join(src_dir, script_file), os.path.join(dest_dir, script_file))
-            shutil.copystat(os.path.join(src_dir, script_file), os.path.join(dest_dir, script_file))
-
-        start_script_path = os.path.realpath(os.path.join(settings.PROJECT_PATH, "..", "start%s" % system_script_extension()))
-
-        # Run videoscan, on the distributed server.
-        if not settings.CENTRAL_SERVER:
-            sys.stdout.write("Scanning for video files in the content directory (%s)\n" % settings.CONTENT_ROOT)
-            call_command("videoscan")
-
         # Now deploy the static files
         call_command("collectstatic", interactive=False)
 
-        # done; notify the user.
-        sys.stdout.write("\n")
-        if install_clean:
-            sys.stdout.write("CONGRATULATIONS! You've finished setting up the KA Lite server software.\n")
-            sys.stdout.write("\tPlease run '%s' to start the server,\n" % start_script_path)
-            sys.stdout.write("\tthen load one of the following addresses in your browser to complete the configuration:\n")
-            for ip in get_ip_addresses():
-                sys.stdout.write("\t\thttp://%s:%d/\n" % (ip, settings.USER_FACING_PORT()))
+        if not settings.CENTRAL_SERVER:
+            # Move scripts
+            for script_name in ["start", "stop", "run_command"]:
+                script_file = script_name + system_script_extension()
+                dest_dir = os.path.join(settings.PROJECT_PATH, "..")
+                src_dir = os.path.join(dest_dir, "scripts")
+                shutil.copyfile(os.path.join(src_dir, script_file), os.path.join(dest_dir, script_file))
+                shutil.copystat(os.path.join(src_dir, script_file), os.path.join(dest_dir, script_file))
 
-        else:
-            sys.stdout.write("CONGRATULATIONS! You've finished updating the KA Lite server software.\n")
-            sys.stdout.write("\tPlease run '%s' to start the server.\n" % start_script_path)
-        sys.stdout.write("\n")
+            start_script_path = os.path.realpath(os.path.join(settings.PROJECT_PATH, "..", "start%s" % system_script_extension()))
+
+            # Run videoscan, on the distributed server.
+            sys.stdout.write("Scanning for video files in the content directory (%s)\n" % settings.CONTENT_ROOT)
+            call_command("videoscan")
+
+            # done; notify the user.
+            sys.stdout.write("\n")
+            if install_clean:
+                sys.stdout.write("CONGRATULATIONS! You've finished setting up the KA Lite server software.\n")
+                sys.stdout.write("\tPlease run '%s' to start the server,\n" % start_script_path)
+                sys.stdout.write("\tthen load one of the following addresses in your browser to complete the configuration:\n")
+                for ip in get_ip_addresses():
+                    sys.stdout.write("\t\thttp://%s:%d/\n" % (ip, settings.USER_FACING_PORT()))
+
+            else:
+                sys.stdout.write("CONGRATULATIONS! You've finished updating the KA Lite server software.\n")
+                sys.stdout.write("\tPlease run '%s' to start the server.\n" % start_script_path)
+            sys.stdout.write("\n")

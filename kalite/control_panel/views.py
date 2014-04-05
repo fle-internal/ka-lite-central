@@ -1,18 +1,19 @@
 """
 """
+import copy
 import datetime
 import os
 from annoying.decorators import render_to, wraps
 from annoying.functions import get_object_or_None
 from collections_local_copy import OrderedDict, namedtuple
 
-from django.conf import settings
+from django.conf import settings; logging = settings.LOG
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db.models import Sum, Max
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
@@ -25,7 +26,6 @@ from kalite.facility.forms import FacilityForm
 from kalite.facility.models import Facility, FacilityUser, FacilityGroup
 from kalite.main.models import ExerciseLog, VideoLog, UserLog, UserLogSummary
 from kalite.main.topic_tools import get_node_cache
-from kalite.settings import LOG as logging
 from kalite.shared.decorators import require_authorized_admin, require_authorized_access_to_student_data
 from kalite.version import VERSION, VERSION_INFO
 from securesync.models import DeviceZone, Device, Zone, SyncSession
@@ -33,7 +33,7 @@ from securesync.models import DeviceZone, Device, Zone, SyncSession
 
 def set_clock_context(request):
     return {
-        "clock_set": settings.ENABLE_CLOCK_SET,
+        "clock_set": getattr(settings, "ENABLE_CLOCK_SET", False),
     }
 
 def sync_now_context(request):
@@ -45,6 +45,13 @@ def sync_now_context(request):
 @require_authorized_admin
 @render_to("control_panel/zone_form.html")
 def zone_form(request, zone_id):
+    context = process_zone_form
+    if request.method == "POST" and context["form"].is_valid:
+        return HttpResponseRedirect(reverse("zone_management", kwargs={ "zone_id": zone_id }))
+    else:
+        return context
+
+def process_zone_form(request, zone_id):
     context = control_panel_context(request, zone_id=zone_id)
 
     if request.method != "POST":
@@ -133,6 +140,17 @@ def zone_management(request, zone_id="None"):
 
 
 @require_authorized_admin
+def delete_zone(request, zone_id):
+    zone = get_object_or_404(Zone, id=zone_id)
+    if not zone.has_dependencies(passable_classes=["Organization"]):
+        zone.delete()
+        messages.success(request, _("You have successfully deleted ") + zone.name + ".")
+    else:
+        messages.warning(request, _("You cannot delete this zone because it is syncing data with with %d device(s)") % zone.devicezone_set.count())
+    return HttpResponseRedirect(reverse("org_management"))
+
+
+@require_authorized_admin
 @render_to("control_panel/device_management.html")
 def device_management(request, device_id, zone_id=None, n_sessions=10):
     context = control_panel_context(request, zone_id=zone_id, device_id=device_id)
@@ -195,7 +213,7 @@ def group_report(request, facility, group_id=None, zone_id=None):
 @facility_required
 @require_authorized_admin
 @render_to("control_panel/facility_management.html")
-@render_to_csv(["students", "teachers"], key_label="user_id", order="stacked")
+@render_to_csv(["students", "coaches"], key_label="user_id", order="stacked")
 def facility_management(request, facility, group_id=None, zone_id=None, frequency=None, period_start="", period_end="", user_type=None, per_page=25):
     context = control_panel_context(request, zone_id=zone_id, facility_id=facility.id)
 
@@ -257,23 +275,23 @@ def facility_management(request, facility, group_id=None, zone_id=None, frequenc
     (student_data, group_data) = _get_user_usage_data(students, groups, period_start=period_start, period_end=period_end, group_id=group_id)
     (coach_data, coach_group_data) = _get_user_usage_data(coaches, period_start=period_start, period_end=period_end, group_id=group_id)
 
-    coach_data, coach_urls = paginate_users(request, coach_data, "coaches", page=coach_page, per_page=coach_per_page)
-    student_data, student_urls = paginate_users(request, student_data, "students", page=student_page, per_page=student_per_page)
-
-    page_urls = {
-        "coaches": coach_urls,
-        "students": student_urls,
-    }
+    coach_pages, coach_urls = paginate_users(request, copy.deepcopy(coach_data.values()), "coaches", page=coach_page, per_page=coach_per_page)
+    student_pages, student_urls = paginate_users(request, copy.deepcopy(student_data.values()), "students", page=student_page, per_page=student_per_page)
 
     context.update({
         "form": form,
         "group": group,
         "date_range": [period_start, period_end],
         "group_id": group_id,
-        "page_urls": page_urls,
-        "groups": group_data,
-        "students": student_data,
-        "coaches": coach_data,
+        "page_urls": {
+            "coaches": coach_urls,
+            "students": student_urls,
+        },
+        "student_pages": student_pages,  # paginated data
+        "coach_pages": coach_pages,  # paginated data
+        "groups": group_data.values(),
+        "students": student_data,  # raw data
+        "coaches": coach_data,  # raw data
     })
     return context
 
@@ -420,7 +438,7 @@ def _get_user_usage_data(users, groups=None, period_start=None, period_end=None,
         total_mastery_so_far = (group_data[group_pk]["pct_mastery"] * (group_data[group_pk]["total_users"] - 1) + user_data[user.pk]["pct_mastery"])
         group_data[group_pk]["pct_mastery"] =  total_mastery_so_far / group_data[group_pk]["total_users"]
 
-    return (user_data.values(), group_data.values())
+    return (user_data, group_data)
 
 
 # context functions
