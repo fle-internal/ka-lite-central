@@ -32,9 +32,11 @@ module.exports = function(grunt) {
 		jshint: {
 			files: [
 				'Gruntfile.js',
-				'centralserver/static/js/coachreports/',
-				'centralserver/static/js/securesync/',
-				'centralserver/static/js/khan-lite.js',
+				'ka-lite/kalite/coachreports/static/js/coachreports/',
+				'ka-lite/kalite/control_panel/static/js/control_panel/',
+				'ka-lite/kalite/distributed/static/js/distributed/',
+				'ka-lite/kalite/updates/static/js/updates/',
+				'ka-lite/python-packages/securesync/static/js/securesync/'
 			],
 			// http://www.jshint.com/docs/options/
 			options: {
