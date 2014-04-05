@@ -10,5 +10,4 @@ except ImportError:
 # Set module settings
 #######################
 
-PROJECT_PATH = os.path.join(os.path.dirname(__file__), '..')
 STATS_DATA_PATH = ROOT_DATA_PATH #os.path.join(os.path.dirname(__file__), "data")
