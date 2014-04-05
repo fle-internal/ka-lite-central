@@ -22,6 +22,7 @@ writeup/
 /run_command.*
 /start.*
 /stop.*
+/centralserver/i18n/data/dubbed_video_mappings.json
 /centralserver/kalite-*.zip
 /centralserver/local_settings.py
 /centralserver/media

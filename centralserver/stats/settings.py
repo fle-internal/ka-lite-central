@@ -11,4 +11,4 @@ except ImportError:
 #######################
 
 PROJECT_PATH = os.path.join(os.path.dirname(__file__), '..')
-STATS_DATA_PATH = os.path.join(PROJECT_PATH, '..', 'data') #os.path.dirname(__file__), "data")
+STATS_DATA_PATH = ROOT_DATA_PATH #os.path.join(os.path.dirname(__file__), "data")
