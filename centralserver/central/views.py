@@ -149,7 +149,7 @@ def organization_form(request, org_id):
             if old_org:
                 return HttpResponseRedirect(reverse("org_management"))
             else:
-                return HttpResponseRedirect(reverse("zone_form", kwargs={"zone_id": "new", "org_id": form.instance.pk}) )
+                return HttpResponseRedirect(reverse("zone_add_to_org", kwargs={"zone_id": "new", "org_id": form.instance.pk}) )
     else:
         form = OrganizationForm(instance=org)
     return {
