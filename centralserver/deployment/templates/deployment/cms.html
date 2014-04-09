@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load staticfiles %}
 {% load my_filters %}
+{% load gpsfrac2coord %}
 
 
 {% block headcss %}{{ block.super }}
@@ -79,7 +80,15 @@
                             </td>
                             <td>{{ org_name }}</td>
                             <td>{{ deployment.name }}</td>
-                            <td>({{ deployment.latitude }}, {{ deployment.longitude }})<br/>{{ deployment.address }}</td>
+                            <td>
+                                {% if deployment.latitude and deployment.longitude and deployment.address %}
+                                    <a href="https://www.google.com/maps/place/{% gpsfrac2coord lat=deployment.latitude %}+{% gpsfrac2coord long=deployment.longitude %}/{{ deployment.latitude }},{{ deployment.longitude }},6z">
+                                    {{ deployment.address }}
+                                    </a>
+                                {% else %}
+                                    {{ deployment.address }}
+                                {% endif %}
+                            </td>
                             <td>Registered: {{ deployment.n_actual_users }}<br/>Anticipated: {{ deployment.user_count }}</td>
                             <td><a target="_blank" href="{% url zone_management zone_id=zone_id %}">View data</a></td>
                         </tr>
