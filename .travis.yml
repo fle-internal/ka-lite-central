@@ -10,9 +10,9 @@ install:
   - npm install -g grunt-cli
 script:
   - grunt jshint  # run jshint
-  - python centralserver/manage.py test
+  - python centralserver/manage.py test --traceback
   - python ka-lite/python-packages/fle_utils/tests.py  # ka-lite regressions
-  - python ka-lite/kalite/manage.py test
+  - python ka-lite/kalite/manage.py test --traceback
 notifications:
   email:
     - ben@learningequality.org
