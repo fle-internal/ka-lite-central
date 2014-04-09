@@ -6,7 +6,9 @@ from datetime import timedelta  # this is OK; central server code can be 2.7+
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Sum, Max, Count, F, Q, Min
+from django.utils.translation import ugettext as _
 
+from fle_utils.django_utils.paginate import pages_to_show
 from kalite.facility.models import Facility
 from kalite.shared.decorators import require_authorized_admin
 
@@ -97,42 +99,10 @@ def show_deployment_cms(request):
 
         return users, page_urls
 
-    user_pages, page_urls = paginate_users(logins_with_facilities, page=int(request.GET.get("page", 1)), per_page=25)
+    user_pages, page_urls = paginate_users(logins_with_facilities, page=int(request.GET.get("page", 1)), per_page=int(request.GET.get("per_page", 25)))
 
     return {
         "user_pages": user_pages,
         "page_urls": page_urls,
+        "title": _("Deployments CMS"),
     }
-
-
-
-def pages_to_show(paginator, page, pages_wanted=None, max_pages_wanted=9):
-    """
-    Function to select first two pages, last two pages and pages around currently selected page
-    to show in pagination bar.
-    """
-    page = int(page)
-
-    #Set precedence for displaying each page on the navigation bar.
-    page_precedence_order = [page,1,paginator.num_pages,page+1,page-1,page+2,page-2,2,paginator.num_pages-1]
-
-    if pages_wanted is None:
-        pages_wanted = []
-
-    #Allow for arbitrary pages wanted to be set via optional argument
-    pages_wanted = set(pages_wanted) or set(page_precedence_order[:max_pages_wanted])
-
-    #Calculate which pages actually exist
-    pages_to_show = set(paginator.page_range).intersection(pages_wanted)
-    pages_to_show = sorted(pages_to_show)
-
-    #Find gaps larger than 1 in pages_to_show, indicating that a range of pages has been skipped here
-    skip_pages = [ x[1] for x in zip(pages_to_show[:-1],
-                                     pages_to_show[1:])
-                   if (x[1] - x[0] != 1) ]
-
-    #Add -1 to stand in for skipped pages which can then be rendered as an ellipsis.
-    for i in skip_pages:
-        pages_to_show.insert(pages_to_show.index(i), -1)
-
-    return pages_to_show
