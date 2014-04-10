@@ -2,18 +2,20 @@
 
 This is the code for the KA Lite Central Server: [https://kalite.learningequality.org](https://kalite.learningequality.org)
 
-## Environment Setup 
+## Environment Setup
 
-1. Install requirements: 
-    - [install node](http://nodejs.org/download/) if you don't have it already. 
+1. Install requirements:
+    - [install node](http://nodejs.org/download/) if you don't have it already.
 2. Get the codebase: `git clone git@github.com:fle-internal/ka-lite-central.git`
 3. Install the dependencies listed in packages.json: `sudo npm install`
 4. Install grunt: `sudo npm install -g grunt-cli`
-5. Run grunt in the root directory: `grunt`
-6. **Go into the centralserver directory: `cd centralserver`**
-7. Set up the server: `python manage.py setup`
-8. Set up a custom `local_settings.py` file (see below)
-9. Run the server: `python manage.py runserver`
+5. Go into the centralserver directory: `cd centralserver`
+6. Set up the server: `python manage.py setup`
+7. Return to the root directory: 'cd ..'
+8. Run grunt in the root directory: `grunt`
+9. Return to the code directory: `cd centralserver`
+10. Set up a custom `centralserver/local_settings.py` file (see below)
+11. Run the server: `python manage.py runserver`
 
 ### Local_settings.py setup
 
