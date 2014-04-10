@@ -94,7 +94,7 @@ def show_deployment_cms(request):
 
     # Combine all data into a single data store.
     sort_fn = lambda dep: (dep["total_users"], dep["models_synced"], dep["sync_sessions"])
-    paged_data, page_urls = paginate_data(request, sorted(deployment_data.values(), key=sort_fn, reverse=True), page=int(request.GET.get("page", 1)), per_page=int(request.GET.get("per_page", 25)))
+    paged_data, page_urls = paginate_data(request, sorted(deployment_data.values(), key=sort_fn, reverse=True), page=int(request.GET.get("cur_page", 1)), per_page=int(request.GET.get("per_page", 25)))
 
     return {
         "pages": paged_data,
