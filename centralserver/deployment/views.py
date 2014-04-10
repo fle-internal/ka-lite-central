@@ -57,6 +57,8 @@ def show_deployment_cms(request):
 
     for devzone in list(device_data):
         org_id = devzone["zone__organization__id"]
+        if not org_id:
+            continue
         deployment_data[org_id]["devices"] = deployment_data[org_id].get("devices", {})
         deployment_data[org_id]["devices"][devzone["device__id"]] = {
             "id": devzone["device__id"],
