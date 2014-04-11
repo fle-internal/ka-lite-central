@@ -36,7 +36,7 @@ class TestAddFacility(KALiteDistributedBrowserTestCase):
         self.browser_login_admin()
 
         # Add the facility
-        add_facility_url = self.reverse("add_facility", kwargs={"id": "new"})
+        add_facility_url = self.reverse("add_facility")
         self.browse_to(add_facility_url)
 
         self.browser_activate_element(id="id_name") # explicitly set the focus, to start
@@ -181,7 +181,7 @@ class StudentExerciseTest(KALiteDistributedWithFacilityBrowserTestCase):
         """
         From an exercise page, insert an answer into the text box and submit.
         """
-        self.browser.find_element_by_css_selector('#solutionarea input[type=text]').click()
+        self.browser.find_element_by_id('solutionarea').find_element_by_css_selector('input[type=text]').click()
         self.browser_send_keys(unicode(answer))
         self.browser_send_keys(Keys.RETURN)
 

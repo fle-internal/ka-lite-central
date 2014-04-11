@@ -28,7 +28,7 @@ from kalite.version import VERSION
 
 CACHE_VARS = []
 
-DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.DATA_PATH, "i18n", "dubbed_video_mappings.json")
+DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.I18N_DATA_PATH, "dubbed_video_mappings.json")
 LOCALE_ROOT = settings.LOCALE_PATHS[0]
 
 class LanguageNotFoundError(Exception):
@@ -49,6 +49,11 @@ def get_locale_path(lang_code=None):
         return LOCALE_ROOT
     else:
         return os.path.join(LOCALE_ROOT, lcode_to_django_dir(lang_code))
+
+def get_po_filepath(lang_code, filename=None):
+    """Return the LC_MESSAGES directory for the language code, with an optional filename appended."""
+    base_dirpath = os.path.join(get_locale_path(lang_code=lang_code), "LC_MESSAGES")
+    return (filename and os.path.join(base_dirpath, filename)) or base_dirpath
 
 
 DUBBED_VIDEO_MAP_RAW = None
@@ -148,7 +153,7 @@ def get_youtube_id(video_id, lang_code=settings.LANGUAGE_CODE):
     """Accepts lang_code in ietf format"""
     if not lang_code:  # looking for the base/default youtube_id
         return video_id
-    return get_dubbed_video_map(lcode_to_ietf(lang_code)).get(video_id)
+    return get_dubbed_video_map(lcode_to_ietf(lang_code)).get(video_id, video_id)
 
 
 def get_video_id(youtube_id):
