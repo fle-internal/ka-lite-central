@@ -15,6 +15,7 @@ import glob
 import re
 import os
 import shutil
+import subprocess
 import sys
 from optparse import make_option
 
@@ -24,10 +25,21 @@ from django.core.management.base import BaseCommand, CommandError
 
 from fle_utils.django_utils import call_command_with_output
 from fle_utils.general import ensure_dir
+from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
 
 
 class Command(test_wrappings.Command):
+    option_list = BaseCommand.option_list + (
+        make_option(
+            '--upload',
+            '-u',
+            dest='upload',
+            action="store_true",
+            default=False,
+            help='Uploads the pot files to crowdin. NOTE: This requires the settings.CROWDIN_KEY to be set to the proper value.',
+        ),
+    )
     help = 'USAGE: \'python manage.py update_pot\' creates new po file templates, used for translations in crowdin.'
 
     def handle(self, **options):
@@ -42,6 +54,14 @@ class Command(test_wrappings.Command):
 
         update_templates()
 
+        if options["upload"]:
+            if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
+                raise CommandError("CROWDIN_PROJECT_KEY must be set in order to upload.")
+            upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY, files={
+                os.path.join(test_wrappings.POT_PATH, "kalite.pot"): os.path.join("KA Lite UI", "kalite.pot"),
+                os.path.join(test_wrappings.POT_PATH, "kalitejs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
+            })
+
 
 def update_templates():
     """Update template po files"""
@@ -51,3 +71,18 @@ def update_templates():
     ensure_dir(test_wrappings.POT_PATH)
     shutil.copy(get_po_filepath(lang_code="en", filename="django.po"), os.path.join(test_wrappings.POT_PATH, "kalite.pot"))
     shutil.copy(get_po_filepath(lang_code="en", filename="djangojs.po"), os.path.join(test_wrappings.POT_PATH, "kalitejs.pot"))
+
+
+def upload_to_crowdin(files, project_key, project_id="ka-lite"):
+    for src_filepath, dest_filepath in files.iteritems():
+        cmd = ['curl', '-F', 'files[%(dest_filepath)s]=@%(src_filepath)s' % {
+            "src_filepath": src_filepath,
+            "dest_filepath": dest_filepath,
+        },  'http://api.crowdin.net/api/project/%(project_id)s/update-file?key=%(project_key)s' % {
+            "project_key": project_key,
+            "project_id": project_id,
+        }]
+        logging.info("Uploading %s" % os.path.basename(src_filepath))
+        upload_output = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+        if "success" not in upload_output:
+            logging.error("Failed to upload %s: %s" % (src_filepath, upload_output))
