@@ -28,6 +28,8 @@ from fle_utils.general import ensure_dir
 from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
 
+POT_PATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
+
 
 class Command(test_wrappings.Command):
     option_list = BaseCommand.option_list + (
@@ -43,11 +45,9 @@ class Command(test_wrappings.Command):
     help = 'USAGE: \'python manage.py update_pot\' creates new po file templates, used for translations in crowdin.'
 
     def handle(self, **options):
-        # All commands must be run from project root
-        test_wrappings.change_dir_to_project_root()
 
         # (safety measure) prevent any english or test translations from being uploaded
-        test_wrappings.delete_current_templates()
+        delete_current_templates()
 
         # Create new files
         test_wrappings.run_makemessages()
@@ -58,19 +58,27 @@ class Command(test_wrappings.Command):
             if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
                 raise CommandError("CROWDIN_PROJECT_KEY must be set in order to upload.")
             upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY, files={
-                os.path.join(test_wrappings.POT_PATH, "kalite.pot"): os.path.join("KA Lite UI", "kalite.pot"),
-                os.path.join(test_wrappings.POT_PATH, "kalitejs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
+                os.path.join(POT_PATH, "kalite.pot"): os.path.join("KA Lite UI", "kalite.pot"),
+                os.path.join(POT_PATH, "kalitejs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
             })
+
+
+def delete_current_templates():
+    """Delete existing en po/pot files"""
+
+    logging.info("Deleting English language pot files")
+    if os.path.exists(POT_PATH):
+        shutil.rmtree(POT_PATH)
 
 
 def update_templates():
     """Update template po files"""
-    logging.info("Copying english po files to %s" % test_wrappings.POT_PATH)
+    logging.info("Copying english po files to %s" % POT_PATH)
 
     #  post them to exposed URL
-    ensure_dir(test_wrappings.POT_PATH)
-    shutil.copy(get_po_filepath(lang_code="en", filename="django.po"), os.path.join(test_wrappings.POT_PATH, "kalite.pot"))
-    shutil.copy(get_po_filepath(lang_code="en", filename="djangojs.po"), os.path.join(test_wrappings.POT_PATH, "kalitejs.pot"))
+    ensure_dir(POT_PATH)
+    shutil.copy(get_po_filepath(lang_code="en", filename="django.po"), os.path.join(POT_PATH, "kalite.pot"))
+    shutil.copy(get_po_filepath(lang_code="en", filename="djangojs.po"), os.path.join(POT_PATH, "kalitejs.pot"))
 
 
 def upload_to_crowdin(files, project_key, project_id="ka-lite"):
