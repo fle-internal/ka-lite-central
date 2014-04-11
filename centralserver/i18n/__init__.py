@@ -150,6 +150,7 @@ def get_dubbed_video_map(lang_code=None, force=False):
                     logging.debug("Generating dubbed video mappings.")
                     call_command("generate_dubbed_video_mappings", force=force)
                 except Exception as e:
+                    logging.debug("Error generating dubbed video mappings: %s" % e)
                     if not os.path.exists(DUBBED_VIDEOS_MAPPING_FILEPATH):
                         # Unrecoverable error, so raise
                         raise
@@ -162,7 +163,7 @@ def get_dubbed_video_map(lang_code=None, force=False):
 
             DUBBED_VIDEO_MAP_RAW = softload_json(DUBBED_VIDEOS_MAPPING_FILEPATH, raises=True)
         except Exception as e:
-            logging.info("Failed to get dubbed video mappings; defaulting to empty.")
+            logging.info("Failed to get dubbed video mappings (%s); defaulting to empty.")
             DUBBED_VIDEO_MAP_RAW = {}  # setting this will avoid triggering reload on every call
 
         DUBBED_VIDEO_MAP = {}

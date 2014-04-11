@@ -41,10 +41,10 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.core.mail import mail_admins
 
+from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
 from centralserver.version import VERSION
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
-from kalite.i18n import *
 from kalite.updates import get_all_remote_video_sizes
 
 
@@ -656,7 +656,7 @@ def generate_metadata(package_metadata=None, version=VERSION, force_version_upda
 
         try:
             # Augment the metadata
-            updated_meta.update(get_language_names(lang_code_django))
+            updated_meta.update(get_code2lang_map(lang_code_django))
         except LanguageNotFoundError:
             logging.warning("Unrecognized language; unable to add extra naming metadata %s" % lang_code_django)
             continue

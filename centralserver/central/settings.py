@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     "kalite.facility",
     "kalite.i18n",  #
     "kalite.main",  # *Log objects
+    "kalite.updates", # video_file_sizes is built into language packs.
     # central-only apps
     "centralserver.contact",
     "centralserver.deployment",
