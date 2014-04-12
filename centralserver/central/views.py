@@ -74,7 +74,6 @@ def org_management(request, org_id=None):
             zones[org.pk].append({
                 "id": zone.id,
                 "name": zone.name,
-                "is_deletable": not zone.has_dependencies(passable_classes=["Organization"]),
             })
     return {
         "title": _("Account administration"),
