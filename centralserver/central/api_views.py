@@ -9,9 +9,27 @@ from distutils.version import StrictVersion
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
+from django.utils.translation import ugettext as _
 
 import kalite.version  # for kalite software version
-from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonpResponse
+from .models import Organization
+from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonResponseMessageError, JsonResponseMessageSuccess
+from kalite.shared.decorators import require_authorized_admin
+
+
+@require_authorized_admin
+@api_handle_error_with_json
+def delete_organization(request, org_id):
+    org = Organization.objects.get(pk=org_id)
+    num_zones = org.get_zones().count()
+    if num_zones > 0:
+        return JsonResponseMessageError(_("You cannot delete '%(name)s' because it has %(num_zones)s sharing network(s) affiliated with it.") % {
+            "name": org.name,
+            "num_zones": num_zones,
+        })
+    else:
+        org.delete()
+        return JsonResponseMessageSuccess(_("You have successfully deleted %(org_name)s.") % {"org_name": org.name})
 
 
 @allow_jsonp

@@ -121,7 +121,9 @@
             <div class="row-fluid content">
                 <div class="span12 content-padding">
                   {% block precontent %}
-                      {% if messages %}
+                  <div id="message_container">
+                        <!--Ajax messages get inserted here-->
+                        {% if messages %}{# static messages #}
                         <div id="messages">
 
                           {% for message in messages %}
@@ -131,7 +133,8 @@
                             </div>
                           {% endfor %}
                         </div>
-                      {% endif %}
+                        {% endif %}
+                  </div>
                   {% endblock precontent %}
                   {% block content %}{% endblock content %}
                 </div>

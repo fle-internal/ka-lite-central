@@ -6,6 +6,8 @@ import kalite.coachreports.api_urls
 
 
 urlpatterns = patterns(__package__ + '.api_views',
+    url(r'^organization/delete/(?P<org_id>\w+)/$', 'delete_organization', {}, 'delete_organization'),
+
     url(r'^version$', 'get_kalite_version', {}, 'get_kalite_version'),
     url(r'^download/kalite/$', 'get_download_urls', {}, 'get_download_urls'),
 )

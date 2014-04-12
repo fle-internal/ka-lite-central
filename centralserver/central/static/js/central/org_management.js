@@ -19,7 +19,6 @@ $(function() {
 
     $('body').on('click', function (e) {
         $('.button-popover').each(function () {
-            console.log('b');
             //the 'is' for buttons that trigger popups
             //the 'has' for icons within a button that triggers a popup
             if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
@@ -29,6 +28,26 @@ $(function() {
     });
 
     /*
-        end setting up glossary
+        Deletions
     */
+
+    $(".zone-delete-link").click(function() {
+        if (confirm(gettext("Are you sure you want to delete this sharing network?"))) {
+            var delete_zone_url = event.target.getAttribute("value");
+            doRequest(delete_zone_url)
+                .success(function() {
+                    window.location.reload();
+                });
+        }
+    });
+
+    $(".org-delete-link").click(function() {
+        if (confirm(gettext("Are you sure you want to delete this organization?"))) {
+            var delete_org_url = event.target.getAttribute("value");
+            doRequest(delete_org_url)
+                .success(function() {
+                    window.location.reload();
+                });
+        }
+    });
 });
