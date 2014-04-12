@@ -15,6 +15,7 @@ import kalite.version  # for kalite software version
 from .models import Organization
 from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonResponseMessageError, JsonResponseMessageSuccess
 from kalite.shared.decorators import require_authorized_admin
+from securesync.models import Zone
 
 
 @require_authorized_admin
@@ -30,6 +31,17 @@ def delete_organization(request, org_id):
     else:
         org.delete()
         return JsonResponseMessageSuccess(_("You have successfully deleted %(org_name)s.") % {"org_name": org.name})
+
+
+@api_handle_error_with_json
+@require_authorized_admin
+def delete_zone(request, zone_id):
+    zone = Zone.objects.get(id=zone_id)
+    if zone.has_dependencies(passable_classes=["Organization"]):
+        return JsonResponseMessageError(_("You cannot delete this zone because it is syncing data with with %d device(s)") % zone.devicezone_set.count())
+    else:
+        zone.delete()
+        return JsonResponseMessageSuccess(_("You have successfully deleted %(zone_name)s") % {"zone_name": zone.name})
 
 
 @allow_jsonp
