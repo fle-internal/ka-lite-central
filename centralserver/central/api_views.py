@@ -13,13 +13,14 @@ from django.utils.translation import ugettext as _
 
 import kalite.version  # for kalite software version
 from .models import Organization
-from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonResponseMessageError, JsonResponseMessageSuccess
+from fle_utils.internet.classes import JsonResponse, JsonResponseMessageError, JsonResponseMessageSuccess
+from fle_utils.internet.decorators import allow_jsonp, api_handle_error_with_json, api_response_causes_reload
 from kalite.shared.decorators import require_authorized_admin
 from securesync.models import Zone
 
 
 @require_authorized_admin
-@api_handle_error_with_json
+@api_response_causes_reload  # must go above @api_handle_error_with_json
 def delete_organization(request, org_id):
     org = Organization.objects.get(pk=org_id)
     num_zones = org.get_zones().count()
@@ -33,8 +34,8 @@ def delete_organization(request, org_id):
         return JsonResponseMessageSuccess(_("You have successfully deleted %(org_name)s.") % {"org_name": org.name})
 
 
-@api_handle_error_with_json
 @require_authorized_admin
+@api_response_causes_reload  # must go above @api_handle_error_with_json
 def delete_zone(request, zone_id):
     zone = Zone.objects.get(id=zone_id)
     if zone.has_dependencies(passable_classes=["Organization"]):

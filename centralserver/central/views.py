@@ -410,13 +410,13 @@ def crypto_login(request):
 
 def handler_403(request, *args, **kwargs):
     context = RequestContext(request)
-    message = None  # Need to retrieve, but can't figure it out yet.
 
     if request.is_ajax():
-        raise PermissionDenied(message)
+        return JsonResponseMessageError(_("You must be logged in with an account authorized to view this page (API)."), status=403)
     else:
         messages.error(request, mark_safe(_("You must be logged in with an account authorized to view this page.")))
-        return HttpResponseRedirect(reverse("auth_login") + "?next=" + request.path)
+        return HttpResponseRedirect(set_query_params(reverse("auth_login"), {"next": request.get_full_path()}))
+
 
 def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
