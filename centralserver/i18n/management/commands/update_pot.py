@@ -50,7 +50,7 @@ class Command(test_wrappings.Command):
         delete_current_templates()
 
         # Create new files
-        test_wrappings.run_makemessages()
+        run_makemessages(verbosity=options["verbosity"])
 
         update_templates()
 
@@ -69,6 +69,17 @@ def delete_current_templates():
     logging.info("Deleting English language pot files")
     if os.path.exists(POT_PATH):
         shutil.rmtree(POT_PATH)
+
+
+def run_makemessages(verbosity=0):
+
+    python_package_dirs = glob.glob(os.path.join(test_wrappings.PROJECT_ROOT, 'ka-lite', 'python-packages', '*'))
+    ignored_packages = [os.path.join('*/python-packages/', os.path.basename(pp)) for pp in python_package_dirs if os.path.basename(pp) not in ['securesync', 'fle_utils']]
+
+    # Central-specific patterns, added on the distributed versions
+    ignore_patterns_py = ignore_patterns_js = ignored_packages + ['*/centralserver/*']
+
+    test_wrappings.run_makemessages(ignore_patterns_py=ignore_patterns_py, ignore_patterns_js=ignore_patterns_js, verbosity=verbosity)
 
 
 def update_templates():
