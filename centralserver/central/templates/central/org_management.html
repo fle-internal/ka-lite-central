@@ -107,11 +107,9 @@
                                  Manage
                             </a></td>
                             <td>
-                                {% if zone.is_deletable %}
                                 <a class="zone-delete-link" href="#" value="{% url delete_zone zone_id=zone.id %}">
                                      Delete
                                 </a>
-                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
