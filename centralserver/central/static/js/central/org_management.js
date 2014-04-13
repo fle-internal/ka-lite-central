@@ -31,7 +31,7 @@ $(function() {
         Deletions
     */
 
-    $(".zone-delete-link").click(function() {
+    $(".zone-delete-link").click(function(event) {
         if (confirm(gettext("Are you sure you want to delete this sharing network?"))) {
             var delete_zone_url = event.target.getAttribute("value");
             doRequest(delete_zone_url)
@@ -41,7 +41,7 @@ $(function() {
         }
     });
 
-    $(".org-delete-link").click(function() {
+    $(".org-delete-link").click(function(event) {
         if (confirm(gettext("Are you sure you want to delete this organization?"))) {
             var delete_org_url = event.target.getAttribute("value");
             doRequest(delete_org_url)

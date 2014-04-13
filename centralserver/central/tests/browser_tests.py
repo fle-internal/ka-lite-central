@@ -311,7 +311,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
             self.assertEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon does not appear.")
 
 
-    def test_issue_697(self):
+    def test_issue_697_part2(self):
         self.facility = Facility(name=self.FACILITY_NAME)
         self.facility.save()
         self.test_delete_org()
@@ -388,7 +388,7 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         with self.assertRaises(NoSuchElementException):
             self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link is gone.")
 
-    def test_issue_697(self):
+    def test_issue_697_part1(self):
         self.facility = Facility(name=self.FACILITY_NAME)
         self.facility.save()
         self.test_delete_zone_from_org_admin()
