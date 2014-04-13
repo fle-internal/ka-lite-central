@@ -345,32 +345,6 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.browser_check_django_message(num_messages=0)
 
 
-    def test_delete_zone_from_zone_admin(self):
-        """Delete a zone from the org_management page"""
-        self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
-        zone_url = self.browser.find_element_by_css_selector(".zone-manage-link").get_attribute("href")
-        self.browse_to(zone_url),
-        self.assertEqual(self.browser.current_url, zone_url, "Expect link to go to zone management page")
-
-        self.browser.find_element_by_css_selector(".zone-delete-link").click()
-        self.browser.switch_to_alert().accept()
-        self.browser_wait_for_no_element(".zone-delete-link")
-        self.browser_check_django_message(message_type="success", contains="successfully deleted")
-        with self.assertRaises(NoSuchElementException):
-            self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link is gone.")
-
-    def test_cancel_delete_zone_from_zone_admin(self):
-        """Delete a zone from the org_management page"""
-        self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
-        zone_url = self.browser.find_element_by_css_selector(".zone-manage-link").get_attribute("href")
-        self.browse_to(zone_url)
-        self.assertEqual(self.browser.current_url, zone_url, "Expect link to go to zone management page")
-
-        self.browser.find_element_by_css_selector(".zone-delete-link").click()
-        self.browser.switch_to_alert().dismiss()
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link still exists.")
-        self.browser_check_django_message(num_messages=0)
-
     def test_cannot_delete_full_zone(self):
         # Save zone info, but without adding
         self.devicezone = DeviceZone(device=Device.get_own_device(), zone=self.zone)
