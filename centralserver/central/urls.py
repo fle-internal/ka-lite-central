@@ -47,6 +47,9 @@ urlpatterns += patterns('',
     url(r'^%s(?P<path>.*)$' % settings.MEDIA_URL[1:], 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT,
     }),
+    url(r'^%s(?P<path>.*)$' % settings.STATIC_URL[1:], 'django.views.static.serve', {
+        'document_root': settings.STATIC_ROOT,
+    }),
 )
 
 urlpatterns += patterns(__package__ + '.views',
@@ -90,7 +93,6 @@ urlpatterns += patterns(__package__ + '.views',
     url(r'^organization/$', 'org_management', {}, 'org_management'),
     url(r'^organization/(?P<org_id>\w+)/$', 'organization_form', {}, 'organization_form'),
     url(r'^organization/invite_action/(?P<invite_id>\w+)/$', 'org_invite_action', {}, 'org_invite_action'),
-    url(r'^organization/delete/(?P<org_id>\w+)/$', 'delete_organization', {}, 'delete_organization'),
 
     url(r'organization/(?P<org_id>\w+)/zone/(?P<zone_id>\w+)$', 'zone_add_to_org', {}, 'zone_add_to_org'),
 )

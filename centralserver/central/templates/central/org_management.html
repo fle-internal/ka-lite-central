@@ -6,44 +6,13 @@
 {% block control_panel_active %}active{% endblock control_panel_active %}
 
 {% block headjs %}{{ block.super }}
-    <script>
-        // makes correct link submit form for removing admin & revoking invites
-        $(function() {
-            $('.remove-admin-submit, .remove-invite-submit').click(function(ev) {
-                $(ev.srcElement).parents('form').submit();
-                return false;
-            });
-
-            $('.glossary-link').wrap('<a href="{% url glossary %}"></a>');
-        });
-    </script>
-
-    <script src="{% static 'js/bootstrap/tooltip.js' %}"></script>
-    <script src="{% static 'js/bootstrap/transition.js' %}"></script>
-    <script src="{% static 'js/bootstrap/popover.js' %}"></script>
-    <script>
-    $(function() {
-        var nbOrganization = {{ organizations|length }} - 1 ; //Start the counter at 0
-
-        // Used <div> instead of <a> to avoid a dirty js hack to avoid the reload to top page.
-        for (var i=0;i<=nbOrganization;i++){
-            $('#button-popover-zone-'+(i.toString()) ).popover() //Each popover needs an individual callback
-            $('#button-popover-orgadmin-'+(i.toString()) ).popover()
-        }
-
-        $('#button-popover-org').popover()
-        $('#button-popover-headless').popover()
-
-        $('body').on('click', function (e) {
-            $('.button-popover').each(function () {
-                //the 'is' for buttons that trigger popups
-                //the 'has' for icons within a button that triggers a popup
-                if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-                    $(this).popover('hide');
-                }
-            });
-        });
-    });
+    <script type="text/javascript" src="{% static 'js/bootstrap/tooltip.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap/transition.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap/popover.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/central/org_management.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
+    <script type="text/javascript">
+        var GLOSSARY_URL = "{% url glossary %}";
     </script>
 {% endblock headjs %}
 
@@ -114,8 +83,8 @@
                         {% endif %}
                         {% if org.owner == request.user and not org.get_zones %}
                             <li>
-                                <a href="{% url delete_organization org_id=org.id %}" onclick="return confirm('Are you sure you want to delete {{org.name}}?')">
-                                    <span class="icon-trash icon-large" title="Delete this organization."></span>
+                                <a class="org-delete-link" href="#">
+                                    <span class="icon-trash icon-large" value="{% url delete_organization org_id=org.id %}" title="Delete this organization."></span>
                                 </a>
                             </li>
                         {% endif %}
@@ -127,7 +96,7 @@
                 <div class="span6">
                     <div class="tooltip-container">
                         <h3>Affiliated Sharing Networks</h3>
-                        <div id="button-popover-zone-{{ forloop.counter0 }}" class="button-popover" data-toggle="popover" data-placement="right" data-content="A Sharing Network is a set of devices that may connect to share data with each other." title="" data-original-title="Sharing Network">?</div>
+                        <div id="button-popover-zone" class="button-popover" data-toggle="popover" data-placement="right" data-content="A Sharing Network is a set of devices that may connect to share data with each other." title="" data-original-title="Sharing Network">?</div>
                     </div>
                     <table class="table">
                         {% for zone in zones|get_item:pk %}
@@ -138,7 +107,7 @@
                             </a></td>
                             <td>
                                 {% if zone.is_deletable %}
-                                <a class="zone-delete-link" href="{% url delete_zone zone_id=zone.id %}" onclick="return confirm('Are you sure you want to delete {{zone.name}}?')">
+                                <a class="zone-delete-link" href="#" value="{% url delete_zone zone_id=zone.id %}">
                                      Delete
                                 </a>
                                 {% endif %}
@@ -156,7 +125,7 @@
 
                     <div class="tooltip-container">
                         <h3>Organization Admins</h3>
-                        <div id="button-popover-orgadmin-{{ forloop.counter0 }}" class="button-popover" data-toggle="popover" data-placement="right" data-content="An Organization Admin is a user responsible for overseeing an organization." title="" data-original-title="Organization admin">?</div>
+                        <div id="button-popover-orgadmin" class="button-popover" data-toggle="popover" data-placement="right" data-content="An Organization Admin is a user responsible for overseeing an organization." title="" data-original-title="Organization admin">?</div>
                     </div>
 
                     {% for member in org.get_members %}{# this is slow #}
