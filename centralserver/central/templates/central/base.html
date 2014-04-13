@@ -48,6 +48,7 @@
           <script type="text/javascript" src="{% static 'js/khan-lite.js' %}"></script>
 
             <script>
+            var USER_LOGIN_URL = "{% url auth_login %}";
             var CURRENT_LANGUAGE = "{{ current_language }}";
             $(function() {
                 $(".header__horizontal-menu__right").addClass("js").before('<div id="menu">&#9776;</div>');
