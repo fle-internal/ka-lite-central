@@ -162,17 +162,20 @@ def organization_form(request, org_id):
 
 @require_authorized_admin
 @render_to("control_panel/zone_form.html")
-def zone_add_to_org(request, org_id=None, *args, **kwargs):
+def zone_add_to_org(request, zone_id, org_id=None, **kwargs):
     """Add a zone, then add that zone to an organization."""
     org = get_object_or_404(Organization, id=org_id)
-    context = kalite_control_panel_views.process_zone_form(request, *args, **kwargs)
+    context = kalite_control_panel_views.process_zone_form(request, zone_id=zone_id, **kwargs)
+
     if request.method == "POST" and context["form"].is_valid():
         zone = context["form"].instance
         if zone not in org.zones.all():
             org.zones.add(zone)
+
+        if zone_id == 'new':
+            messages.success(request, _("To connect a KA Lite installation to this new sharing network, visit the server's 'registration' page."))
         return HttpResponseRedirect(reverse("zone_management", kwargs={ "zone_id": zone.id }))
-    else:
-        return context
+
     return context
 
 
