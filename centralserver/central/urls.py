@@ -44,6 +44,7 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
+    url(r'^favicon.ico/?$', lambda request: HttpResponseRedirect(settings.STATIC_URL + "images" + request.path)),
     url(r'^%s(?P<path>.*)$' % settings.MEDIA_URL[1:], 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT,
     }),
