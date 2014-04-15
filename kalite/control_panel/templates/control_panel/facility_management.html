@@ -155,7 +155,7 @@
                     </thead>
                     <tbody>
                         {% for coach in coach_pages %}
-                        <tr value="{{ coach.username }}">
+                        <tr value="{{ coach.id }}">
                             <td>
                                 <a title="{% blocktrans with coachname=coach|format_name:"last_first" %}Edit user info for coach {{ coachname }}{% endblocktrans %}" href="{% url edit_facility_user id=coach.id %}?facility={{ facility_id }}">
                                     {{ coach|format_name:"last_first" }}
@@ -200,7 +200,7 @@
             {# "Second block is a list of all available groups, in table form." %}{% endcomment #}
             <div class="title-div">
                 <span class="title" style="float: left">{% trans "Student Groups" %}</span>
-                <a title="{% trans 'Add a new group.' %}" href="{% url add_group %}?facility={{ facility_id }}&next={{ request.path }}">
+                <a title="{% trans 'Add a new group.' %}" href="{% url add_group %}?facility={{ facility_id }}&next={{ request.get_full_path|urlencode }}">
                     <span class="icon-add icon-medium">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 </a>
             </div>
@@ -244,6 +244,11 @@
                                         {{ group.name }}
                                         <!--span class="icon-pencil">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span-->
                                     </a>
+                                    {% if group.id %}
+                                    <a class="btn btn-warning" href="{% url group_edit group_id=group.id %}?facility={{ facility_id }}&next={{ request.get_full_path|urlencode }}">{% trans 'Edit group' %}
+                                        <span class="icon-pencil icon-medium" title="{% trans 'Edit group' %}">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    </a>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if group.id %}
@@ -277,7 +282,7 @@
         <div class="students" id="students">
             <div class="title-div">
                 <span class="title" style="float: left">{% trans "Students" %}</span>
-                <a  title="{% trans 'Add a new student.' %}" href="{% url add_facility_student %}?facility={{ facility_id }}&group={{ group_id }}&next={{ request.path }}">
+                <a  title="{% trans 'Add a new student.' %}" href="{% url add_facility_student %}?facility={{ facility_id }}&group={{ group_id }}&next={{ request.get_full_path|urlencode }}">
                     <span class="icon-add icon-medium">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 </a>
             </div>
@@ -357,7 +362,7 @@
                 </thead>
                 <tbody>
                     {% for student in student_pages %}
-                        <tr value="{{ student.username }}">
+                        <tr value="{{ student.id }}">
                             <td>
                                 <a title="{% blocktrans with studentname=student|format_name:"last_first" %}Edit student {{ studentname }}{% endblocktrans %}" href="{% url edit_facility_user id=student.id %}?facility={{ facility_id }}">
                                     {{ student|format_name:"last_first" }}
