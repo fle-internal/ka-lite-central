@@ -38,6 +38,7 @@
 
           <script type="text/javascript" src="{% static 'js/jquery-1.9.1.min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/jquery-ui/jquery-ui.min.js' %}"></script>
+          <script type="text/javascript" src="{% static 'js/purl.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/backbone-min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
@@ -47,6 +48,7 @@
           <script type="text/javascript" src="{% static 'js/khan-lite.js' %}"></script>
 
             <script>
+            var CURRENT_LANGUAGE = "{{ current_language }}";
             $(function() {
                 $(".header__horizontal-menu__right").addClass("js").before('<div id="menu">&#9776;</div>');
                 $("#menu").click(function(){
@@ -56,6 +58,20 @@
                   if(window.innerWidth > 768) {
                     $(".header__horizontal-menu__right").removeAttr("style");
                   }
+                });
+
+                // Code below overwrites khan-lite.js setup to ensure that the correct csrftoken is passed for the central server.
+
+                var csrftoken = getCookie("csrftoken_central") || "";
+
+                $.ajaxSetup({
+                    cache: false,
+                    crossDomain: false,
+                    beforeSend: function(xhr, settings) {
+                        if (!csrfSafeMethod(settings.type)) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    }
                 });
             });
             </script>

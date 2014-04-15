@@ -26,33 +26,44 @@ from fle_utils.chronograph import force_job
 from fle_utils.internet import set_query_params
 from kalite.i18n import get_default_language
 from kalite.main.models import UserLog
-from kalite.shared.decorators import require_admin
+
+from kalite.shared.decorators import require_authorized_admin
+from securesync.devices.models import Zone
 from securesync.devices.views import *
 
 
-@require_admin
+
+@require_authorized_admin
 @render_to("facility/facility_edit.html")
-def facility_edit(request, id=None):
-    if id != "new":
-        facil = get_object_or_404(Facility, pk=id)
+def facility_edit(request, id=None, zone_id=None):
+    facil = (id != "new" and get_object_or_404(Facility, pk=id)) or None
+    if facil:
+        zone = facil.get_zone()
     else:
-        facil = None
-    if request.method == "POST":
+        zone = get_object_or_None(Zone, pk=zone_id)
+
+    if settings.CENTRAL_SERVER:
+        assert zone is not None
+
+    if request.method != "POST":
+        form = FacilityForm(instance=facil, initial={"zone_fallback": zone})
+    else:
         form = FacilityForm(data=request.POST, instance=facil)
-        if form.is_valid():
+        if not form.is_valid():
+            messages.error(request, _("Failed to save the facility; please review errors below."))
+        else:
             form.save()
             facil = form.instance
             # Translators: Do not change the text of '%(facility_name)s' because it is a variable, but you can change its position.
             messages.success(request, _("The facility '%(facility_name)s' has been successfully saved!") % {"facility_name": form.instance.name})
             return HttpResponseRedirect(request.next or reverse("zone_management", kwargs={"zone_id": getattr(facil.get_zone(), "id", "None")}))
-    else:
-        form = FacilityForm(instance=facil)
+
     return {
         "form": form
     }
 
 
-@require_admin
+@require_authorized_admin
 def add_facility_teacher(request):
     return edit_facility_user(request, id="new", is_teacher=True)
 
@@ -72,11 +83,13 @@ def edit_facility_user(request, facility, is_teacher=None, id=None):
     """
 
     title = ""
-    user = get_object_or_404(FacilityUser, id=id) if id != "new" else None
+    user = (id != "new" and get_object_or_404(FacilityUser, id=id)) or None
+
     # Check permissions
     if user and not request.is_admin and user != request.session.get("facility_user"):
         # Editing a user, user being edited is not self, and logged in user is not admin
         raise PermissionDenied()
+
     elif settings.DISABLE_SELF_ADMIN and not request.is_admin:
         # Users cannot create/edit their own data when UserRestricted
         raise PermissionDenied(_("Please contact a teacher or administrator to receive login information to this installation."))
@@ -85,7 +98,10 @@ def edit_facility_user(request, facility, is_teacher=None, id=None):
     if request.method == "POST":  # now, teachers and students can belong to a group, so all use the same form.
 
         form = FacilityUserForm(facility, data=request.POST, instance=user)
-        if form.is_valid():
+        if not form.is_valid():
+            messages.error(request, _("There was a problem saving the information provided; please review errors below."))
+
+        else:
             if form.cleaned_data["password_first"]:
                 form.instance.set_password(form.cleaned_data["password_first"])
             form.save()
@@ -123,7 +139,7 @@ def edit_facility_user(request, facility, is_teacher=None, id=None):
         form = FacilityUserForm(facility, initial={
             "group": request.GET.get("group", None),
             "is_teacher": is_teacher,
-            "default_language": get_default_language()
+            "default_language": get_default_language(),
         })
 
     if not title:
@@ -146,41 +162,26 @@ def edit_facility_user(request, facility, is_teacher=None, id=None):
     }
 
 
-@require_admin
-@render_to("facility/add_facility.html")
-def add_facility(request):
-    if request.method == "POST":
-        form = FacilityForm(data=request.POST)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse("add_facility_student") + "?facility=" + form.instance.pk)
-    else:
-        form = FacilityForm()
-    return {
-        "form": form
-    }
-
-
-@require_admin
+@require_authorized_admin
 @facility_required
 @render_to("facility/add_group.html")
 def add_group(request, facility):
     groups = FacilityGroup.objects.all()
-    if request.method == 'POST' and request.is_admin:
-        form = FacilityGroupForm(data=request.POST)
-        if form.is_valid():
-            form.instance.facility = facility
+
+    if request.method != 'POST':
+        form = FacilityGroupForm(facility)
+
+    else:
+        form = FacilityGroupForm(facility, data=request.POST)
+        if not form.is_valid():
+            messages.error(request, _("Failed to save the facility; please review errors below."))
+        else:
             form.save()
 
             redir_url = request.next or request.GET.get("prev") or reverse("add_facility_student")
             redir_url = set_query_params(redir_url, {"facility": facility.pk, "group": form.instance.pk})
             return HttpResponseRedirect(redir_url)
 
-    elif request.method == 'POST' and not request.is_admin:
-        messages.error(request, _("This mission is too important for me to allow you to jeopardize it."))
-        return HttpResponseRedirect(reverse("login"))
-    else:
-        form = FacilityGroupForm()
     return {
         "form": form,
         "facility": facility,
@@ -192,13 +193,20 @@ def add_group(request, facility):
 @facility_from_request
 @render_to("facility/login.html")
 def login(request, facility):
-    facility_id = facility and facility.id or None
+    facility_id = (facility and facility.id) or None
     facilities = list(Facility.objects.all())
 
     # Fix for #1211: refresh cached facility info when it's free and relevant
     refresh_session_facility_info(request, facility_count=len(facilities))
 
-    if request.method == 'POST':
+    if request.method != 'POST':  # render the unbound login form
+        referer = urlparse.urlparse(request.META["HTTP_REFERER"]).path if request.META.get("HTTP_REFERER") else None
+        # never use the homepage as the referer
+        if referer in [reverse("homepage"), reverse("add_facility_student")]:
+            referer = None
+        form = LoginForm(initial={"facility": facility_id, "callback_url": referer})
+
+    else:  # process the login form
         # log out any Django user or facility user
         logout(request)
 
@@ -206,14 +214,21 @@ def login(request, facility):
         password = request.POST.get("password", "")
 
         # first try logging in as a Django user
-        user = authenticate(username=username, password=password)
-        if user:
-            auth_login(request, user)
-            return HttpResponseRedirect(request.next or reverse("zone_redirect"))
+        if not settings.CENTRAL_SERVER:
+            user = authenticate(username=username, password=password)
+            if user:
+                auth_login(request, user)
+                return HttpResponseRedirect(request.next or reverse("zone_redirect"))
 
         # try logging in as a facility user
         form = LoginForm(data=request.POST, request=request, initial={"facility": facility_id})
-        if form.is_valid():
+        if not form.is_valid():
+            messages.error(
+                request,
+                _("There was an error logging you in. Please correct any errors listed below, and try again."),
+            )
+
+        else:
             user = form.get_user()
 
             try:
@@ -233,19 +248,6 @@ def login(request, facility):
                 landing_page = landing_page or (reverse("account_management") if False else reverse("homepage"))  # TODO: pass the redirect as a parameter.
 
             return HttpResponseRedirect(form.non_field_errors() or request.next or landing_page)
-
-        else:
-            messages.error(
-                request,
-                _("There was an error logging you in. Please correct any errors listed below, and try again."),
-            )
-
-    else:  # render the unbound login form
-        referer = urlparse.urlparse(request.META["HTTP_REFERER"]).path if request.META.get("HTTP_REFERER") else None
-        # never use the homepage as the referer
-        if referer in [reverse("homepage"), reverse("add_facility_student")]:
-            referer = None
-        form = LoginForm(initial={"facility": facility_id, "callback_url": referer})
 
     return {
         "form": form,

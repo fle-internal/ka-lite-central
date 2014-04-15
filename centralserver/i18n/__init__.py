@@ -32,16 +32,16 @@ AMARA_HEADERS = {
     "X-apikey": getattr(settings, "AMARA_API_KEY", None),
 }
 
-SUBTITLES_DATA_ROOT = os.path.join(settings.DATA_PATH, "subtitles")
+SUBTITLES_DATA_ROOT = os.path.join(settings.ROOT_DATA_PATH, "subtitles")
 LANGUAGE_PACK_ROOT = os.path.join(settings.MEDIA_ROOT, "language_packs")
 
 LANGUAGE_SRT_SUFFIX = "_download_status.json"
 SRTS_JSON_FILEPATH = os.path.join(SUBTITLES_DATA_ROOT, "srts_remote_availability.json")
-DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.DATA_PATH, "i18n", "dubbed_video_mappings.json")
+DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "dubbed_video_mappings.json")
 SUBTITLE_COUNTS_FILEPATH = os.path.join(SUBTITLES_DATA_ROOT, "subtitle_counts.json")
-SUPPORTED_LANGUAGES_FILEPATH = os.path.join(settings.DATA_PATH, "i18n", "supported_languages.json")
+SUPPORTED_LANGUAGES_FILEPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "supported_languages.json")
 CROWDIN_CACHE_DIR = os.path.join(settings.PROJECT_PATH, "..", "_crowdin_cache")
-LANGUAGE_PACK_BUILD_DIR = os.path.join(settings.DATA_PATH, "i18n", "build")
+LANGUAGE_PACK_BUILD_DIR = os.path.join(settings.ROOT_DATA_PATH, "i18n", "build")
 
 LOCALE_ROOT = settings.LOCALE_PATHS[0]
 
@@ -150,6 +150,7 @@ def get_dubbed_video_map(lang_code=None, force=False):
                     logging.debug("Generating dubbed video mappings.")
                     call_command("generate_dubbed_video_mappings", force=force)
                 except Exception as e:
+                    logging.debug("Error generating dubbed video mappings: %s" % e)
                     if not os.path.exists(DUBBED_VIDEOS_MAPPING_FILEPATH):
                         # Unrecoverable error, so raise
                         raise
@@ -162,7 +163,7 @@ def get_dubbed_video_map(lang_code=None, force=False):
 
             DUBBED_VIDEO_MAP_RAW = softload_json(DUBBED_VIDEOS_MAPPING_FILEPATH, raises=True)
         except Exception as e:
-            logging.info("Failed to get dubbed video mappings; defaulting to empty.")
+            logging.info("Failed to get dubbed video mappings (%s); defaulting to empty.")
             DUBBED_VIDEO_MAP_RAW = {}  # setting this will avoid triggering reload on every call
 
         DUBBED_VIDEO_MAP = {}

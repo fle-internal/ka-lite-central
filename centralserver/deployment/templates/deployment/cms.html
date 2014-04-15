@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load staticfiles %}
 {% load my_filters %}
+{% load gpsfrac2coord %}
 
 
 {% block headcss %}{{ block.super }}
@@ -9,6 +10,9 @@
     <style>
     th {
         white-space: nowrap;
+    }
+    td {
+        vertical-align: top;
     }
     </style>
 {% endblock headcss %}
@@ -29,61 +33,93 @@
 
             {% block coaches_table %}
                 {# Action row, including pagination #}
-                {% if user_pages.num_listed_pages > 1 %}
+                {% if pages.num_listed_pages > 1 %}
                 <div class="pagination">
-                        <a title="{% trans 'Browse to the previous page of deployments.' %}" {% if user_pages.has_previous %}href="{{ page_urls.prev_page }}"{% endif %}>&lt&lt</a>
-                        {% for listed_page in user_pages.listed_pages %}
+                        <a title="{% trans 'Browse to the previous page of deployments.' %}" {% if pages.has_previous %}href="{{ page_urls.prev_page }}"{% endif %}>&lt&lt</a>
+                        {% for listed_page in pages.listed_pages %}
                             {% if listed_page == -1 %}
                                 <span class="disabled">&hellip;</span>
-                            {% elif listed_page == user_pages.number %}
+                            {% elif listed_page == pages.number %}
                                 <span class="current">
-                                   {{ user_pages.number }}
+                                   {{ pages.number }}
                                 </span>
                             {% else %}
-                                <a title="{% blocktrans %}Browse to page # {{ listed_page }} of user_pages.{% endblocktrans %}" href="{{ page_urls|get_item:listed_page }}">{{ listed_page }}</a>
+                                <a title="{% blocktrans %}Browse to page # {{ listed_page }} of pages.{% endblocktrans %}" href="{{ page_urls|get_item:listed_page }}">{{ listed_page }}</a>
                             {% endif %}
                         {% endfor %}
-                        <a title="{% trans 'Browse to the next page of deployments.' %}" {% if user_pages.has_next %}href="{{ page_url.next_page }}"{% endif %}>&gt&gt</a>
+                        <a title="{% trans 'Browse to the next page of deployments.' %}" {% if pages.has_next %}href="{{ page_url.next_page }}"{% endif %}>&gt&gt</a>
                 </div>
                 <div class="clear"></div>
                 {% endif %}
 
 
-                <table class="simple-table selectable-table">
+                <table class="simple-table">
                 {# Table header row #}
                     <thead>
                         <tr>
-                            <th class="headrowuser">{% trans "Contact Name" %}</th>
-                            <th class="headrowuser">{% trans "Contact Email" %}</th>
-                            <th class="headrowuser">{% trans "Org Name" %}</th>
-                            <th class="headrowuser">{% trans "Facility Name" %}</th>
-                            <th class="headrowuser">{% trans "Facility Location" %}</th>
-                            <th class="headrowuser">{% trans "# Users" %}</th>
-                            <th class="headrowuser">{% trans "Synced Data" %}</th>
+                            <th class="headrowuser">{% trans "Organization Name &amp; Contacts" %}</th>
+                            <th class="headrowuser">{% trans "Facilities" %}</th>
+                            <th class="headrowuser">{% trans "Devices &amp; Zones" %}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for deployment in user_pages %}
-                        {% with org_email=deployment.signed_by__devicezone__zone__organization__users__username org_name=deployment.signed_by__devicezone__zone__organization__name first_name=deployment.signed_by__devicezone__zone__organization__users__first_name last_name=deployment.signed_by__devicezone__zone__organization__users__last_name zone_id=deployment.signed_by__devicezone__zone__id %}
-                        <tr value="{{ org_email }}">
+                        {% for deployment in pages %}
+                        <tr value="{{ deployment.org_name }}">
                             <td>
-                                <a title="{% blocktrans %}Email {{ org_name }}{% endblocktrans %}" href="mailto:{{ org_email }}">
-                                    {{ first_name }} {{ last_name }}
-                                    <span class="icon-pencil">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                                </a>
+                                {{ deployment.org_name }}
+                                <ul>
+                                {% for user in deployment.users.values %}
+                                    <li>
+                                        <a {% if deployment.owner == user.email %}style="font-weight: bold"{% endif %}title="{% blocktrans %}Email {{ deployment.org_name }}{% endblocktrans %}" href="mailto:{{ user.email }}">
+                                            {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                                    <li>{{ deployment.total_users }} registered users</li>
+                                    <li>{{ deployment.models_synced }} total models synced</li>
+                                    <li>{{ deployment.sync_sessions }} total sync sessions</li>
+                                </ul>
                             </td>
-                            <td nowrap="">
-                                Login email: <a href="mailto:{{ org_email }}">{{ org_email }}</a>
-                                <br />
-                                Facility email: <a href="{{ deployment.contact_email }}">{{ deployment.contact_email }}</a>
+                            <td>
+                                <ul>
+                                {% for facility in deployment.facilities.values %}
+                                    <li>
+                                        {{ facility.name }}
+                                        <ul>
+                                            <li># registered users: {{ facility.n_actual_users }}</li>
+                                            {% if facility.user_count %}
+                                            <li># anticipated users: {{ facility.user_count }}</li>
+                                            {% endif %}
+                                            {% if facility.address %}
+                                            <li>
+                                                {% if facility.latitude and facility.longitude and facility.address %}
+                                                    <a href="https://www.google.com/maps/place/{% gpsfrac2coord lat=facility.latitude %}+{% gpsfrac2coord long=facility.longitude %}/{{ facility.latitude }},{{ facility.longitude }},6z">
+                                                    {{ facility.address }}
+                                                    </a>
+                                                {% else %}
+                                                    {{ facility.address }}
+                                                {% endif %}
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                {% endfor %}
+                                </ul>
                             </td>
-                            <td>{{ org_name }}</td>
-                            <td>{{ deployment.name }}</td>
-                            <td>({{ deployment.latitude }}, {{ deployment.longitude }})<br/>{{ deployment.address }}</td>
-                            <td>Registered: {{ deployment.n_actual_users }}<br/>Anticipated: {{ deployment.user_count }}</td>
-                            <td><a target="_blank" href="{% url zone_management zone_id=zone_id %}">View data</a></td>
+                            <td>
+                                <ul>
+                                {% for device in deployment.devices.values %}
+                                    <li>
+                                        <a href="{% url zone_management zone_id=device.zone_id %}">{{ device.zone_name }}</a>
+                                        /
+                                        <a href="{% url device_management zone_id=device.zone_id device_id=device.id %}">{{ device.name }}</a>
+                                        ({{ device.sync_sessions }} sessions
+                                        {% if device.models_synced %}, {{ device.models_synced }} models{% endif %})
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </td>
                         </tr>
-                        {% endwith %}
                         {% endfor %}
                     </tbody>
                 </table>

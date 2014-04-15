@@ -8,8 +8,13 @@ except ImportError:
 # Set module settings
 #######################
 
+MIDDLEWARE_CLASSES = (
+    __package__ + ".middleware.AuthFlags",  # this must come first in app-dependent middleware--many others depend on it.
+    __package__ + ".middleware.FacilityCheck",
+)
+
 # Default facility name
-INSTALL_FACILITY_NAME = getattr(local_settings, "INSTALL_FACILITY_NAME", "Default Facility")
+INSTALL_FACILITY_NAME = getattr(local_settings, "INSTALL_FACILITY_NAME", None)  # default to None, so can be translated to latest language at runtime.
 
 # None means, use full hashing locally--turn off the password cache
 PASSWORD_ITERATIONS_TEACHER = getattr(local_settings, "PASSWORD_ITERATIONS_TEACHER", None)

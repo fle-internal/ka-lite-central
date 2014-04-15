@@ -33,85 +33,14 @@ function show_api_messages(messages) {
     }
 }
 
-function handleSuccessAPI(obj) {
 
-    var messages = null;
-    var msg_types = ["success", "info", "warning", "error"];  // in case we need to dig for messages
-
-
-    if (!obj) {
-        return;
-
-    } else if (obj.hasOwnProperty("responseText")) {
-        // Got a HTTP response object; parse it.
-        try {
-            if (obj.responseText) {  // No point in trying to parse empty response (which is common)
-                messages = $.parseJSON(obj.responseText);
-            }
-        } catch (e) {
-            // Many reasons this could fail, some valid; others not.
-            console.log(e);
-        }
-    } else if (obj.hasOwnProperty("messages")) {
-        // Got messages embedded in the object
-        messages = {}
-        for (idx in obj.messages) {
-            messages = obj.messages[idx];
-        }
-    } else {
-        // Got messages at the top level of the object; grab them.
-        messages = {};
-        for (idx in msg_types) {
-            var msg_type = msg_types[idx];
-            if (msg_type in obj) {
-                messages[msg_type] = obj[msg_type];
-                console.log(messages[msg_type]);
-            }
-        }
-    }
-
-    clear_messages("error");
-    if (messages) {
-        show_api_messages(messages);
-    }
-}
-
-function handleFailedAPI(resp, error_prefix) {
-    // Two ways for this function to be called:
-    // 1. With an API response (resp) containing a JSON error.
-    // 2. With an explicit error_prefix
-
-    // Parse the messages.
-    var messages = {};
-    if (resp.status == 403) {
-        messages = {error: gettext("You are not authorized to complete the request.  Please <a href='/securesync/login/' target='_blank'>login</a> as an administrator, then retry.")};
-    }
-    else if (resp && resp.responseText) {
-        try {
-            messages = $.parseJSON(resp.responseText);
-        } catch (e) {
-            console.log("Response text: " + resp.responseText);
-            console.log(e);
-        }
-    }
-
-    // Pre-pend any canned message
-    if (error_prefix) {
-        for (msg_key in messages) {
-            messages[msg_key] = sprintf("%s: %s", error_prefix, messages[msg_key]);
-        }
-    }
-
-    clear_messages();  // Clear all messages before showing the new (error) message.
-    show_api_messages(messages);
-}
 
 function force_sync() {
     // Simple function that calls the API endpoint to force a data sync,
     //   then shows a message for success/failure
     doRequest("/securesync/api/force_sync")
         .success(function() {
-            show_message("success", gettext("Successfully launched data syncing job. After syncing completes, visit the <a href='/management/device/'>device management page</a> to view results."), "id_command");
+            show_message("success", gettext("Successfully launched data syncing job. After syncing completes, visit the <a href='/management/device/'>device management page</a> to view results."));
         });
 }
 

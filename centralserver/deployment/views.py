@@ -6,17 +6,74 @@ from datetime import timedelta  # this is OK; central server code can be 2.7+
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Sum, Max, Count, F, Q, Min
+from django.utils.translation import ugettext as _
 
+from centralserver.central.models import Organization
+from fle_utils.django_utils.paginate import pages_to_show, paginate_data
 from kalite.facility.models import Facility
 from kalite.shared.decorators import require_authorized_admin
+from securesync.models import DeviceZone
 
 
 @require_authorized_admin
 @render_to("deployment/cms.html")
 def show_deployment_cms(request):
+    """
+    This does 3 queries:
+    * Facilities, organized by organization.
+    * Devices, organized by organization.
+    * Organizations, organized by organization.
 
-    logins_with_facilities = Facility.objects \
-        .filter(signed_by__devicemetadata__is_trusted=False, signed_by__devicemetadata__is_demo_device=False) \
+    It then combines results from these 3 queries to create a list of:
+    * All Users that have facilities, have devices but no facilities, and have no devices.
+    """
+
+    # Query 1: Organizations
+    deployment_data = OrderedDict([(org["id"], {
+        "org_name": org["name"],
+        "owner": org["owner__username"],
+        "total_users": 0,
+        "sync_sessions": 0,
+        "models_synced": 0,
+    }) for org in list(Organization.objects.values("id", "name", "owner__username"))])
+
+    # Query 2: Organizations with users
+    for org in list(Organization.objects.values("id", "users__username", "users__first_name", "users__last_name")):
+        org_id = org["id"]
+        deployment_data[org_id]["users"] = deployment_data[org_id].get("users", {})
+        deployment_data[org_id]["users"][org["users__username"]] = {
+            "first_name": org["users__first_name"],
+            "last_name": org["users__last_name"],
+            "email": org["users__username"],
+        }
+
+    # Query 3: Organizations with devices
+    device_data = DeviceZone.objects \
+        .annotate( \
+            n_sessions=Count("device__client_sessions"), \
+            n_models=Sum("device__client_sessions__models_uploaded")) \
+        .values("n_sessions", "n_models", "device__id", "device__name", "zone__id", "zone__name", "zone__organization__id") \
+        .order_by("zone__name", "-n_models", "-n_sessions")
+
+    for devzone in list(device_data):
+        org_id = devzone["zone__organization__id"]
+        if not org_id:
+            continue
+        deployment_data[org_id]["devices"] = deployment_data[org_id].get("devices", {})
+        deployment_data[org_id]["devices"][devzone["device__id"]] = {
+            "id": devzone["device__id"],
+            "name": devzone["device__name"],
+            "zone_name": devzone["zone__name"],
+            "zone_id": devzone["zone__id"],
+            "models_synced": devzone["n_models"],
+            "sync_sessions": devzone["n_sessions"],
+        }
+        deployment_data[org_id]["models_synced"] += devzone["n_models"] or 0
+        deployment_data[org_id]["sync_sessions"] += devzone["n_sessions"] or 0
+
+    # Query 4: Organizations with facilities
+    facilities_by_org = list(Facility.objects \
+        .filter(signed_by__devicemetadata__is_demo_device=False) \
         .annotate( \
             n_actual_users=Count("facilityuser")) \
         .values( \
@@ -24,115 +81,23 @@ def show_deployment_cms(request):
             "name", "address", \
             "latitude", "longitude", \
             "contact_email", "contact_name", \
-            "user_count",
-            "signed_by__devicezone__zone__id", \
-            "signed_by__devicezone__zone__organization__users__username", \
-            "signed_by__devicezone__zone__organization__users__first_name", \
-            "signed_by__devicezone__zone__organization__users__last_name", \
-            "signed_by__devicezone__zone__organization__name",) \
-        .order_by("-n_actual_users")
+            "user_count", \
+            "zone_fallback__organization__id", \
+            "signed_by__devicezone__zone__organization__id",) \
+        .order_by("-n_actual_users"))
 
-        #.extra (select={ \
-        #    "facility_name": "name", \
-        #    "zone_id": "signed_by__devicezone__zone__id", \
-        #    "email": "signed_by__devicezone__zone__organization__users__email", \
-        #    "org_name": "signed_by__devicezone__zone__organization__name", })
+    for fac in list(facilities_by_org):
+        org_id = fac["signed_by__devicezone__zone__organization__id"] or fac["zone_fallback__organization__id"]
+        deployment_data[org_id]["facilities"] = deployment_data[org_id].get("facilities", {})
+        deployment_data[org_id]["facilities"][fac["name"]] = fac
+        deployment_data[org_id]["total_users"] += fac["n_actual_users"] or 0
 
-    def paginate_users(user_list, per_page=25, page=1):
-        """
-        Create pagination for users
-        """
-        if not user_list:
-            users = []
-            page_urls = {}
-
-        else:
-            #Create a Django Pagintor from QuerySet
-            paginator = Paginator(user_list, per_page)
-            try:
-                #Try to render the page with the passed 'page' number
-                users = paginator.page(page)
-                #Call pages_to_show function that selects a subset of pages to link to
-                listed_pages = pages_to_show(paginator, page)
-            except PageNotAnInteger:
-                #If not a proper page number, render page 1
-                users = paginator.page(1)
-                #Call pages_to_show function that selects a subset of pages to link to
-                listed_pages = pages_to_show(paginator, 1)
-            except EmptyPage:
-                #If past the end of the page range, render last page
-                users = paginator.page(paginator.num_pages)
-                #Call pages_to_show function that selects a subset of pages to link to
-                listed_pages = pages_to_show(paginator, paginator.num_pages)
-
-        if users:
-            #Generate URLs for pagination links
-            if not users.has_previous():
-                previous_page_url = ""
-            else:
-                #If there are pages before the current page, generate a link for 'previous page'
-                prevGETParam = request.GET.copy()
-                prevGETParam["page"] = users.previous_page_number()
-                previous_page_url = "?" + prevGETParam.urlencode()
-
-            if not users.has_next():
-                next_page_url = ""
-            else:
-                #If there are pages after the current page, generate a link for 'next page'
-                nextGETParam = request.GET.copy()
-                nextGETParam["page"] = users.next_page_number()
-                next_page_url = "?" + nextGETParam.urlencode()
-
-            page_urls = {"next_page": next_page_url, "prev_page": previous_page_url}
-
-            if listed_pages:
-                #Generate URLs for other linked to pages
-                for listed_page in listed_pages:
-                    if listed_page != -1:
-                        GETParam = request.GET.copy()
-                        GETParam["page"] = listed_page
-                        page_urls.update({listed_page: "?" + GETParam.urlencode()})
-                users.listed_pages = listed_pages
-                users.num_listed_pages = len(listed_pages)
-
-        return users, page_urls
-
-    user_pages, page_urls = paginate_users(logins_with_facilities, page=int(request.GET.get("page", 1)), per_page=25)
+    # Combine all data into a single data store.
+    sort_fn = lambda dep: (dep["total_users"], dep["models_synced"], dep["sync_sessions"])
+    paged_data, page_urls = paginate_data(request, sorted(deployment_data.values(), key=sort_fn, reverse=True), page=int(request.GET.get("cur_page", 1)), per_page=int(request.GET.get("per_page", 25)))
 
     return {
-        "user_pages": user_pages,
+        "pages": paged_data,
         "page_urls": page_urls,
+        "title": _("Deployments CMS"),
     }
-
-
-
-def pages_to_show(paginator, page, pages_wanted=None, max_pages_wanted=9):
-    """
-    Function to select first two pages, last two pages and pages around currently selected page
-    to show in pagination bar.
-    """
-    page = int(page)
-
-    #Set precedence for displaying each page on the navigation bar.
-    page_precedence_order = [page,1,paginator.num_pages,page+1,page-1,page+2,page-2,2,paginator.num_pages-1]
-
-    if pages_wanted is None:
-        pages_wanted = []
-
-    #Allow for arbitrary pages wanted to be set via optional argument
-    pages_wanted = set(pages_wanted) or set(page_precedence_order[:max_pages_wanted])
-
-    #Calculate which pages actually exist
-    pages_to_show = set(paginator.page_range).intersection(pages_wanted)
-    pages_to_show = sorted(pages_to_show)
-
-    #Find gaps larger than 1 in pages_to_show, indicating that a range of pages has been skipped here
-    skip_pages = [ x[1] for x in zip(pages_to_show[:-1],
-                                     pages_to_show[1:])
-                   if (x[1] - x[0] != 1) ]
-
-    #Add -1 to stand in for skipped pages which can then be rendered as an ellipsis.
-    for i in skip_pages:
-        pages_to_show.insert(pages_to_show.index(i), -1)
-
-    return pages_to_show

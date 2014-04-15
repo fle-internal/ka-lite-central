@@ -111,12 +111,14 @@ def delete_admin(request, org_id, user_id):
     if org.owner == admin:
         raise PermissionDenied(_("The owner of an organization cannot be removed."))
     if request.user == admin:
-        raise PermissionDenied(_("Your personal views are your own, but in this case ") +
-            _("you are not allowed to delete yourself."))
+        raise PermissionDenied(_("Your personal views are your own, but in this case you are not allowed to delete yourself."))
     deletion = DeletionRecord(organization=org, deleter=request.user, deleted_user=admin)
     deletion.save()
     org.users.remove(admin)
-    messages.success(request, _("You have successfully removed ") + admin.username + _(" as an administrator for ") + org.name + ".")
+    messages.success(request, _("You have successfully removed %(username)s as an administrator for %(org_name)s") % {
+         "username": admin.username,
+         "org_name": org.name,
+    })
     return HttpResponseRedirect(reverse("org_management"))
 
 
@@ -127,7 +129,7 @@ def delete_invite(request, org_id, invite_id):
     deletion = DeletionRecord(organization=org, deleter=request.user, deleted_invite=invite)
     deletion.save()
     invite.delete()
-    messages.success(request, _("You have successfully revoked the invitation for ") + invite.email_to_invite + ".")
+    messages.success(request, _("You have successfully revoked the invitation for %(email).") % {"email": invite.email_to_invite})
     return HttpResponseRedirect(reverse("org_management"))
 
 
@@ -149,7 +151,7 @@ def organization_form(request, org_id):
             if old_org:
                 return HttpResponseRedirect(reverse("org_management"))
             else:
-                return HttpResponseRedirect(reverse("zone_form", kwargs={"zone_id": "new", "org_id": form.instance.pk}) )
+                return HttpResponseRedirect(reverse("zone_add_to_org", kwargs={"zone_id": "new", "org_id": form.instance.pk}) )
     else:
         form = OrganizationForm(instance=org)
     return {
