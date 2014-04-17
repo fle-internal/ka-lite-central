@@ -49,6 +49,7 @@ def delete_zone(request, zone_id):
 
 
 @allow_jsonp
+@api_handle_error_with_json
 def get_kalite_version(request):
     assert kalite.version.VERSION in kalite.version.VERSION_INFO
 
