@@ -59,8 +59,7 @@ def get_kalite_version(request):
         number.
         '''
         version, vdata = v
-        date_data = [int(d) for d in vdata['release_date'].split('/')]
-        date = datetime.date(*date_data)
+        date = datetime.datetime.strptime(vdata['release_date'], "%Y/%m/%d")
         return date.toordinal() / 1000 # divide by 1000 to turn into 100s range
 
     request_version = request.GET.get("current_version", "0.10.0")  # default to first version that can understand this.
