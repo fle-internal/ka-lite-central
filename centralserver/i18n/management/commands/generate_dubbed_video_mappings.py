@@ -1,8 +1,10 @@
 """
 Command to import mappings from spreadsheet, convert to a json dictionary.
 """
+import copy
 import csv
 import datetime
+import httplib
 import json
 import os
 import requests
@@ -12,34 +14,51 @@ from StringIO import StringIO
 from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
-from ... import DUBBED_VIDEOS_MAPPING_FILEPATH
+from ... import DUBBED_VIDEOS_MAPPING_FILEPATH, get_dubbed_video_map
 from fle_utils.general import ensure_dir, datediff
 from kalite.main.topic_tools import get_node_cache
 
-SPREADSHEET_ID ="0AhvqOn88FUVedEJXM1ZhMG1XdGJuVTE4OEZ3WkNxYUE"
-SPREADSHEET_EXPORT_FORMAT = "csv"
-SPREADSHEET_GID = 0
-SPREADSHEET_BASE_URL = "https://docs.google.com/spreadsheet/ccc"
 
+def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
 
-def generate_dubbed_video_mappings(download_url=None, csv_data=None):
     """
     Function to do the heavy lifting in getting the dubbed videos map.
 
     Could be moved into utils
     """
-    if not download_url:
-        download_url = SPREADSHEET_BASE_URL
-        params = {'key': SPREADSHEET_ID, 'gid': SPREADSHEET_GID, 'output': SPREADSHEET_EXPORT_FORMAT}
-    else:
-        params = {}
 
-    if not csv_data:
-        logging.info("Downloading dubbed video data from %s" % download_url)
-        response = requests.get(download_url, params=params)
-        if response.status_code != 200:
-            raise CommandError("Failed to download dubbed video CSV data: status=%s" % response.status)
-        csv_data = response.content
+    # Get the redirect url
+    if not download_url:
+        logging.info("Getting spreadsheet location from Khan Academy")
+        conn = httplib.HTTPConnection("www.khanacademy.org")
+        conn.request("GET", "/r/translationmapping")
+        r1 = conn.getresponse()
+        if not r1.status == 302:
+            raise Exception("Expected redirect response from Khan Academy redirect url.")
+        download_url = r1.getheader('Location')
+        if "docs.google.com" not in download_url:
+            logging.warn("Redirect location no longer in Google docs (%s)" % download_url)
+        else:
+            download_url += "&output=csv&gid=0"
+
+    logging.info("Downloading dubbed video data from %s" % download_url)
+    response = requests.get(download_url)
+    if response.status_code != 200:
+        raise CommandError("Failed to download dubbed video CSV data: status=%s" % response.status)
+    csv_data = response.content
+
+    # Dump the data to a local cache file
+    try:
+        ensure_dir(os.path.dirname(cache_filepath))
+        with open(cache_filepath, "w") as fp:
+            fp.write(csv_data)
+    except Exception as e:
+        logging.error("Failed to make a local cache of the CSV data: %s; parsing local data" % e)
+
+    return csv_data
+
+
+def generate_dubbed_video_mappings(csv_data=None):
 
     # This CSV file is in standard format: separated by ",", quoted by '"'
     logging.info("Parsing csv file.")
@@ -66,7 +85,7 @@ def generate_dubbed_video_mappings(download_url=None, csv_data=None):
             elif row_num == 4:
                 # Row 5 is the header row.
                 header_row = [v.lower() for v in row]  # lcase all header row values (including language names)
-                slug_idx = header_row.index("titled id")
+                slug_idx = header_row.index("title id")
                 english_idx = header_row.index("english")
                 assert slug_idx != -1, "Video slug column header should be found."
                 assert english_idx != -1, "English video column header should be found."
@@ -122,7 +141,7 @@ def generate_dubbed_video_mappings(download_url=None, csv_data=None):
     if extra_videos:
         logging.warn("There are %d videos in the list of dubbed videos that we have never heard of." % len(extra_videos))
 
-    return (video_map, csv_data)
+    return video_map
 
 
 class Command(BaseCommand):
@@ -134,35 +153,55 @@ class Command(BaseCommand):
                     dest='force',
                     default=False,
                     help='Force reload of spreadsheet'),
+        make_option('--max-age',
+                    action='store',
+                    dest='max_cache_age',
+                    default=7.0,
+                    help='Max # of days to use cached database file.'),
+        make_option('--cache-filepath',
+                    action='store',
+                    dest='cache_filepath',
+                    default=None,
+                    help='Location to load/store a cached dubbings file'),
     )
 
     def handle(self, *args, **options):
 
-        # Get the CSV data, either from a recent cache_file
-        #   or from the internet
-        cache_dir = settings.MEDIA_ROOT
-        cache_file = os.path.join(cache_dir, "dubbed_videos.csv")
-        if not options["force"] and os.path.exists(cache_file) and datediff(datetime.datetime.now(), datetime.datetime.fromtimestamp(os.path.getctime(cache_file)), units="days") <= 14.0:
+
+        old_map = os.path.exists(DUBBED_VIDEOS_MAPPING_FILEPATH) and copy.deepcopy(get_dubbed_video_map()) or {}  # for comparison purposes
+
+        cache_filepath = options["cache_filepath"] or os.path.join(settings.MEDIA_ROOT, 'khan_dubbed_videos.csv')
+        max_cache_age = (not options["force"] and options["max_cache_age"]) or 0.0
+
+        if os.path.exists(cache_filepath) and datediff(datetime.datetime.now(), datetime.datetime.fromtimestamp(os.path.getctime(cache_filepath)), units="days") <= max_cache_age:
             # Use cached data to generate the video map
-            csv_data = open(cache_file, "r").read()
-            (video_map, _) = generate_dubbed_video_mappings(csv_data=csv_data)
+            csv_data = open(cache_filepath, "r").read()
 
         else:
-            # Use cached data to generate the video map
-            (video_map, csv_data) = generate_dubbed_video_mappings()
+            csv_data = download_ka_dubbed_video_mappings(cache_filepath=cache_filepath)
 
-            try:
-                ensure_dir(cache_dir)
-                with open(cache_file, "w") as fp:
-                    fp.write(csv_data)
-            except Exception as e:
-                logging.error("Failed to make a local cache of the CSV data: %s" % e)
+        # Use cached data to generate the video map
+        raw_map = generate_dubbed_video_mappings(csv_data=csv_data)
 
         # Now we've built the map.  Save it.
-        out_file = DUBBED_VIDEOS_MAPPING_FILEPATH
-        ensure_dir(os.path.dirname(out_file))
-        logging.info("Saving data to %s" % out_file)
-        with open(out_file, "w") as fp:
-            json.dump(video_map, fp)
+        ensure_dir(os.path.dirname(DUBBED_VIDEOS_MAPPING_FILEPATH))
+        logging.info("Saving data to %s" % DUBBED_VIDEOS_MAPPING_FILEPATH)
+        with open(DUBBED_VIDEOS_MAPPING_FILEPATH, "w") as fp:
+            json.dump(raw_map, fp)
+
+        new_map = get_dubbed_video_map(reload=True)
+
+        # Now tell the user about what changed.
+        added_languages = set(new_map.keys()) - set(old_map.keys())
+        removed_languages = set(old_map.keys()) - set(new_map.keys())
+        if added_languages or removed_languages:
+            logging.info("*** Added support for %2d languages; removed support for %2d languages. ***" % (len(added_languages), len(removed_languages)))
+
+        for lang_code in sorted(list(set(new_map.keys()).union(set(old_map.keys())))):
+            added_videos = set(new_map[lang_code].keys()) - set(old_map[lang_code].keys())
+            removed_videos = set(old_map[lang_code].keys()) - set(new_map[lang_code].keys())
+            shared_keys = set(new_map[lang_code].keys()).intersection(set(old_map[lang_code].keys()))
+            changed_videos = [vid for vid in shared_keys if old_map[lang_code][vid] != new_map[lang_code][vid]]
+            logging.info("\t%5s: Added %d videos, removed %3d videos, changed %3d videos." % (lang_code, len(added_videos), len(removed_videos), len(changed_videos)))
 
         logging.info("Done.")
