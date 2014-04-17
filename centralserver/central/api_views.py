@@ -19,8 +19,17 @@ from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResp
 def get_kalite_version(request):
     assert kalite.version.VERSION in kalite.version.VERSION_INFO
 
+    def versionkey(v):
+        '''sorts a version. For now, it sorts them by release date. It returns
+        a number in the hundreds range to make space for subsorts, such as version
+        number.
+        '''
+        version, vdata = v
+        date = datetime.datetime.strptime(vdata['release_date'], "%Y/%m/%d")
+        return date.toordinal() / 1000 # divide by 1000 to turn into 100s range
+
     request_version = request.GET.get("current_version", "0.10.0")  # default to first version that can understand this.
-    needed_updates = [v for v in sorted(kalite.version.VERSION_INFO.keys(), key=lambda vs: StrictVersion(vs)) if StrictVersion(request_version) < StrictVersion(v)]    # versions are nice--they sort by string
+    needed_updates = [version for version,_ in sorted(kalite.version.VERSION_INFO.iteritems(), key=versionkey) if StrictVersion(request_version) < StrictVersion(version)]    # versions are nice--they sort by string
     return JsonResponse({
         "version": kalite.version.VERSION,
         "version_info": OrderedDict([(v, kalite.version.VERSION_INFO[v]) for v in needed_updates]),
