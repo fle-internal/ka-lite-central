@@ -135,13 +135,15 @@ def get_supported_languages():
 
 DUBBED_VIDEO_MAP_RAW = None
 DUBBED_VIDEO_MAP = None
-def get_dubbed_video_map(lang_code=None, force=False):
+def get_dubbed_video_map(lang_code=None, reload=None, force=False):
     """
     Stores a key per language.  Value is a dictionary between video_id and (dubbed) youtube_id
     """
     global DUBBED_VIDEO_MAP, DUBBED_VIDEO_MAP_RAW, DUBBED_VIDEOS_MAPPING_FILEPATH
 
-    if DUBBED_VIDEO_MAP is None or force:
+    reload = (reload is None and force) or reload  # default of reload is force
+
+    if DUBBED_VIDEO_MAP is None or reload:
         try:
             if not os.path.exists(DUBBED_VIDEOS_MAPPING_FILEPATH) or force:
                 try:

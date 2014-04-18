@@ -122,14 +122,16 @@ function handleFailedAPI(resp, error_prefix) {
             try {
                 messages = $.parseJSON(resp.responseText);
             } catch (e) {
-                var error_msg = sprintf("%s<br/>%s<br/>%s", resp.status, resp.responseText, response);
+                var error_msg = sprintf("%s<br/>%s<br/>%s", resp.status, resp.responseText, resp);
                 messages = {error: sprintf(gettext("Unexpected error; contact the FLE with the following information: %(error_msg)s"), {error_msg: error_msg})};
                 console.log("Response text: " + resp.responseText);
                 console.log(e);
             }
             break;
         case 403:
-            messages = {error: gettext("You are not authorized to complete the request.  Please <a href='/securesync/login/' target='_blank'>login</a> as an administrator, then retry.")};
+            messages = {error: sprintf(gettext("You are not authorized to complete the request.  Please <a href='%(login_url)'>login</a> as an authorized user, then retry the request."), {
+                login_url: USER_LOGIN_URL
+            })};
             break;
 
         default:

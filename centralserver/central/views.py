@@ -23,6 +23,7 @@ import kalite.version  # for software version
 from .forms import OrganizationForm, OrganizationInvitationForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
+from fle_utils.internet import set_query_params
 from kalite.control_panel import views as kalite_control_panel_views
 from kalite.shared.decorators import require_authorized_admin
 from securesync.engine.api_client import SyncClient
@@ -158,34 +159,23 @@ def organization_form(request, org_id):
         'form': form
     }
 
-@require_authorized_admin
-def delete_organization(request, org_id):
-    org = Organization.objects.get(pk=org_id)
-    num_zones = org.get_zones().count()
-    if num_zones > 0:
-        messages.error(request, _("You cannot delete '%(name)s' because it has %(num_zones)s sharing network(s) affiliated with it.") % {
-            "name": org.name,
-            "num_zones": num_zones,
-        })
-    else:
-        messages.success(request, _("You have successfully deleted %(org_name)s.") % {"org_name": org.name})
-        org.delete()
-    return HttpResponseRedirect(reverse("org_management"))
-
 
 @require_authorized_admin
 @render_to("control_panel/zone_form.html")
-def zone_add_to_org(request, org_id=None, *args, **kwargs):
+def zone_add_to_org(request, zone_id, org_id=None, **kwargs):
     """Add a zone, then add that zone to an organization."""
     org = get_object_or_404(Organization, id=org_id)
-    context = kalite_control_panel_views.process_zone_form(request, *args, **kwargs)
+    context = kalite_control_panel_views.process_zone_form(request, zone_id=zone_id, **kwargs)
+
     if request.method == "POST" and context["form"].is_valid():
         zone = context["form"].instance
         if zone not in org.zones.all():
             org.zones.add(zone)
+
+        if zone_id == 'new':
+            messages.success(request, _("To connect a KA Lite installation to this new sharing network, visit the server's 'registration' page."))
         return HttpResponseRedirect(reverse("zone_management", kwargs={ "zone_id": zone.id }))
-    else:
-        return context
+
     return context
 
 
@@ -424,13 +414,13 @@ def crypto_login(request):
 
 def handler_403(request, *args, **kwargs):
     context = RequestContext(request)
-    message = None  # Need to retrieve, but can't figure it out yet.
 
     if request.is_ajax():
-        raise PermissionDenied(message)
+        return JsonResponseMessageError(_("You must be logged in with an account authorized to view this page (API)."), status=403)
     else:
         messages.error(request, mark_safe(_("You must be logged in with an account authorized to view this page.")))
-        return HttpResponseRedirect(reverse("auth_login") + "?next=" + request.path)
+        return HttpResponseRedirect(set_query_params(reverse("auth_login"), {"next": request.get_full_path()}))
+
 
 def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
