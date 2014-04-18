@@ -31,6 +31,8 @@ from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
 
 
+TRANSLATOR_VARIABLE_COMMENT = "Translators: please do not change variable names (anything with the format %(xxxx)s), but it is OK to change its position."
+
 class Command(test_wrappings.Command):
     option_list = BaseCommand.option_list + (
         make_option(
@@ -98,7 +100,7 @@ def insert_translator_comments(po_filepaths):
         pofile = polib.pofile(po_filepath)
         for po_entry in pofile:
             if "%(" in po_entry.msgid and "%(" not in po_entry.comment:  # variable detected.
-                po_entry.comment += "\nTranslators: please do not change variable names (anything with the format %(xxxx)s), but it is OK to change its position."
+                po_entry.comment += "\n%s" % TRANSLATOR_VARIABLE_COMMENT
         pofile.save()
 
 

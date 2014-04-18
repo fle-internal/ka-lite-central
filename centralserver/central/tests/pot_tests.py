@@ -1,0 +1,1 @@
+from centralserver.i18n.tests import *

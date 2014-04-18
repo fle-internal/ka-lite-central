@@ -28,7 +28,11 @@ class TranslationCommentTestCase(LiveServerTestCase):
         anybad = False
         for pot_filepath in glob.glob(os.path.join(POT_DIRPATH, "*.pot")):
             for po_entry in polib.pofile(pot_filepath):
-                if "%(" in po_entry.msgid and po_entry.comment != "Translators: please do not change variable names (anything with the format %(xxxx)s), but it is OK to change its position.":
+                if "%(" in po_entry.msgid and "%(" not in po_entry.comment:
+                    if not anybad:
+                        print "Pot file translations that have format strings, but without a comment containing said format string:"
+                    print "%s (%s; current comment: %s)" % (pot_filepath, po_entry.msgid, po_entry.comment)
                     anybad = True
-                    print "Bad pot file (%s): %s / %s" % (pot_filepath, po_entry.msgid, po_entry.comment)
-        self.assertTrue(anybad, "All pot comments told translators NOT to touch variable names.")
+
+        # After printing all bad strings, fail the test.
+        self.assertTrue(not anybad, "All pot comments told translators NOT to touch variable names.")
