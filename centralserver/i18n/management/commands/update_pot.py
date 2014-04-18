@@ -23,12 +23,11 @@ from django.conf import settings; logging = settings.LOG
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
+from ... import POT_DIRPATH
 from fle_utils.django_utils import call_command_with_output
 from fle_utils.general import ensure_dir
 from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
-
-POT_PATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
 
 
 class Command(test_wrappings.Command):
@@ -58,8 +57,8 @@ class Command(test_wrappings.Command):
             if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
                 raise CommandError("CROWDIN_PROJECT_KEY must be set in order to upload.")
             upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY, files={
-                os.path.join(POT_PATH, "kalite.pot"): os.path.join("KA Lite UI", "kalite.pot"),
-                os.path.join(POT_PATH, "kalitejs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
+                os.path.join(POT_DIRPATH, "kalite.pot"): os.path.join("KA Lite UI", "kalite.pot"),
+                os.path.join(POT_DIRPATH, "kalitejs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
             })
 
 
@@ -67,8 +66,8 @@ def delete_current_templates():
     """Delete existing en po/pot files"""
 
     logging.info("Deleting English language pot files")
-    if os.path.exists(POT_PATH):
-        shutil.rmtree(POT_PATH)
+    if os.path.exists(POT_DIRPATH):
+        shutil.rmtree(POT_DIRPATH)
 
 
 def run_makemessages(verbosity=0):
@@ -84,12 +83,12 @@ def run_makemessages(verbosity=0):
 
 def update_templates():
     """Update template po files"""
-    logging.info("Copying english po files to %s" % POT_PATH)
+    logging.info("Copying english po files to %s" % POT_DIRPATH)
 
     #  post them to exposed URL
-    ensure_dir(POT_PATH)
-    shutil.copy(get_po_filepath(lang_code="en", filename="django.po"), os.path.join(POT_PATH, "kalite.pot"))
-    shutil.copy(get_po_filepath(lang_code="en", filename="djangojs.po"), os.path.join(POT_PATH, "kalitejs.pot"))
+    ensure_dir(POT_DIRPATH)
+    shutil.copy(get_po_filepath(lang_code="en", filename="django.po"), os.path.join(POT_DIRPATH, "kalite.pot"))
+    shutil.copy(get_po_filepath(lang_code="en", filename="djangojs.po"), os.path.join(POT_DIRPATH, "kalitejs.pot"))
 
 
 def upload_to_crowdin(files, project_key, project_id="ka-lite"):
