@@ -45,6 +45,8 @@ LANGUAGE_PACK_BUILD_DIR = os.path.join(settings.ROOT_DATA_PATH, "i18n", "build")
 
 LOCALE_ROOT = settings.LOCALE_PATHS[0]
 
+POT_DIRPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
+
 
 def get_lang_map_filepath(lang_code):
     return os.path.join(SUBTITLES_DATA_ROOT, "languages", lang_code + LANGUAGE_SRT_SUFFIX)
