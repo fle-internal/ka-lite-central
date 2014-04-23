@@ -94,7 +94,7 @@ INSTALLED_APPS = ("centralserver.central",)
 MIDDLEWARE_CLASSES = tuple()  # will be filled recursively via INSTALLED_APPS
 TEMPLATE_DIRS  = tuple()  # will be filled recursively via INSTALLED_APPS
 STATICFILES_DIRS = (
-    os.path.join(PROJECT_PATH, '..', 'ka-lite', 'static'),
+    os.path.join(PROJECT_PATH, '..', 'static-libraries'),
     os.path.join(PROJECT_PATH, '..', 'ka-lite', 'static-libraries'),
 )  # libraries common to all apps
 
