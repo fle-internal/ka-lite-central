@@ -43,9 +43,20 @@ if USE_DEBUG_TOOLBAR:
     }
 
 if getattr(local_settings, "DEBUG", False):
-    # add ?prof to URL, to see performance stats
-    MIDDLEWARE_CLASSES += ('django_snippets.profiling_middleware.ProfileMiddleware',)
+    INSTALLED_APPS += (
+        "django.contrib.admin",  # this and the following are needed to enable django admin.
+    )
 
+    # add ?prof to URL, to see performance stats
+    MIDDLEWARE_CLASSES += (
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        'django_snippets.profiling_middleware.ProfileMiddleware',
+    )
+
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        "django.contrib.auth.context_processors.auth",
+    )
 
 TESTS_TO_SKIP = getattr(local_settings, "TESTS_TO_SKIP", ["long"])  # can be
 assert not (set(TESTS_TO_SKIP) - set(["fast", "medium", "long"])), "TESTS_TO_SKIP must contain only 'fast', 'medium', and 'long'"
