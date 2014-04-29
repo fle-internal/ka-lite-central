@@ -81,7 +81,7 @@
                                 </a>
                             </li>
                         {% endif %}
-                        {% if org.owner == request.user and not org.get_zones %}
+                        {% if org.owner == request.user %}
                             <li>
                                 <a class="org-delete-link" href="#">
                                     <span class="icon-trash icon-large" value="{% url 'delete_organization' org_id=org.id %}" title="Delete this organization."></span>
@@ -120,8 +120,7 @@
                     <form method="link" action="{% url 'zone_add_to_org' org_id=org.id zone_id='new' %}">
                         <input class="button--small" type="submit" value="Create a new sharing network">
                     </form>
-                /div>
-            </div>
+                </div>
 
             <div class="span6">
                 <div class="tooltip-container">
