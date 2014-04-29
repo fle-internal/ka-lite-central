@@ -23,8 +23,6 @@ from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download red
 
 admin.autodiscover()
 
-def redirect_to(self, base_url, path=""):
-    return HttpResponseRedirect(base_url + path)
 
 # This must be prioritized, to make sure stats are recorded for all necessary urls.
 #   If removed, all apps should still function, as appropriate URL confs for each
