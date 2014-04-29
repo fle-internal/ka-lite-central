@@ -23,29 +23,16 @@ from securesync.models import Zone
 @api_response_causes_reload  # must go above @api_handle_error_with_json
 def delete_organization(request, org_id):
     org = Organization.objects.get(pk=org_id)
-    num_zones = org.get_zones().count()
-    if num_zones > 0:
-        return JsonResponseMessageError(_("You cannot delete Organization '%(org_name)s' because it has %(num_zones)s sharing network(s) associated with it.") % {
-            "org_name": org.name,
-            "num_zones": num_zones,
-        })
-    else:
-        org.delete()
-        return JsonResponseMessageSuccess(_("You have successfully deleted Organization %(org_name)s.") % {"org_name": org.name})
+    org.delete()
+    return JsonResponseMessageSuccess(_("You have successfully deleted Organization %(org_name)s.") % {"org_name": org.name})
 
 
 @require_authorized_admin
 @api_response_causes_reload  # must go above @api_handle_error_with_json
 def delete_zone(request, zone_id):
     zone = Zone.objects.get(id=zone_id)
-    if zone.has_dependencies(passable_classes=["Organization"]):
-        return JsonResponseMessageError(_("You cannot delete Zone '%(zone_name)s' because it is syncing data with with %(num_devices)d device(s)") % {
-            "zone_name": zone.name,
-            "num_devices": zone.devicezone_set.count(),
-        })
-    else:
-        zone.delete()
-        return JsonResponseMessageSuccess(_("You have successfully deleted Zone %(zone_name)s") % {"zone_name": zone.name})
+    zone.delete()
+    return JsonResponseMessageSuccess(_("You have successfully deleted Zone %(zone_name)s") % {"zone_name": zone.name})
 
 
 @allow_jsonp

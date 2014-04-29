@@ -22,7 +22,6 @@ from fle_utils.django_utils import ExtendedModel
 from fle_utils.general import datediff, isnumeric
 from kalite import i18n
 from kalite.facility.models import FacilityUser
-from securesync import engine
 from securesync.models import DeferredCountSyncedModel, SyncedModel, Device
 
 
@@ -53,7 +52,7 @@ class VideoLog(DeferredCountSyncedModel):
             " (completed)" if self.complete else "",
         )
 
-    def save(self, update_userlog=True, *args, **kwargs):
+    def save(self, update_userlog=False, *args, **kwargs):
         # To deal with backwards compatibility,
         #   check video_id, whether imported or not.
         if not self.video_id:
@@ -116,7 +115,7 @@ class VideoLog(DeferredCountSyncedModel):
         # write the video log to the database, overwriting any old video log with the same ID
         # (and since the ID is computed from the user ID and YouTube ID, this will behave sanely)
         videolog.full_clean()
-        videolog.save()
+        videolog.save(update_userlog=True)
 
         return videolog
 
@@ -140,7 +139,7 @@ class ExerciseLog(DeferredCountSyncedModel):
     def __unicode__(self):
         return u"user=%s, exercise_id=%s, points=%d, language=%s%s" % (self.user, self.exercise_id, self.points, self.language, " (completed)" if self.complete else "")
 
-    def save(self, update_userlog=True, *args, **kwargs):
+    def save(self, update_userlog=False, *args, **kwargs):
         if not kwargs.get("imported", False):
             self.full_clean()
 
@@ -513,6 +512,3 @@ def cull_records(sender, **kwargs):
             to_discard = current_models \
                 .order_by("start_datetime")[0:current_models.count() - settings.USER_LOG_MAX_RECORDS_PER_USER]
             UserLog.objects.filter(pk__in=to_discard).delete()
-
-
-engine.add_syncing_models([VideoLog, ExerciseLog, UserLogSummary])

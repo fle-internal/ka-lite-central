@@ -297,7 +297,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
         self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon appears.")
         self.browser_check_django_message(num_messages=0)
 
-    def test_cannot_delete_full_org(self):
+    def test_can_delete_full_org(self):
         """Confirm no option to delete an org with data"""
         # Save zone info, but without adding
         self.zone = Zone(name=self.ZONE_NAME)
@@ -307,8 +307,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
 
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
-        with self.assertRaises(NoSuchElementException):
-            self.assertEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon does not appear.")
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon appears.")
 
 
     def test_issue_697_part2(self):
@@ -334,7 +333,7 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.browser_wait_for_no_element(".zone-delete-link")
         self.browser_check_django_message(message_type="success", contains="successfully deleted")
         with self.assertRaises(NoSuchElementException):
-            self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link is gone.")
+            self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link no longer exists.")
 
     def test_cancel_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
@@ -343,24 +342,6 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.browser.switch_to_alert().dismiss()
         self.assertNotEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link still exists.")
         self.browser_check_django_message(num_messages=0)
-
-
-    def test_cannot_delete_full_zone(self):
-        # Save zone info, but without adding
-        self.devicezone = DeviceZone(device=Device.get_own_device(), zone=self.zone)
-        self.devicezone.save()
-
-        # Check on the org management page
-        self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
-        with self.assertRaises(NoSuchElementException):
-            self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link is gone.")
-
-        # Follow the link, and confirm on the zone management page.
-        zone_url = self.browser.find_element_by_css_selector(".zone-manage-link").get_attribute("href")
-        self.browse_to(zone_url)
-        self.assertEqual(self.browser.current_url, zone_url, "Expect link to go to zone management page")
-        with self.assertRaises(NoSuchElementException):
-            self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link is gone.")
 
     def test_issue_697_part1(self):
         self.facility = Facility(name=self.FACILITY_NAME)
