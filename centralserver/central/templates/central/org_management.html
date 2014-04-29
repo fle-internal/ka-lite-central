@@ -12,7 +12,7 @@
     <script type="text/javascript" src="{% static 'js/central/org_management.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
     <script type="text/javascript">
-        var GLOSSARY_URL = "{% url glossary %}";
+        var GLOSSARY_URL = "{% url 'glossary' %}";
     </script>
 {% endblock headjs %}
 
@@ -47,7 +47,7 @@
     </div>
 
     {% for invite in my_invitations %}
-    <form method="post" action="{% url org_invite_action invite_id=invite.pk %}">
+    <form method="post" action="{% url 'org_invite_action' invite_id=invite.pk %}">
         {% csrf_token %}
         <div id="invite-text">
             <p>You have been invited by <a href="mailto:{{invite.invited_by.email}}">{% firstof invite.invited_by.get_full_name invite.invited_by.username %}</a> to help administer "<span style="font-weight:bold">{{ invite.organization }}</span>". Please click below to join the organization or to decline this invitation.</p>
@@ -76,15 +76,15 @@
                     <ul class="options">
                         {% if org.name != HEADLESS_ORG_NAME %}
                             <li>
-                                <a href="{% url organization_form org_id=org.id %}">
+                                <a href="{% url 'organization_form' org_id=org.id %}">
                                     <span class="icon-pencil icon-large" title="Edit this organization's information."></span>
                                 </a>
                             </li>
                         {% endif %}
-                        {% if org.owner == request.user and not org.get_zones %}
+                        {% if org.owner == request.user %}
                             <li>
                                 <a class="org-delete-link" href="#">
-                                    <span class="icon-trash icon-large" value="{% url delete_organization org_id=org.id %}" title="Delete this organization."></span>
+                                    <span class="icon-trash icon-large" value="{% url 'delete_organization' org_id=org.id %}" title="Delete this organization."></span>
                                 </a>
                             </li>
                         {% endif %}
@@ -103,11 +103,11 @@
                         {% for zone in zones|get_item:pk %}
                         <tr>
                             <td>{{ zone.name }}</td>
-                            <td><a class="zone-manage-link" href="{% url zone_management zone_id=zone.id %}">
+                            <td><a class="zone-manage-link" href="{% url 'zone_management' zone_id=zone.id %}">
                                  Manage
                             </a></td>
                             <td>
-                                <a class="zone-delete-link" href="#" value="{% url delete_zone zone_id=zone.id %}">
+                                <a class="zone-delete-link" href="#" value="{% url 'delete_zone' zone_id=zone.id %}">
                                      Delete
                                 </a>
                             </td>
@@ -115,11 +115,10 @@
                         {% endfor %}
                     </table>
 
-                    <form method="link" action="{% url zone_add_to_org org_id=org.id zone_id='new' %}">
+                    <form method="link" action="{% url 'zone_add_to_org' org_id=org.id zone_id='new' %}">
                         <input class="button--small" type="submit" value="Create a new sharing network">
                     </form>
-                /div>
-            </div>
+                </div>
 
             <div class="span6">
                 <div class="tooltip-container">
@@ -141,7 +140,7 @@
                             {% elif org.owner == member %}
                             (Owner)
                             {% else %}
-                            <form method="post" action="{% url delete_admin org_id=org.id user_id=member.id %}">
+                            <form method="post" action="{% url 'delete_admin' org_id=org.id user_id=member.id %}">
                                 {% csrf_token %}
                                 (<a href="" class="remove-admin-submit">Remove Admin</a>)
                             </form>
@@ -160,7 +159,7 @@
                         </td>
 
                         <td>
-                            <form method="post" action="{% url delete_invite org_id=org.id invite_id=invite.pk %}">
+                            <form method="post" action="{% url 'delete_invite' org_id=org.id invite_id=invite.pk %}">
                                 {% csrf_token %}
                                 <a href="" class="remove-invite-submit">(Revoke Invite)</a>
 

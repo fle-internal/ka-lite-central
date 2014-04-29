@@ -26,6 +26,7 @@ writeup/
 /centralserver/i18n/data/dubbed_video_mappings.json
 /centralserver/kalite-*.zip
 /centralserver/local_settings.py
+/centralserver/local_settings_secrets.py
 /centralserver/media
 /centralserver/static
 /data/logs
