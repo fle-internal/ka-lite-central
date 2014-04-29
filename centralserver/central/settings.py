@@ -20,6 +20,7 @@ INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "announcements",  # display announcements in the header
     "south",
     "fle_utils.django_utils",  # custom template tags

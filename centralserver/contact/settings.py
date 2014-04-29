@@ -8,8 +8,17 @@ except ImportError:
 # Django settings
 ##############################
 
-# TODO: fill this out
+INSTALLED_APPS = (
+    "django.contrib.auth",
+)
 
+MIDDLEWARE_CLASSES = (
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+)
 
 #######################
 # Set module settings

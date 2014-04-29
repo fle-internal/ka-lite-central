@@ -12,6 +12,7 @@ except ImportError:
 
 INSTALLED_APPS = (
     "django.contrib.messages",  # default_language, language_choices, etc
+    "django.contrib.humanize",
 )
 
 MIDDLEWARE_CLASSES = (
