@@ -70,7 +70,8 @@ def download_subtitle(request, lang_code, youtube_id):
 
 
 def download_windows_installer(request, version):
-    version = (version == "latest" and KALITE_VERSION) or version  # make sure 'latest' gets translated to the latest version.
+    if version == "latest":
+        version = KALITE_VERSION  # make sure 'latest' gets translated to the latest version.
 
     installer_name = "KALiteSetup-%s.exe" % version
     installer_url = settings.INSTALLER_BASE_URL + installer_name
