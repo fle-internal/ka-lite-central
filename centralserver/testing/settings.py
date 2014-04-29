@@ -6,9 +6,19 @@ except ImportError:
     local_settings = object()
 
 
-# Django debug_toolbar config
-INSTALLED_APPS = tuple()
+########################
+# Django dependencies
+########################
+
+INSTALLED_APPS = (
+    "kalite.testing",  # topic_tools
+)
 MIDDLEWARE_CLASSES = tuple()
+
+
+########################
+# Module-specific settings
+########################
 
 USE_DEBUG_TOOLBAR = getattr(local_settings, "USE_DEBUG_TOOLBAR", False)
 
@@ -40,4 +50,4 @@ if getattr(local_settings, "DEBUG", False):
 TESTS_TO_SKIP = getattr(local_settings, "TESTS_TO_SKIP", ["long"])  # can be
 assert not (set(TESTS_TO_SKIP) - set(["fast", "medium", "long"])), "TESTS_TO_SKIP must contain only 'fast', 'medium', and 'long'"
 
-TEST_RUNNER = __package__ + ".testrunner.CentralTestRunner"
+CENTRALSERVER_TEST_RUNNER = __package__ + ".testrunner.CentralTestRunner"

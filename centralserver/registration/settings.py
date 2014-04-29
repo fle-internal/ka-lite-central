@@ -6,6 +6,24 @@ except ImportError:
     local_settings = object()
 
 
+########################
+# Django dependencies
+########################
+
+INSTALLED_APPS = (
+    "django.contrib.messages",  # default_language, language_choices, etc
+)
+
+MIDDLEWARE_CLASSES = (
+    "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
+    "django.middleware.csrf.CsrfViewMiddleware",
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.messages.context_processors.messages",  # needed for django admin
+)
+
+
 #######################
 # Set module settings
 #######################

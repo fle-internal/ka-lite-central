@@ -4,6 +4,13 @@ except ImportError:
     local_settings = object()
 
 
+##############################
+# Django settings
+##############################
+
+# TODO: fill this out
+
+
 #######################
 # Set module settings
 #######################

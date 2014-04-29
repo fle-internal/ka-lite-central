@@ -6,6 +6,21 @@ except ImportError:
     local_settings = object()
 
 
+########################
+# Django dependencies
+########################
+
+INSTALLED_APPS = (
+    "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
+)
+
+MIDDLEWARE_CLASSES = (
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+)
+
+
 #######################
 # Set module settings
 #######################
