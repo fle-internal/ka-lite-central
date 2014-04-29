@@ -47,7 +47,7 @@ def check_setup_status(handler):
     NOTE that this decorator must appear before the backend_cache_page decorator,
     so that it is run even when there is a cache hit.
     """
-    def wrapper_fn(request, *args, **kwargs):
+    def check_setup_status_wrapper_fn(request, *args, **kwargs):
         if request.is_admin:
             # TODO(bcipolli): move this to the client side?
             if not request.session["registered"] and BaseClient().test_connection() == "success":
@@ -73,7 +73,7 @@ def check_setup_status(handler):
                     to complete the setup." % (reverse("login"), redirect_url)))
 
         return handler(request, *args, **kwargs)
-    return wrapper_fn
+    return check_setup_status_wrapper_fn
 
 
 def refresh_topic_cache(handler, force=False):
@@ -259,7 +259,6 @@ def video_handler(request, video, format="mp4", prev=None, next=None):
         "prev": prev,
         "next": next,
         "backup_vids_available": bool(settings.BACKUP_VIDEO_SOURCE),
-        "use_mplayer": settings.USE_MPLAYER and is_loopback_connection(request),
     }
     return context
 
@@ -444,7 +443,7 @@ def search(request, topics):  # we don't use the topics variable, but this setup
             hit_max[node_type] = len(possible_matches[node_type]) == max_results_per_category
 
     return {
-        'title': _("Search results for '%s'") % (query if query else ""),
+        'title': _("Search results for '%(query)s'") % {"query": (query if query else "")},
         'query_error': query_error,
         'results': possible_matches,
         'hit_max': hit_max,

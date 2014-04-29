@@ -5,7 +5,7 @@ Note that most times, these patterns are all under /api/, due to the way
 they're imported into the project's urls.py file.
 """
 from django.conf import settings
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import include, patterns, url
 from django.http import HttpResponseServerError
 
 import kalite.khanload.api_urls
@@ -16,9 +16,6 @@ import kalite.updates.api_urls
 urlpatterns = patterns(__package__ + '.api_views',
     # For manipulating the static webpage to show data based on user state
     url(r'^status$', 'status', {}, 'status'),
-
-    # For launching an external player (RPi)
-    url(r'^launch_mplayer$', 'launch_mplayer', {}, 'launch_mplayer'),
 
     # Setting server time (RPi)
     url(r'^time_set/$', 'time_set', {}, 'time_set'),

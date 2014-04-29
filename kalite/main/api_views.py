@@ -27,7 +27,6 @@ from .models import VideoLog, ExerciseLog
 from .topic_tools import get_flat_topic_tree, get_node_cache, get_neighbor_nodes
 from fle_utils.internet import api_handle_error_with_json, JsonResponse, JsonResponseMessageSuccess, JsonResponseMessageError, JsonResponseMessageWarning
 from fle_utils.internet.webcache import backend_cache_page
-from fle_utils.mplayer_launcher import play_video_in_new_thread
 from fle_utils.testing.decorators import allow_api_profiling
 
 
@@ -43,7 +42,7 @@ class student_log_api(object):
 
     def __call__(self, handler):
         @api_handle_error_with_json
-        def wrapper_fn(request, *args, **kwargs):
+        def student_log_api_wrapper_fn(request, *args, **kwargs):
             # TODO(bcipolli): send user info in the post data,
             #   allowing cross-checking of user information
             #   and better error reporting
@@ -51,7 +50,7 @@ class student_log_api(object):
                 return JsonResponseMessageWarning(self.logged_out_message + "  " + _("You must be logged in as a student or teacher to view/save progress."))
             else:
                 return handler(request)
-        return wrapper_fn
+        return student_log_api_wrapper_fn
 
 
 @student_log_api(logged_out_message=ugettext_lazy("Video progress not saved."))
@@ -62,7 +61,7 @@ def save_video_log(request):
     """
 
     # Form does all the data validation, including the video_id
-    form = VideoLogForm(data=simplejson.loads(request.raw_post_data))
+    form = VideoLogForm(data=simplejson.loads(request.body))
     if not form.is_valid():
         raise ValidationError(form.errors)
     data = form.data
@@ -78,7 +77,7 @@ def save_video_log(request):
         )
 
     except ValidationError as e:
-        return JsonResponseMessageError(_("Could not save VideoLog: %s") % e)
+        return JsonResponseMessageError(_("Could not save VideoLog: %(err)s") % {"err": e})
 
     if "points" in request.session:
         del request.session["points"]  # will be recomputed when needed
@@ -97,7 +96,7 @@ def save_exercise_log(request):
     """
 
     # Form does all data validation, including of the exercise_id
-    form = ExerciseLogForm(data=simplejson.loads(request.raw_post_data))
+    form = ExerciseLogForm(data=simplejson.loads(request.body))
     if not form.is_valid():
         raise Exception(form.errors)
     data = form.data
@@ -126,13 +125,13 @@ def save_exercise_log(request):
     if not previously_complete and exerciselog.complete:
         exercise = get_node_cache("Exercise").get(data["exercise_id"], [None])[0]
         junk, next_exercise = get_neighbor_nodes(exercise, neighbor_kind="Exercise") if exercise else None
-        if next_exercise:
+        if not next_exercise:
+            return JsonResponseMessageSuccess(_("You have mastered this exercise and this topic!"))
+        else:
             return JsonResponseMessageSuccess(_("You have mastered this exercise!  Please continue on to <a href='%(href)s'>%(title)s</a>") % {
                 "href": next_exercise["path"],
                 "title": _(next_exercise["title"]),
             })
-        else:
-            return JsonResponseMessageSuccess(_("You have mastered this exercise and this topic!"))
 
     # Return no message in release mode; "data saved" message in debug mode.
     return JsonResponse({})
@@ -144,7 +143,7 @@ def get_video_logs(request):
     """
     Given a list of video_ids, retrieve a list of video logs for this user.
     """
-    data = simplejson.loads(request.raw_post_data or "[]")
+    data = simplejson.loads(request.body or "[]")
     if not isinstance(data, list):
         return JsonResponseMessageError(_("Could not load VideoLog objects: Unrecognized input data format."))
 
@@ -162,7 +161,7 @@ def get_exercise_logs(request):
     """
     Given a list of exercise_ids, retrieve a list of video logs for this user.
     """
-    data = simplejson.loads(request.raw_post_data or "[]")
+    data = simplejson.loads(request.body or "[]")
     if not isinstance(data, list):
         return JsonResponseMessageError(_("Could not load ExerciseLog objects: Unrecognized input data format."))
 
@@ -171,30 +170,6 @@ def get_exercise_logs(request):
             .filter(user=user, exercise_id__in=data) \
             .values("exercise_id", "streak_progress", "complete", "points", "struggling", "attempts")
     return JsonResponse(list(logs))
-
-
-
-def _update_video_log_with_points(seconds_watched, video_id, video_length, youtube_id, facility_user, language):
-    """Handle the callback from the mplayer thread, saving the VideoLog. """
-    # TODO (bcipolli) add language info here
-
-    if not facility_user:
-        return  # in other places, we signal to the user that info isn't being saved, but can't do it here.
-                #   adding this code for consistency / documentation purposes.
-
-    new_points = VideoLog.calc_points(seconds_watched, video_length)
-
-    videolog = VideoLog.update_video_log(
-        facility_user=facility_user,
-        video_id=video_id,
-        youtube_id=youtube_id,
-        additional_seconds_watched=seconds_watched,
-        new_points=new_points,
-        language=language,
-    )
-
-    if "points" in request.session:
-        del request.session["points"]  # will be recomputed when needed
 
 
 @api_handle_error_with_json

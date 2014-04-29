@@ -24,7 +24,7 @@
         {# Allow admins to add a new group #}
         {% if request.is_admin %}
             {% trans "Add a new group" as add_new_group %}
-            $('#id_group').parent().find(".helptext").html('(<a href="{% url add_group %}?facility={{facility.id}}&prev={{cur_url|urlencode:''}}">{{add_new_group}}</a>)');
+            $('#id_group').parent().find(".helptext").html('(<a href="{% url 'add_group' %}?facility={{facility.id}}&prev={{cur_url|urlencode:''}}">{{add_new_group}}</a>)');
         {% elif num_groups == 0 %}
             $('#id_group').parent().hide();
         {% endif %}
@@ -35,9 +35,13 @@
             $("#id_group").parent().hide();
         {% endif %}
 
-        {# Hide facility info #}
+        {# Show facility info #}
         {% if not singlefacility %}
-        $("#id_facility").parent().show()
+            // Show the dropdown
+            $("#id_facility").show();
+        {% else %}
+            // Show that there's only one facility, and it's being selected.
+            $(sprintf("<span>%s</span>", $("#id_facility option:selected").text()).insertAfter($("#id_facility"));
         {% endif %}
         });
     </script>

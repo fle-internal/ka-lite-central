@@ -34,13 +34,16 @@ function show_api_messages(messages) {
 }
 
 
-
 function force_sync() {
     // Simple function that calls the API endpoint to force a data sync,
     //   then shows a message for success/failure
-    doRequest("/securesync/api/force_sync")
+    doRequest(FORCE_SYNC_URL)
         .success(function() {
-            show_message("success", gettext("Successfully launched data syncing job. After syncing completes, visit the <a href='/management/device/'>device management page</a> to view results."));
+            var msg = gettext("Successfully launched data syncing job.") + " ";
+            msg += sprintf(gettext("After syncing completes, visit the <a href='%(devman_url)s'>device management page</a> to view results."), {
+                devman_url: LOCAL_DEVICE_MANAGEMENT_URL
+            });
+            show_message("success", msg);
         });
 }
 
@@ -64,6 +67,7 @@ var TotalPointView = Backbone.View.extend({
         _.bindAll(this);
         this.model.bind("change:points", this.render);
         this.model.bind("change:newpoints", this.render);
+        this.model.bind("change:username", this.render);
         this.render();
     },
 
@@ -71,14 +75,20 @@ var TotalPointView = Backbone.View.extend({
 
         // add the points that existed at page load and the points earned since page load, to get the total current points
         var points = this.model.get("points") + this.model.get("newpoints");
+        var username_span = sprintf("<span id='logged-in-name'>%s</span>", this.model.get("username"));
+        var message = null;
 
         // only display the points if they are greater than zero, and the user is logged in
-        if (points > 0 && this.model.get("is_logged_in")) {
-            this.$el.text(sprintf(gettext("Total Points : %(points)d "), { points : points }));
-            this.$el.show();
+        if (!this.model.get("is_logged_in")) {
+            return;
+        } else if (points > 0) {
+            message = sprintf("%s | %s", username_span, sprintf(gettext("Total Points : %(points)d "), { points : points }));
         } else {
-            this.$el.hide();
+            message = sprintf(gettext("Welcome, %(username)s!"), {username: username_span});
         }
+
+        this.$el.html(message);
+        this.$el.show();
     }
 
 });
@@ -86,7 +96,7 @@ var TotalPointView = Backbone.View.extend({
 // Related to showing elements on screen
 $(function(){
     // global Backbone model instance to store state related to the user (username, points, admin status, etc)
-    window.userModel = new UserModel();
+    window.userModel = new UserModel({el: "#sitepoints"});
 
     // create an instance of the total point view, which encapsulates the point display in the top right of the screen
     var totalPointView = new TotalPointView({model: userModel, el: "#sitepoints"});
@@ -102,7 +112,7 @@ $(function(){
 
     // Do the AJAX request to async-load user and message data
     //$("[class$=-only]").hide();
-    doRequest("/api/status")
+    doRequest(STATUS_URL)
         .success(function(data){
 
             // store the data on the global user model, so that info about the current user can be accessed and bound to by any view
@@ -114,15 +124,8 @@ $(function(){
             toggle_state("registered", data.registered);
             toggle_state("super-user", data.is_django_user);
             toggle_state("teacher", data.is_admin && !data.is_django_user);
+            toggle_state("student", !data.is_admin && !data.is_django_user && data.is_logged_in);
             toggle_state("admin", data.is_admin); // combination of teachers & super-users
-            if (data.is_logged_in){
-                if (data.is_django_user) {
-                    $('#nav_logout').text(sprintf(gettext("%(username)s (Logout)"), { username : data.username }));
-                }
-                else {
-                    $('#logged-in-name').text(data.username);
-                }
-            }
         });
 });
 
@@ -131,7 +134,7 @@ $(function(){
     // load progress data for all videos linked on page, and render progress circles
     var video_ids = $.map($(".progress-circle[data-video-id]"), function(el) { return $(el).data("video-id"); });
     if (video_ids.length > 0) {
-        doRequest("/api/get_video_logs", video_ids)
+        doRequest(GET_VIDEO_LOGS_URL, video_ids)
             .success(function(data) {
                 $.each(data, function(ind, video) {
                     var newClass = video.complete ? "complete" : "partial";
@@ -143,7 +146,7 @@ $(function(){
     // load progress data for all exercises linked on page, and render progress circles
     var exercise_ids = $.map($(".progress-circle[data-exercise-id]"), function(el) { return $(el).data("exercise-id"); });
     if (exercise_ids.length > 0) {
-        doRequest("/api/get_exercise_logs", exercise_ids)
+        doRequest(GET_EXERCISE_LOGS_URL, exercise_ids)
             .success(function(data) {
                 $.each(data, function(ind, exercise) {
                     var newClass = exercise.complete ? "complete" : "partial";
