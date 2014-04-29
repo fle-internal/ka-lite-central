@@ -146,7 +146,8 @@ def update_all_central_callback(request):
     video_logs = []
     for video in videos:
         # Assume that KA videos are all english-language, not dubbed (for now)
-        video_id = youtube_id = video.get('video', {}).get('youtube_id', "")
+        youtube_id = video.get('video', {}).get('youtube_id', "")
+        video_id = get_video_id(youtube_id)  # map from youtube_id to video_id (across all languages)
 
         # Only save videos with progress
         if not video.get('seconds_watched', None):
