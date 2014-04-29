@@ -11,16 +11,21 @@ except ImportError:
 ########################
 
 INSTALLED_APPS = (
+    "django.contrib.sessions",
+    "django.contrib.auth",
     "django.contrib.messages",  # default_language, language_choices, etc
     "django.contrib.humanize",
 )
 
 MIDDLEWARE_CLASSES = (
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
     "django.middleware.csrf.CsrfViewMiddleware",
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
     "django.contrib.messages.context_processors.messages",  # needed for django admin
 )
 

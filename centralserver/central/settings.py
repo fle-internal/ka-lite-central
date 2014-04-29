@@ -17,6 +17,7 @@ EMAIL_BACKEND           = getattr(local_settings, "EMAIL_BACKEND", "postmark.bac
 
 INSTALLED_APPS = getattr(local_settings, 'INSTALLED_APPS', tuple())
 INSTALLED_APPS = (
+    "django.contrib.sessions",
     "django.contrib.auth",
     "django.contrib.messages",
     "django.contrib.staticfiles",

@@ -44,6 +44,7 @@ if USE_DEBUG_TOOLBAR:
 
 if getattr(local_settings, "DEBUG", False):
     INSTALLED_APPS += (
+        "django.contrib.sessions",
         "django.contrib.admin",  # this and the following are needed to enable django admin.
     )
 

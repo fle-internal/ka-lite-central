@@ -9,10 +9,12 @@ except ImportError:
 ##############################
 
 INSTALLED_APPS = (
+    "django.contrib.sessions",
     "django.contrib.auth",
 )
 
 MIDDLEWARE_CLASSES = (
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
 )
 
