@@ -332,7 +332,8 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.browser.switch_to_alert().accept()
         self.browser_wait_for_no_element(".zone-delete-link")
         self.browser_check_django_message(message_type="success", contains="successfully deleted")
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link still exists.")
+        with self.assertRaises(NoSuchElementException):
+            self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link no longer exists.")
 
     def test_cancel_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
