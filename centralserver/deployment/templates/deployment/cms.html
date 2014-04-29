@@ -110,9 +110,9 @@
                                 <ul>
                                 {% for device in deployment.devices.values %}
                                     <li>
-                                        <a href="{% url zone_management zone_id=device.zone_id %}">{{ device.zone_name }}</a>
+                                        <a href="{% url 'zone_management' zone_id=device.zone_id %}">{{ device.zone_name }}</a>
                                         /
-                                        <a href="{% url device_management zone_id=device.zone_id device_id=device.id %}">{{ device.name }}</a>
+                                        <a href="{% url 'device_management' zone_id=device.zone_id device_id=device.id %}">{{ device.name }}</a>
                                         ({{ device.sync_sessions }} sessions
                                         {% if device.models_synced %}, {{ device.models_synced }} models{% endif %})
                                     </li>
