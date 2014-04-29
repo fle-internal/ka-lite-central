@@ -9,6 +9,7 @@ from . import stats_logger
 from centralserver.i18n import get_language_pack_filepath, get_srt_path
 from fle_utils.django_utils import get_request_ip
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
+from kalite.version import VERSION as KALITE_VERSION
 
 
 # central server
@@ -69,7 +70,11 @@ def download_subtitle(request, lang_code, youtube_id):
 
 
 def download_windows_installer(request, version):
+    if version == "latest":
+        version = KALITE_VERSION  # make sure 'latest' gets translated to the latest version.
+
     installer_name = "KALiteSetup-%s.exe" % version
     installer_url = settings.INSTALLER_BASE_URL + installer_name
     stats_logger("installer").info("wi;%s;%s" % (get_request_ip(request), installer_name))
+
     return HttpResponseRedirect(installer_url)
