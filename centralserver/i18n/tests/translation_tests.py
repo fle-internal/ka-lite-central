@@ -10,7 +10,7 @@ from django.core.management import call_command
 from django.test import LiveServerTestCase
 from django.utils import unittest
 
-from centralserver.i18n import POT_DIRPATH
+from .. import POT_DIRPATH
 
 
 class TranslationCommentTestCase(LiveServerTestCase):
