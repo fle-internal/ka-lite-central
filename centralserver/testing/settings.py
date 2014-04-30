@@ -11,7 +11,7 @@ except ImportError:
 ########################
 
 INSTALLED_APPS = (
-    "kalite.testing",  # topic_tools
+    "kalite.testing",  # start from KALite test runner
 )
 MIDDLEWARE_CLASSES = tuple()
 

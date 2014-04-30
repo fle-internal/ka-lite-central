@@ -39,8 +39,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from fle_utils.internet import JsonResponse, JsonResponseMessageError, set_query_params
 from kalite.main.models import ExerciseLog, VideoLog
-from kalite.main.topic_tools import get_node_cache
 from kalite.shared.decorators import require_login
+from kalite.topic_tools import get_node_cache
 
 KHAN_SERVER_URL = "http://www.khanacademy.org"
 
