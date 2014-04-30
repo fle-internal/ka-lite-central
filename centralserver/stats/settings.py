@@ -13,8 +13,10 @@ except ImportError:
 
 INSTALLED_APPS = (
     "fle_utils.django_utils",  # templatetags
+    "securesync",  # for querying data
     "kalite.i18n",  # video info
     "kalite.main",  # topic_tools
+    "centralserver.i18n",  # for redirecting to resource paths
 )
 
 

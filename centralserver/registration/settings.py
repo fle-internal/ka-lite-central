@@ -15,6 +15,9 @@ INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.messages",  # default_language, language_choices, etc
     "django.contrib.humanize",
+    "securesync",  # creates a Zone on registration
+    "centralserver.central",  # creates an Organization on registration
+    "centralserver.contact",  # for auto-subscribe to newsletter.
 )
 
 MIDDLEWARE_CLASSES = (

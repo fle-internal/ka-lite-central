@@ -11,6 +11,7 @@ except ImportError:
 INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.auth",
+    "centralserver.central",  # Organization, browser tests.
 )
 
 MIDDLEWARE_CLASSES = (
