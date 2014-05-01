@@ -66,6 +66,7 @@ class Deployment(ExtendedModel):
     hardware_infrastructure = multiselect.MultiSelectField(choices=DEPLOYMENT_HARDWARE, max_length=100, blank=True, verbose_name=_("Which of the following statements accurately describe the hardware and infrastructure at your planned deployment?"))
     facilities              = models.TextField(blank=True, verbose_name=_("Please describe the facilities in more detail, to catch anything not covered above."),help_text=_("e.g. number of facilities, number of students at each, grade levels, languages spoken, etc."))
     low_cost_bundle         = models.TextField(blank=True, verbose_name=_("Would you be interested in the possibility of a low-cost (~$60), small, self-contained server solution, capable of running KA Lite?"))
+    organization            = models.TextField(blank=True, verbose_name=_("What organization do you represent, if any ? If applicable, please include your URL."))
     other                   = models.TextField(blank=True, verbose_name=_("Do you have any other questions or suggestions for us?"))
 
     def __unicode__(self):
