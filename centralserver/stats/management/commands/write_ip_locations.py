@@ -1,5 +1,6 @@
 """
 """
+import csv
 import json
 import os
 import pygeoip
@@ -31,6 +32,12 @@ class Command(BaseCommand):
                     default="",
                     metavar="FILE",
                     help="Output filename for location list"),
+        make_option("-v", "--locations_csv",
+                    action="store",
+                    dest="location_csv_file",
+                    default="",
+                    metavar="FILE",
+                    help="Output filename for location list CSV file"),
         make_option("-c", "--countries",
                     action="store",
                     dest="country_file",
@@ -64,6 +71,13 @@ class Command(BaseCommand):
                 self.stdout.write("Writing locations of IPs as JSONP data to %s!\n" % options["location_file"])
                 jsonp = "display_locations(%s);" % json.dumps(locations)
                 f.write(jsonp)
+
+        if options.get("location_file"):
+            with open(options["location_csv_file"], "w") as f:
+                self.stdout.write("Writing locations of IPs as CSV data to %s!\n" % options["location_csv_file"])
+                cf = csv.writer(f)
+                cf.writerow(["name", "latitude", "longitude", "description"])
+                cf.writerows([r["name"], r["latitude"], r["longitude"], ""])
 
         if options.get("country_file"):
             with open(options["country_file"], "w") as f:
