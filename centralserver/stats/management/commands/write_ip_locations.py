@@ -3,6 +3,7 @@
 import json
 import os
 import pygeoip
+import re
 
 from optparse import make_option
 
@@ -17,15 +18,15 @@ class Command(BaseCommand):
     help = "Generate IP address list."
 
     option_list = BaseCommand.option_list + (
-        make_option('-f', '--file',
-                    action='store',
-                    dest='file',
+        make_option("-f", "--file",
+                    action="store",
+                    dest="file",
                     default="",
                     metavar="FILE",
                     help="Output filename"),
-        make_option('-l', '--locations',
-                    action='store_true',
-                    dest='locations',
+        make_option("-l", "--locations",
+                    action="store_true",
+                    dest="locations",
                     help="Turn IPs into geolocations"),
     )
 
@@ -54,15 +55,15 @@ def ips_to_locations(ips):
     existing_locations = set([(0, 0)])
     for record in records:
         if record:
-            if (record['latitude'], record['longitude']) not in existing_locations:
-                name = [record['city'], record['region_name'], record['country_name']]
+            if (record["latitude"], record["longitude"]) not in existing_locations:
+                name = [record.get("city") or "", record.get("region_name") or "", record["country_name"]]
                 name = filter(lambda x: not re.match("^\d*$", x), name)
                 name = ", ".join(name)
                 locations.append({
-                    "latitude": record['latitude'],
-                    "longitude": record['longitude'],
+                    "latitude": record["latitude"],
+                    "longitude": record["longitude"],
                     "name": name,
                 })
-                existing_locations.add((record['latitude'], record['longitude']))
+                existing_locations.add((record["latitude"], record["longitude"]))
     
     return locations
