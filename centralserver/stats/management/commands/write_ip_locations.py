@@ -32,7 +32,7 @@ class Command(BaseCommand):
                     default="",
                     metavar="FILE",
                     help="Output filename for location list"),
-        make_option("-v", "--locations_csv",
+        make_option("-q", "--locations_csv",
                     action="store",
                     dest="location_csv_file",
                     default="",
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 self.stdout.write("Writing locations of IPs as CSV data to %s!\n" % options["location_csv_file"])
                 cf = csv.writer(f)
                 cf.writerow(["name", "latitude", "longitude", "description"])
-                cf.writerows([r["name"], r["latitude"], r["longitude"], ""])
+                cf.writerows([[r["name"], r["latitude"], r["longitude"], ""] for r in locations])
 
         if options.get("country_file"):
             with open(options["country_file"], "w") as f:
