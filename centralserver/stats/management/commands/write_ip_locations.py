@@ -79,7 +79,7 @@ def ips_to_locations(ips):
                 record["city"] = record.get("city") or ""
                 record["region_name"] = record.get("region_name") or ""
                 record["country_name"] = record.get("country_name") or ""
-                name = [rec["city"], rec["region_name"], rec["country_name"]]
+                name = [record["city"], record["region_name"], record["country_name"]]
                 name = filter(lambda x: not re.match("^\d*$", x), name)
                 record["name"] = ", ".join(name)
                 locations.append(record)
