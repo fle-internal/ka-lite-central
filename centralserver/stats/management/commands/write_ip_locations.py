@@ -40,7 +40,17 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        ips = [addr.strip() for ip in SyncSession.objects.order_by("timestamp").values("ip").distinct() for addr in ip["ip"].split(",") if addr.strip() not in ["", "127.0.0.1"]]
+
+        ip_set = set(["", "127.0.0.1"])
+
+        ips = []
+
+        for ip in SyncSession.objects.order_by("timestamp").values("ip"):
+            for addr in ip["ip"].split(","):
+                addr = addr.strip()
+                if addr not in ip_set:
+                    ips.append(addr)
+                    ip_set.add(addr)
 
         locations = ips_to_locations(ips)
 
