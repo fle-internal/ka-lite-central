@@ -54,7 +54,8 @@ urlpatterns += patterns('',
 urlpatterns += patterns(__package__ + '.views',
     url(r'^$', 'homepage', {}, 'homepage'),
     url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
-    url(r'^wiki/(?P<path>.*)$', 'content_page', {"page": "wiki_page", "wiki_site": settings.CENTRAL_WIKI_URL}, 'wiki'),
+    url(r'^wiki/(?P<path>.*)$', 'wiki_redirect', {}, 'wiki'),
+    url(r'^wiki/installation/$', 'wiki_redirect', {"path": "installation/"}, 'install'),
 
     url(r'^glossary/$', 'glossary', {}, 'glossary'),
 
@@ -75,8 +76,6 @@ urlpatterns += patterns(__package__ + '.views',
     # The following has been superceded by the stats app, but we
     #   keep it here so that things will function even if that app is removed.
     url(r'^download/videos/(.*)$', lambda request, vpath: HttpResponseRedirect(OUTSIDE_DOWNLOAD_BASE_URL + vpath)),
-
-    url(r'^wiki/installation/$', 'content_page', {"page": "wiki_page", "wiki_site": settings.CENTRAL_WIKI_URL, "path": "/installation/"}, 'install'),
 
     url(r'^about/$', lambda request: HttpResponseRedirect('http://learningequality.org/'), {}, 'about'),
 
