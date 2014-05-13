@@ -17,7 +17,7 @@ import kalite.coachreports.urls
 import kalite.control_panel.urls
 import kalite.facility.urls
 import securesync.urls
-from .import api_urls
+from . import api_urls
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
 
 
