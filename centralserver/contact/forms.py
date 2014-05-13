@@ -29,7 +29,7 @@ class DeploymentForm(ModelForm):
     required_css_class = 'required'
     class Meta:
         model = Deployment
-        fields = ('countries', 'internet_access', 'hardware_infrastructure', 'facilities', 'low_cost_bundle', 'other' )
+        fields = ('organization', 'countries', 'internet_access', 'hardware_infrastructure', 'facilities', 'other' )
 
 class SupportForm(ModelForm):
     required_css_class = 'required'
