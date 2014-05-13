@@ -154,6 +154,8 @@ import_installed_app_settings(INSTALLED_APPS, globals())
 
 TEST_RUNNER = CENTRALSERVER_TEST_RUNNER
 
+RUNNING_IN_TRAVIS = bool(os.environ.get("TRAVIS"))
+
 LOG.debug("======== MIDDLEWARE ========")
 LOG.debug("\n".join(MIDDLEWARE_CLASSES))
 LOG.debug("====== INSTALLED_APPS ======")
