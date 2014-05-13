@@ -431,9 +431,4 @@ def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
 
 def handler_500(request):
-    errortype, value, tb = sys.exc_info()
-    context = {
-        "errortype": errortype.__name__,
-        "value": unicode(value),
-    }
-    return HttpResponseServerError(render_to_string("central/500.html", context, context_instance=RequestContext(request)))
+    return HttpResponseServerError(render_to_string("central/500.html", {}, context_instance=RequestContext(request)))
