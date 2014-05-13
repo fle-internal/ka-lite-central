@@ -146,8 +146,8 @@ MESSAGE_STORAGE = 'fle_utils.django_utils.NoDuplicateMessagesSessionStorage'
 #CONTENT_ROOT   = None  # needed for shared functions that are distributed-only
 #CONTENT_URL    = None
 
-CACHE_TIME=0
-CACHE_NAME=None
+CACHE_TIME = 0
+CACHE_NAME = None
 CENTRAL_SERVER_HOST = ""
 
 import_installed_app_settings(INSTALLED_APPS, globals())
@@ -160,3 +160,10 @@ LOG.debug("====== INSTALLED_APPS ======")
 LOG.debug("\n".join(INSTALLED_APPS))
 LOG.debug("============================")
 
+########################
+# Now that we've imported the settings from all other installed apps,
+#   override their settings as necessary to get desired central server config.
+########################
+
+# Don't want to have a limited number of SyncSession records on the central server (save them all!)
+SYNC_SESSIONS_MAX_RECORDS = getattr(local_settings, "SYNC_SESSIONS_MAX_RECORDS", None)

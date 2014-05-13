@@ -1,6 +1,7 @@
 """
 """
 import json
+import os
 import re
 import sys
 import tempfile
@@ -183,6 +184,10 @@ def content_page(request, page, **kwargs):
     context = RequestContext(request)
     context.update(kwargs)
     return render_to_response("central/content/%s.html" % page, context_instance=context)
+
+
+def wiki_redirect(request, path, **kwargs):
+    return HttpResponseRedirect(os.path.join(settings.CENTRAL_WIKI_URL, path.strip("/")))
 
 
 @render_to("central/glossary.html")

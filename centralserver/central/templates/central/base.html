@@ -43,6 +43,7 @@
           <script type="text/javascript" src="{% static 'js/backbone-min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
           <script type="text/javascript" src='{% static "js/bootstrap-timepicker.min.js" %}'></script>
+          <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
 
           <script type="text/javascript" src="{% static 'js/i18n/en.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/khan-lite.js' %}"></script>
@@ -91,9 +92,9 @@
                             <ul class="header__horizontal-menu__right">
 
                                 <li><a href="{% url 'homepage' %}" class="{% block home_active %}{% endblock home_active %}">{% trans "Home" %}</a></li>
-                                <li><a href="{% url 'install' %}" class="{% block download_active %}{% endblock download_active %}">{% trans "Install" %}</a></li>
+                                <li><a href="{% url 'install' %}" class="{% block download_active %}{% endblock download_active %}" target="_blank">{% trans "Install" %}</a></li>
                                 <li><a href="{% url 'faq_topic_list' %}" class="{% block faq_active %}{% endblock faq_active%}">{% trans "FAQ" %}</a></li>
-                                <li><a href="{% url 'contact_wizard' %}" class="{% block contact_active %}{% endblock contact_active%}">{% trans "Contact" %}</a></li>
+                                <li><a href="{% url 'contact_wizard' %}"class="{% block contact_active %}{% endblock contact_active%}">{% trans "Contact" %}</a></li>
                                 <li><a href="{% url 'content_page' page='about' %}" class="{% block about_active %}{% endblock about_active%}">{% trans "About Us" %}</a></li>
 
                                 {% if not user.is_authenticated %}
@@ -144,10 +145,11 @@
                 <div class="span12 float-right">
                 {% block attribution %}
                     <p>
-                        &copy; 2013 <a href="//learningequality.org/">Foundation for Learning Equality, Inc.</a>
+                        &copy; 2014 <a href="//learningequality.org/">Foundation for Learning Equality, Inc</a>
                     </p>
                     <p>
-                        Except where otherwise noted, content on this site is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International license.</a>
+                        Except where otherwise noted, content on this site is licensed under a<br/>
+                        <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International license.</a>
                     </p>
                 {% endblock attribution %}
                 </div>

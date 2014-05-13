@@ -63,8 +63,8 @@ class Command(test_wrappings.Command):
             if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
                 raise CommandError("CROWDIN_PROJECT_KEY must be set in order to upload.")
             upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY, files={
-                os.path.join(POT_DIRPATH, "kalite.pot"): os.path.join("KA Lite UI", "kalite.pot"),
-                os.path.join(POT_DIRPATH, "kalitejs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
+                os.path.join(POT_DIRPATH, "django.pot"): os.path.join("KA Lite UI", "kalite.pot"),
+                os.path.join(POT_DIRPATH, "djangojs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
             })
 
 

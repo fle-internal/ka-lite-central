@@ -1,6 +1,7 @@
 .project
 .pydevproject
 .DS_Store
+*.dat
 *.db
 *.sqlite*
 *.patch
@@ -10,6 +11,7 @@
 *~
 *.sublime-*
 *.zip
+*.jsonp
 build/
 locale/
 node_modules/
@@ -19,6 +21,7 @@ writeup/
 /_crowdin_cache
 /_khanload_cache
 /mergetomaster.sh
+/ka-lite-lang-pack-builder.sh
 /run_command.*
 /start.*
 /stop.*
@@ -29,6 +32,7 @@ writeup/
 /centralserver/local_settings_secrets.py
 /centralserver/media
 /centralserver/static
-/data/logs
+/data/content
 /data/i18n
+/data/logs
 /data/subtitles
