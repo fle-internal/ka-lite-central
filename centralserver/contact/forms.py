@@ -30,6 +30,9 @@ class DeploymentForm(ModelForm):
     class Meta:
         model = Deployment
         fields = ('organization', 'countries', 'internet_access', 'hardware_infrastructure', 'facilities', 'other' )
+        widgets = {
+            'organization': forms.TextInput(attrs={ 'required': 'false', 'style': 'width: 550px;' }),
+        }
 
 class SupportForm(ModelForm):
     required_css_class = 'required'
