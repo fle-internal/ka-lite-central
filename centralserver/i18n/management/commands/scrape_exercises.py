@@ -20,7 +20,7 @@ from django.core.management.base import BaseCommand, CommandError
 from ... import get_dubbed_video_map, get_localized_exercise_dirpath
 from fle_utils.general import ensure_dir
 from kalite.i18n import lcode_to_ietf, lcode_to_django_lang
-from kalite.main.topic_tools import get_node_cache
+from kalite.topic_tools import get_node_cache
 
 
 AVAILABLE_EXERCISE_LANGUAGE_CODES = ["da", "he", "pt-BR", "tr", "es", "fr"]

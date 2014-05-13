@@ -1,7 +1,8 @@
 """
 """
-import re
 import json
+import re
+import sys
 import tempfile
 from annoying.decorators import render_to
 from annoying.functions import get_object_or_None
@@ -425,4 +426,9 @@ def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
 
 def handler_500(request):
-    return HttpResponseServerError(render_to_string("central/500.html", {}, context_instance=RequestContext(request)))
+    errortype, value, tb = sys.exc_info()
+    context = {
+        "errortype": errortype.__name__,
+        "value": unicode(value),
+    }
+    return HttpResponseServerError(render_to_string("central/500.html", context, context_instance=RequestContext(request)))
