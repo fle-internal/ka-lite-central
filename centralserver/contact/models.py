@@ -63,9 +63,9 @@ class Deployment(ExtendedModel):
     countries               = models.CharField(max_length=100, blank=True, verbose_name=_("What country/countries are you hoping to deploy in?"))
     internet_access         = multiselect.MultiSelectField(choices=DEPLOYMENT_INTERNET_ACCESS, max_length=100, blank=True, verbose_name=_("Which of the following statements accurately describe the internet access at your planned deployment?"))
     hardware_infrastructure = multiselect.MultiSelectField(choices=DEPLOYMENT_HARDWARE, max_length=100, blank=True, verbose_name=_("Which of the following statements accurately describe the hardware and infrastructure at your planned deployment?"))
-    facilities              = models.TextField(blank=True, verbose_name=_("Please describe the facilities in more detail, to catch anything not covered above."),help_text=_("e.g. number of facilities, number of teachers, number of students, grade levels, languages spoken, learning model (e.g. formal, non-formal, prison, alternative), etc."))
+    facilities              = models.TextField(blank=True, verbose_name=_("Please describe the facilities in more detail, to catch anything not covered above:"),help_text=_("e.g. number of facilities, number of teachers, number of students, grade levels, languages spoken, learning model (e.g. formal, non-formal, prison, alternative), etc."))
     low_cost_bundle         = models.TextField(blank=True, verbose_name=_("Would you be interested in the possibility of a low-cost (~$60), small, self-contained server solution, capable of running KA Lite?"))
-    organization            = models.TextField(blank=True, verbose_name=_("If applicable, please include the URL for your organization."))
+    organization            = models.TextField(blank=True, verbose_name=_("If applicable, please include the URL for your organization:"))
     other                   = models.TextField(blank=True, verbose_name=_("Do you have any other questions or suggestions for us?"))
 
     def __unicode__(self):
