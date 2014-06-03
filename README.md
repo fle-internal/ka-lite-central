@@ -17,6 +17,16 @@ This is the code for the KA Lite Central Server: [https://kalite.learningequalit
 10. Set up a custom `centralserver/local_settings.py` file (see below)
 11. Run the server: `python manage.py runserver`
 
+### Pointing distributed ka-lite servers to local central server
+
+After cloning the distrbuted server codebase from https://github.com/learningequality/ka-lite, add the following to its `kalite/local_settings.py` prior to running `install.sh` or `install.bat`:
+```
+CENTRAL_SERVER_HOST   = "127.0.0.1:8000"
+SECURESYNC_PROTOCOL   = "http"
+```
+
+This will cause it to point to your locally running instance of the central server for registering and syncing.
+
 ### Local_settings.py setup
 
 You may create a `centralserver/local_settings.py` file to customize your setup.  Here are a few options to consider:
