@@ -32,10 +32,13 @@
   } 
 }
 
+.ka-quote, #about-hub, #learn-more {
+  text-align: center;
+}
+
 .ka-quote{
   background-color:@quote-color;
   color:rgb(87, 87, 87);
-  text-align: center;
   font-size: 26px;  
   padding: 50px 0px ;
   .box-shadow(0px 1px 4px @light-gray);
@@ -44,25 +47,24 @@
     font-size: 18px;
     color: gray;
   }
+
+  form {
+    input {
+      max-width: 135px;
+    }
+  }
 }
 
-.call-out, .features {
-  background-color:#fcfcfc;
-  text-align: center
+#learn-more {
+  background-color: #fcfcfc;
 }
 
-.features{
-  h4 {
-    font-size: 24px;
-  }
-  img {
-    max-height: 200px;
-  }
-  p {
-    text-align: left;
-    max-width: 250px;
-    margin-left: 50px;
-  }
+#ridiculously-enticing-button {
+  width: auto;
+  padding: .5em;
+  min-width: 60%;
+  font-size: 1em;
+  line-height: 1.5em;
 }
 
 // Footer (only visible on the landing page)
