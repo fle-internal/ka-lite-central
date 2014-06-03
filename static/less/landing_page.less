@@ -32,7 +32,7 @@
   } 
 }
 
-.ka-quote, #about-hub, #learn-more {
+.ka-quote, #about-hub {
   text-align: center;
 }
 
@@ -55,33 +55,36 @@
   }
 }
 
-#learn-more {
+#about-hub {
   background-color: #fcfcfc;
-}
-
-#ridiculously-enticing-button {
-  width: auto;
-  padding: .5em;
-  min-width: 60%;
-  font-size: 1em;
-  line-height: 1.5em;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  img {
+    max-width: 400px;
+  }
+  #data-hub-info {
+    text-align: left;
+    margin-top: 40px;
+    ul {
+      list-style-type: none;
+      margin-left: -35px;
+      li {
+        line-height: 1.5em;
+        font-size: 1.3em;
+        margin-bottom: 0.8em;
+      }
+    }
+  }
 }
 
 // Footer (only visible on the landing page)
 // --------------------------------------------------
 
-.footer{
+.footer {
+  border-top: 3px solid #1C2C38;
   background-color: @footer-color;
   height: 100%;
-}
-
-.footer__first-part{
-  padding: 20px 0px;
-}
-
-.footer__second-part{
-  padding: 20px 0px;
-  ul{
-    float:right;
+  .list-icons {
+    margin-top: 20px;
   }
 }

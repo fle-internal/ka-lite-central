@@ -90,16 +90,40 @@
                         <ul class="header__horizontal-menu">
                             <li class="header__logo"><a href="{% if not user.is_authenticated %}{% url homepage %}{% else %}{% url org_management %}{% endif %}"><img src="{% static 'images/horizontal-logo-small.png' %}" alt="{% trans 'Home' %}"></a></li>
                             <ul class="header__horizontal-menu__right">
+                                <li>
+                                  <a href="https://learningequality.org/ka-lite/" target="_blank">
+                                    {% trans "About" %}
+                                  </a>
+                                </li>
                                 {% if not user.is_authenticated %}
-                                  <li><a href="https://learningequality.org/ka-lite/">{% trans "Learn More" %}</a></li>
-                                  <li><a href="{% url auth_login %}" id="login" class="{% block login_active %}{% endblock login_active %}">{% trans "Login" %}</a></li>
-                                  <li><a href="{% url registration_register %}" id="sign_up" class="{% block signup_active %}{% endblock signup_active %}">{% trans "Sign Up" %}</a></li>
+                                  <li>
+                                    <a href="{% url auth_login %}" id="login" class="{% block login_active %}{% endblock login_active %}">
+                                      {% trans "Login" %}
+                                    </a>
+                                  </li>
+                                  <li>
+                                    <a href="{% url registration_register %}" id="sign_up" class="{% block signup_active %}{% endblock signup_active %}">
+                                      {% trans "Sign Up" %}
+                                    </a>
+                                  </li>
                                 {% else %}
-                                  <li><a href="{% url org_management %}" class="{% block control_panel_active %}{% endblock control_panel_active %}">{% trans "Home" %}</a></li>
+                                  <li>
+                                    <a href="{% url org_management %}" class="{% block control_panel_active %}{% endblock control_panel_active %}">
+                                      {% trans "Home" %}
+                                    </a>
+                                  </li>
                                   {% if user.is_superuser %}
-                                    <li><a href="{% url admin:index %}" >{% trans "Admin" %}</a></li>
+                                    <li>
+                                      <a href="{% url admin:index %}" >
+                                        {% trans "Admin" %}
+                                      </a>
+                                    </li>
                                   {% endif %}
-                                  <li><a href="{% url auth_logout %}" id="logout">{% trans "Logout" %}</a></li>
+                                  <li>
+                                    <a href="{% url auth_logout %}" id="logout">
+                                      {% trans "Logout" %}
+                                    </a>
+                                  </li>
                                 {% endif %}
                             </ul>
                         </ul>
