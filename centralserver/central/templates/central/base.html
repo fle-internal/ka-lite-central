@@ -88,10 +88,8 @@
                 <div class="row-fluid">
                     <div class="span12">
                         <ul class="header__horizontal-menu">
-                            <li class="header__logo"><a href="/"><img src="{% static 'images/horizontal-logo-small.png' %}" alt=""></a></li>
+                            <li class="header__logo"><a href="{% url homepage %}"><img src="{% static 'images/horizontal-logo-small.png' %}" alt="{% trans 'Home' %}"></a></li>
                             <ul class="header__horizontal-menu__right">
-
-                                <li><a href="{% url homepage %}" class="{% block home_active %}{% endblock home_active %}">{% trans "Home" %}</a></li>
                                 {% if not user.is_authenticated %}
                                   <li><a href="{% url auth_login %}" id="login" class="{% block login_active %}{% endblock login_active %}">{% trans "Login" %}</a></li>
                                   <li><a href="{% url registration_register %}" id="sign_up" class="{% block signup_active %}{% endblock signup_active %}">{% trans "Sign Up" %}</a></li>
