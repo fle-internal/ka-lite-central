@@ -15,4 +15,5 @@ script:
   - python ka-lite/kalite/manage.py test --traceback
 notifications:
   email:
-    - ben@learningequality.org
+    - jamie@learningequality.org
+    - richard@learningequality.org
