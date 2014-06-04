@@ -24,7 +24,7 @@ from ... import AMARA_HEADERS, SRTS_JSON_FILEPATH, get_lang_map_filepath
 from fle_utils.general import convert_date_input, ensure_dir, softload_json
 from fle_utils.internet import make_request
 from kalite.i18n import lcode_to_ietf
-from kalite.main.topic_tools import get_slug2id_map
+from kalite.topic_tools import get_slug2id_map
 
 
 class OutDatedSchema(Exception):
