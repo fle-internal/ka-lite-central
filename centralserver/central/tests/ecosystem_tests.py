@@ -26,9 +26,12 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
     def test_can_run_on_distributed_server(self):
         with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
             d1.call_command('validate')
-            _stdout, stderr = d1.wait()
+
+            _stdout, stderr, ret = d1.wait()
+
             # the command shouldn't have printed anything to stderr
             self.assertFalse(stderr)
+            self.assertEquals(0, ret, "validate command return non-0 ret code")
 
     def test_can_instantiate_two_distributed_servers(self):
         settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
@@ -37,5 +40,7 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             d1.call_command('validate')
             d2.call_command('validate')
 
-            d1.wait()
-            d2.wait()
+            _, _, ret1 = d1.wait()
+            _, _, ret2 = d2.wait()
+
+            assert ret1 == ret2 == 0
