@@ -93,7 +93,7 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             # # Expecting to see the "name" field to be set to "kir1"
             # self.assertRegexpMatches(_stdout, '"name": "kir1"')
 
-            d1.call_command('register', username="test_user", password="invalid_password",
+            d1.call_command('register', username="test_user", password="invalid",
                 zone=self.test_zone.id)
             d1.wait()
             d1.call_command('syncmodels')
