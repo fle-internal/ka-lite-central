@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 
 from centralserver.central.models import Organization
+from kalite.facility.models import Facility
 from securesync.tests import SecuresyncTestCase
 from securesync.devices.models import Device, Zone
 
@@ -58,3 +59,43 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         with DistributedServer(**self.settings) as d:
             with self.assertRaises(subprocess.CalledProcessError):
                 d.addmodel('kalite.facility.models.Facilty')  # lacks a name
+
+
+    def test_sync(self):
+        """Add the given fake facility users to each of the given fake facilities.
+        If no facilities are given, they are created."""
+        with DistributedServer(**self.settings) as d1:
+            # model_name = 'kalite.facility.models.Facility'
+            # d1.call_command('createmodel', model_name, data='{"name" : "kir1"}',
+            #                 output_to_stdout=False,
+            #                 output_to_stderr=False)
+            # _stdout, stderr, create_ret_code = d1.wait()
+            # self.assertEquals(0, create_ret_code)
+            # self.assertTrue(_stdout)
+            # id = _stdout.strip()
+            # # the command shouldn't have printed anything to stderr
+            # self.assertFalse(stderr)
+            # self.assertTrue(id)
+
+            # # Read the model back
+            # d1.call_command('readmodel', model_name, id=id,
+            #                 output_to_stdout=False,
+            #                 output_to_stderr=False)
+            # _stdout, stderr, read_ret_code = d1.wait()
+            # self.assertEquals(0, read_ret_code)
+            # self.assertTrue(_stdout)
+            # # Expecting to see the "name" field to be set to "kir1"
+            # self.assertRegexpMatches(_stdout, '"name": "kir1"')
+
+            d1.call_command('register', username="test_user", password="invalid_password",
+                zone=self.test_zone.id)
+            d1.wait()
+            d1.call_command('syncmodels')
+            _stdout, stderr, create_ret_code = d1.wait()
+            # # the command shouldn't have printed anything to stderr
+            self.assertFalse(stderr)
+            # print Facility.objects.all()
+
+
+        
+
