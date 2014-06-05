@@ -18,14 +18,23 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         self.setUp_fake_device()
 
         self.user = User.objects.create(username='test_user',
-                                        password='invalid_password')
+                                        password='invalid')
+        self.user.set_password('invalid')
+        self.user.save()
+
         self.test_org = Organization.objects.create(name='test_org',
                                                     owner=self.user)
+        self.test_org.users.add(self.user)
+        self.test_org.save()
+
         self.test_zone = Zone.objects.create(name='test_zone')
         self.test_zone.organization_set.add(self.test_org)
         self.test_zone.save()
 
-        self.settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
+        self.settings = {
+            'CENTRAL_SERVER_HOST': self.live_server_url,
+            'SECURESYNC_PROTOCOL': 'http',
+        }
 
     def test_can_run_on_distributed_server(self):
         with DistributedServer(**self.settings) as d1:
