@@ -1,6 +1,7 @@
+import json
 import pathlib
 import string
-import json
+import subprocess
 from random import choice
 from urlparse import urlparse
 
@@ -131,7 +132,9 @@ INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
 
         if ret != 0:
             errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
-            raise Exception(errmsgtemplate % err)
+            raise subprocess.CalledProcessError(ret,
+                                                'createmodel',
+                                                output=errmsgtemplate % err)
 
         return model_id
 
