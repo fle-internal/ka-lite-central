@@ -121,7 +121,7 @@ class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCas
             self.assertEquals(0, create_ret_code)
             self.assertTrue(_stdout)
             id = _stdout.strip()
-            d1.call_command('register', username='test_user', password='invalid_password',
+            d1.call_command('register', username='test_user', password='invalid',
                             zone=self.test_zone.id)
             d1.wait()
             d1.call_command('syncmodels')
