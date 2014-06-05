@@ -5,6 +5,7 @@ from django.test import LiveServerTestCase
 from centralserver.central.models import Organization
 from securesync.tests import SecuresyncTestCase
 from securesync.devices.models import Device, Zone
+from kalite.facility.models import Facility
 
 from .utils.distributed_server_factory import DistributedServer
 
@@ -60,7 +61,22 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
                 d.addmodel('kalite.facility.models.Facilty')  # lacks a name
 
 
-class CreateReadModelSingleDistServerTests(LiveServerTestCase):
+class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCase):
+
+    def setUp(self):
+        # TODO (aron): move this entire thing into its own mixins
+        Device.own_device = None
+        self.setUp_fake_device()
+
+        self.user = User.objects.create(username='test_user',
+                                        password='invalid_password')
+        self.test_org = Organization.objects.create(name='test_org',
+                                                    owner=self.user)
+        self.test_zone = Zone.objects.create(name='test_zone')
+        self.test_zone.organization_set.add(self.test_org)
+        self.test_zone.save()
+
+        self.settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
 
     def test_create_read_facility(self):
         with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
@@ -87,7 +103,7 @@ class CreateReadModelSingleDistServerTests(LiveServerTestCase):
             self.assertRegexpMatches(_stdout, '"name": "kir1"')
 
     def test_sync_with_central(self):
-        with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
+        with DistributedServer(**self.settings) as d1:
             model_name = 'kalite.facility.models.Facility'
             d1.call_command('createmodel', model_name, data='{"name" : "kir1"}',
                             output_to_stdout=False,
@@ -96,5 +112,10 @@ class CreateReadModelSingleDistServerTests(LiveServerTestCase):
             self.assertEquals(0, create_ret_code)
             self.assertTrue(_stdout)
             id = _stdout.strip()
+            d1.call_command('register', username='test_user', password='invalid_password',
+                            zone=self.test_zone.id)
+            d1.wait()
             d1.call_command('syncmodels')
+            d1.wait()
             kir1_facility = Facility.objects.get(pk=id)
+            self.assertTrue(kir1_facility)
