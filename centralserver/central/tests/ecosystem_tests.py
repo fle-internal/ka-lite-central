@@ -44,13 +44,15 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
 
             assert ret1 == ret2 == 0
 
+
 class CreateReadModelSingleDistServerTests(LiveServerTestCase):
 
     def test_create_read_facility(self):
         with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
-            MODEL_NAME = 'kalite.facility.models.Facility'
-            d1.call_command('createmodel', MODEL_NAME, json_data='{"name" : "kir1"}')
-            _stdout, stderr = d1.wait()
+            model_name = 'kalite.facility.models.Facility'
+            d1.call_command('createmodel', model_name, data='{"name" : "kir1"}')
+            _stdout, stderr, create_ret_code = d1.wait()
+            self.assertEquals(0, create_ret_code)
             self.assertTrue(_stdout)
             id = _stdout.strip()
             # the command shouldn't have printed anything to stderr
