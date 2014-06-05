@@ -85,14 +85,16 @@ DATABASES = {
     def wait(self):
         '''
         Waits for the command run by `self.call_command` to finish. Returns
-        the error code of the process. Returns the stdout and stderr
+        a tuple (stdin, stderr, returncode). Returns the stdout and stderr
         of the command in the string, if output_to_stdout and
-        output_to_stderr were given as False respectively.
+        output_to_stderr were given as False respectively. `returncode` is the
+        return code of the process.
 
         '''
         stdout, stderr = self.running_process.communicate()
+        returncode = self.running_process.returncode
         self.running_process = None  # so we can run other commands
-        return (stdout, stderr)
+        return (stdout, stderr, returncode)
 
     def sync(self):
         '''
