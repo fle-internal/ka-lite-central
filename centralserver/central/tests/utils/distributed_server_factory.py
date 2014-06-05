@@ -122,6 +122,10 @@ INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
         with open(self.settings_path.as_posix(), 'w') as f:
             f.write(self.settings_contents)
 
+        # prepare the DB
+        self.call_command('syncdb', noinput=True)
+        self.wait()
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
