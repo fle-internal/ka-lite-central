@@ -22,8 +22,10 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         self.test_zone.organization_set.add(self.test_org)
         self.test_zone.save()
 
+        self.settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
+
     def test_can_run_on_distributed_server(self):
-        with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
+        with DistributedServer(**self.settings) as d1:
             d1.call_command('validate')
 
             _stdout, stderr, ret = d1.wait()
@@ -33,9 +35,8 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             self.assertEquals(0, ret, "validate command return non-0 ret code")
 
     def test_can_instantiate_two_distributed_servers(self):
-        settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
 
-        with DistributedServer(**settings) as d1, DistributedServer(**settings) as d2:
+        with DistributedServer(**self.settings) as d1, DistributedServer(**self.settings) as d2:
             d1.call_command('validate')
             d2.call_command('validate')
 
