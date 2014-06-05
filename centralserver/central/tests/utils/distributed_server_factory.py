@@ -37,6 +37,13 @@ DATABASES = {
 }
         '''
 
+        # super hack to not run migrations on the distributed servers.
+        # Basically, we replace south's syncdb (which adds migrations)
+        # with the normal syncdb
+        new_settings += '''
+INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
+        '''
+
         # we have to remove the protocol (http or https) from the url
         # that the user gives to us
         if 'CENTRAL_SERVER_HOST' in kwargs:
@@ -54,8 +61,7 @@ DATABASES = {
 
     def call_command(self,
                      commandname,
-                     output_to_stdout=True,
-                     output_to_stderr=True,
+                     *args,
                      **kwargs):
         '''
         Run a command in the context of this distributed server, customized to
@@ -67,6 +73,10 @@ DATABASES = {
         output_to_stderr -- True to output the command's stderr to the console
                             instead of capturing to a variable
         '''
+
+        output_to_stdout = kwargs.pop('output_to_stdout', True)
+        output_to_stderr = kwargs.pop('output_to_stderr', True)
+
         if self.running_process:
             raise Exception('Command {} already started.'.format(commandname))
 
@@ -77,6 +87,7 @@ DATABASES = {
             settings=self.settings_name,
             manage_py_dir=self.distributed_dir.as_posix(),
             wait=False,
+            *args,
             **kwargs
         )
 
@@ -85,19 +96,21 @@ DATABASES = {
     def wait(self):
         '''
         Waits for the command run by `self.call_command` to finish. Returns
-        the error code of the process. Returns the stdout and stderr
+        a tuple (stdin, stderr, returncode). Returns the stdout and stderr
         of the command in the string, if output_to_stdout and
-        output_to_stderr were given as False respectively.
+        output_to_stderr were given as False respectively. `returncode` is the
+        return code of the process.
 
         '''
         stdout, stderr = self.running_process.communicate()
+        returncode = self.running_process.returncode
         self.running_process = None  # so we can run other commands
-        return (stdout, stderr)
+        return (stdout, stderr, returncode)
 
     def sync(self):
         '''
         Convenience function for running `syncmodels` on the distributed
-        server, waiting and then returning the stdout and stdin.
+        server, waiting and then returning the stdout, stderr and returncode.
         '''
         self.call_command('syncmodels',
                           output_to_stdout=False,
@@ -108,6 +121,10 @@ DATABASES = {
         # write our settings file
         with open(self.settings_path.as_posix(), 'w') as f:
             f.write(self.settings_contents)
+
+        # prepare the DB
+        self.call_command('syncdb', noinput=True)
+        self.wait()
 
         return self
 

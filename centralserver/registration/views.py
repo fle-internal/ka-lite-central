@@ -277,6 +277,9 @@ def login_view(request, *args, **kwargs):
     Since we don't want things to change to the user (if something fails),
     we should try the new way first, then fall back to the old way
     """
+
+    prev = None
+
     if request.method=="POST":
         users = User.objects.filter(username__iexact=request.POST["username"])
         nusers = users.count()
@@ -285,10 +288,10 @@ def login_view(request, *args, **kwargs):
         if nusers == 1 and users[0].username != request.POST["username"]:
             request.POST = copy.deepcopy(request.POST)
             request.POST['username'] = request.POST['username'].lower()
-        prev = request.POST['prev']
 
-    else:
-        prev = request.META.get("HTTP_REFERER")
+        prev = request.POST.get('prev') or request.META.get("HTTP_REFERER")
+
+    prev = prev or request.META.get("HTTP_REFERER")
 
     # Note: prev used because referer is lost on a login / redirect.
     #   So paste it on the success redirect.
