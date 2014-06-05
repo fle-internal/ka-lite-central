@@ -1,3 +1,4 @@
+import subprocess
 from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 
@@ -52,3 +53,8 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
                                   name='test')
 
             self.assertTrue(model_id, "addmodel didn't run as intended")
+
+    def test_create_incomplete_facility_fails(self):
+        with DistributedServer(**self.settings) as d:
+            with self.assertRaises(subprocess.CalledProcessError):
+                d.addmodel('kalite.facility.models.Facilty')  # lacks a name
