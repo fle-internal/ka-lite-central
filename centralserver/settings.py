@@ -169,3 +169,6 @@ LOG.debug("============================")
 
 # Don't want to have a limited number of SyncSession records on the central server (save them all!)
 SYNC_SESSIONS_MAX_RECORDS = getattr(local_settings, "SYNC_SESSIONS_MAX_RECORDS", None)
+
+LOGIN_URL = '/accounts/login/'
+LOGOUT_URL = '/accounts/logout/'
