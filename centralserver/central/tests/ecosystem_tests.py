@@ -78,14 +78,23 @@ class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCas
         self.setUp_fake_device()
 
         self.user = User.objects.create(username='test_user',
-                                        password='invalid_password')
+                                        password='invalid')
+        self.user.set_password('invalid')
+        self.user.save()
+
         self.test_org = Organization.objects.create(name='test_org',
                                                     owner=self.user)
+        self.test_org.users.add(self.user)
+        self.test_org.save()
+
         self.test_zone = Zone.objects.create(name='test_zone')
         self.test_zone.organization_set.add(self.test_org)
         self.test_zone.save()
 
-        self.settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
+        self.settings = {
+            'CENTRAL_SERVER_HOST': self.live_server_url,
+            'SECURESYNC_PROTOCOL': 'http',
+        }
 
     def test_create_read_facility(self):
         with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
@@ -113,6 +122,10 @@ class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCas
 
     def test_sync_with_central(self):
         with DistributedServer(**self.settings) as d1:
+            d1.call_command('register', username='test_user', password='invalid',
+                            zone=self.test_zone.id)
+            d1.wait()
+
             model_name = 'kalite.facility.models.Facility'
             d1.call_command('createmodel', model_name, data='{"name" : "kir1"}',
                             output_to_stdout=False,
@@ -121,9 +134,6 @@ class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCas
             self.assertEquals(0, create_ret_code)
             self.assertTrue(_stdout)
             id = _stdout.strip()
-            d1.call_command('register', username='test_user', password='invalid',
-                            zone=self.test_zone.id)
-            d1.wait()
             d1.call_command('syncmodels')
             d1.wait()
             kir1_facility = Facility.objects.get(pk=id)
