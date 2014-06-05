@@ -46,6 +46,13 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
 
             assert ret1 == ret2 == 0
 
+    def test_can_create_one_facility(self):
+        with DistributedServer(**self.settings) as d:
+            model_id = d.addmodel('kalite.facility.models.Facility',
+                                  name='test')
+
+            self.assertTrue(model_id, "addmodel didn't run as intended")
+
 
 class CreateReadModelSingleDistServerTests(LiveServerTestCase):
 
