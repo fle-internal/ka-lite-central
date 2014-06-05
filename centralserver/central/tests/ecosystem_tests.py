@@ -27,7 +27,10 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         self.test_zone.organization_set.add(self.test_org)
         self.test_zone.save()
 
-        self.settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
+        self.settings = {
+            'CENTRAL_SERVER_HOST': self.live_server_url,
+            'SECURESYNC_PROTOCOL': 'http',
+        }
 
     def test_can_run_on_distributed_server(self):
         with DistributedServer(**self.settings) as d1:
