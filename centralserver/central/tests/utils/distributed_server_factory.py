@@ -84,6 +84,16 @@ DATABASES = {
         self.running_process = None  # so we can run other commands
         return (stdout, stderr)
 
+    def sync(self):
+        '''
+        Convenience function for running `syncmodels` on the distributed
+        server, waiting and then returning the stdout and stdin.
+        '''
+        self.call_command('syncmodels',
+                          output_to_stdout=False,
+                          output_to_stderr=False)
+        return self.wait()
+
     def __enter__(self):
         # write our settings file
         with open(self.settings_path.as_posix(), 'w') as f:
