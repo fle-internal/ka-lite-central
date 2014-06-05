@@ -1,8 +1,9 @@
 """
 """
+import json
 import os
 import re
-import json
+import sys
 import tempfile
 from annoying.decorators import render_to
 from annoying.functions import get_object_or_None
@@ -75,7 +76,6 @@ def org_management(request, org_id=None):
             zones[org.pk].append({
                 "id": zone.id,
                 "name": zone.name,
-                "is_deletable": not zone.has_dependencies(passable_classes=["Organization"]),
             })
     return {
         "title": _("Account administration"),

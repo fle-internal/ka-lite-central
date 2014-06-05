@@ -30,7 +30,6 @@ from khanacademy.test_oauth_client import TestOAuthClient
 from oauth import OAuthToken
 
 from django.conf import settings; logging = settings.LOG
-from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
@@ -40,8 +39,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from fle_utils.internet import JsonResponse, JsonResponseMessageError, set_query_params
 from kalite.main.models import ExerciseLog, VideoLog
-from kalite.main.topic_tools import get_node_cache
 from kalite.shared.decorators import require_login
+from kalite.topic_tools import get_node_cache
 
 KHAN_SERVER_URL = "http://www.khanacademy.org"
 
@@ -146,7 +145,8 @@ def update_all_central_callback(request):
     video_logs = []
     for video in videos:
         # Assume that KA videos are all english-language, not dubbed (for now)
-        video_id = youtube_id = video.get('video', {}).get('youtube_id', "")
+        youtube_id = video.get('video', {}).get('youtube_id', "")
+        video_id = get_video_id(youtube_id)  # map from youtube_id to video_id (across all languages)
 
         # Only save videos with progress
         if not video.get('seconds_watched', None):

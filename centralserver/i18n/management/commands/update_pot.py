@@ -12,6 +12,7 @@ hope of making it easy to identify unwrapped strings.
 This can be run independently of the "update_language_packs" command
 """
 import glob
+import polib
 import re
 import os
 import shutil
@@ -23,13 +24,14 @@ from django.conf import settings; logging = settings.LOG
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
+from ... import POT_DIRPATH
 from fle_utils.django_utils import call_command_with_output
 from fle_utils.general import ensure_dir
 from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
 
-POT_PATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
 
+TRANSLATOR_VARIABLE_COMMENT = "Translators: please do not change variable names (anything with the format %(xxxx)s), but it is OK to change its position."
 
 class Command(test_wrappings.Command):
     option_list = BaseCommand.option_list + (
@@ -50,9 +52,12 @@ class Command(test_wrappings.Command):
         delete_current_templates()
 
         # Create new files
-        run_makemessages(verbosity=options["verbosity"])
+        po_filepaths = run_makemessages(verbosity=options["verbosity"])
 
-        update_templates()
+        insert_translator_comments(po_filepaths)
+
+        update_templates(po_filepaths)
+
 
         if options["upload"]:
             if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
@@ -67,8 +72,8 @@ def delete_current_templates():
     """Delete existing en po/pot files"""
 
     logging.info("Deleting English language pot files")
-    if os.path.exists(POT_PATH):
-        shutil.rmtree(POT_PATH)
+    if os.path.exists(POT_DIRPATH):
+        shutil.rmtree(POT_DIRPATH)
 
 
 def run_makemessages(verbosity=0):
@@ -81,15 +86,36 @@ def run_makemessages(verbosity=0):
 
     test_wrappings.run_makemessages(ignore_patterns_py=ignore_patterns_py, ignore_patterns_js=ignore_patterns_js, verbosity=verbosity)
 
+    # Return the list of files created.
+    return glob.glob(os.path.join(get_po_filepath(lang_code="en"), "*.po"))
 
-def update_templates():
+
+def insert_translator_comments(po_filepaths):
+    """We want to make sure that translators do not tweak format strings.
+    We inserted a comment into relevant translation entries when we
+    detect format strings, to try and help guide the translators.
+    """
+    for po_filepath in po_filepaths:
+        logging.debug("Adding translator comments to %s" % po_filepath)
+        pofile = polib.pofile(po_filepath)
+        for po_entry in pofile:
+            if "%(" in po_entry.msgid and "%(" not in po_entry.comment:  # variable detected.
+                po_entry.comment += "\n%s" % TRANSLATOR_VARIABLE_COMMENT
+        pofile.save()
+
+
+
+
+def update_templates(po_filepaths):
     """Update template po files"""
-    logging.info("Copying english po files to %s" % POT_PATH)
+    logging.info("Copying english po files to %s" % POT_DIRPATH)
 
     #  post them to exposed URL
-    ensure_dir(POT_PATH)
-    shutil.copy(get_po_filepath(lang_code="en", filename="django.po"), os.path.join(POT_PATH, "kalite.pot"))
-    shutil.copy(get_po_filepath(lang_code="en", filename="djangojs.po"), os.path.join(POT_PATH, "kalitejs.pot"))
+    ensure_dir(POT_DIRPATH)
+    for po_filepath in po_filepaths:
+        pot_filename = os.path.basename(po_filepath) + 't'
+        pot_filepath = os.path.join(POT_DIRPATH, pot_filename)
+        shutil.copy(po_filepath, pot_filepath)
 
 
 def upload_to_crowdin(files, project_key, project_id="ka-lite"):

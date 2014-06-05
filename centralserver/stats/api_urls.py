@@ -3,7 +3,7 @@ URLs added here should be absolute URLs, as they must be inserted at the highest
 (i.e. central.urls) to guarantee to intercept the request before the appropriate app
 or url conf gets called.
 """
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 
 
 urlpatterns = patterns(__package__ + '.api_views',

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 
 import centralserver.i18n.api_urls
 import centralserver.khanload.api_urls
