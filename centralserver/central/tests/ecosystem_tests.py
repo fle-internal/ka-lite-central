@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 
 from centralserver.central.models import Organization
