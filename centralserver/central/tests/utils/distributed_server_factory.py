@@ -54,8 +54,7 @@ DATABASES = {
 
     def call_command(self,
                      commandname,
-                     output_to_stdout=True,
-                     output_to_stderr=True,
+                     *args,
                      **kwargs):
         '''
         Run a command in the context of this distributed server, customized to
@@ -67,6 +66,10 @@ DATABASES = {
         output_to_stderr -- True to output the command's stderr to the console
                             instead of capturing to a variable
         '''
+
+        output_to_stdout = kwargs.pop('output_to_stdout', True)
+        output_to_stderr = kwargs.pop('output_to_stderr', True)
+
         if self.running_process:
             raise Exception('Command {} already started.'.format(commandname))
 
@@ -77,6 +80,7 @@ DATABASES = {
             settings=self.settings_name,
             manage_py_dir=self.distributed_dir.as_posix(),
             wait=False,
+            *args,
             **kwargs
         )
 
