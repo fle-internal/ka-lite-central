@@ -21,3 +21,18 @@ class SameVersionTests(LiveServerTestCase):
 
             d1.wait()
             d2.wait()
+
+
+class CreateReadModelSingleDistServerTests(LiveServerTestCase):
+
+    def test_create_read_facility(self):
+        with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
+            MODEL_NAME = 'kalite.facility.models.Facility'
+            d1.call_command('createmodel', MODEL_NAME, json_data='{"name" : "kir1"}')
+            _stdout, stderr = d1.wait()
+            self.assertTrue(_stdout)
+            id = _stdout.strip()
+            # the command shouldn't have printed anything to stderr
+            self.assertFalse(stderr)
+            self.assertTrue(id)
+            # Read the model back
