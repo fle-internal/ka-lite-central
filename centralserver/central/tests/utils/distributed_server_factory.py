@@ -74,8 +74,11 @@ DATABASES = {
 
     def wait(self):
         '''
-        Waits for the command run by `self.call_command` to
-        finish. Returns the error code of the process.
+        Waits for the command run by `self.call_command` to finish. Returns
+        the error code of the process. Returns the stdout and stderr
+        of the command in the string, if output_to_stdout and
+        output_to_stderr were given as False respectively.
+
         '''
         stdout, stderr = self.running_process.communicate()
         self.running_process = None  # so we can run other commands
