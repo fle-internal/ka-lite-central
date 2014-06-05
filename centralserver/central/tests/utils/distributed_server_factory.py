@@ -37,6 +37,13 @@ DATABASES = {
 }
         '''
 
+        # super hack to not run migrations on the distributed servers.
+        # Basically, we replace south's syncdb (which adds migrations)
+        # with the normal syncdb
+        new_settings += '''
+INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
+        '''
+
         # we have to remove the protocol (http or https) from the url
         # that the user gives to us
         if 'CENTRAL_SERVER_HOST' in kwargs:
@@ -114,6 +121,10 @@ DATABASES = {
         # write our settings file
         with open(self.settings_path.as_posix(), 'w') as f:
             f.write(self.settings_contents)
+
+        # prepare the DB
+        self.call_command('syncdb', noinput=True)
+        self.wait()
 
         return self
 
