@@ -17,7 +17,10 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         self.setUp_fake_device()
 
         self.user = User.objects.create(username='test_user',
-                                        password='invalid_password')
+                                        password='invalid')
+        self.user.set_password('invalid')
+        self.user.save()
+
         self.test_org = Organization.objects.create(name='test_org',
                                                     owner=self.user)
         self.test_zone = Zone.objects.create(name='test_zone')
