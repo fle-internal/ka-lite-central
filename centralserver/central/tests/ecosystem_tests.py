@@ -24,6 +24,9 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
 
         self.test_org = Organization.objects.create(name='test_org',
                                                     owner=self.user)
+        self.test_org.users.add(self.user)
+        self.test_org.save()
+
         self.test_zone = Zone.objects.create(name='test_zone')
         self.test_zone.organization_set.add(self.test_org)
         self.test_zone.save()
