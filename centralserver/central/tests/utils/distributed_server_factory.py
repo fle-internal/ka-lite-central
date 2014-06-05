@@ -1,5 +1,7 @@
+import json
 import pathlib
 import string
+import subprocess
 from random import choice
 from urlparse import urlparse
 
@@ -14,11 +16,13 @@ class DistributedServer:
                                 / 'ka-lite' / 'kalite')
         self.manage_py_path = self.distributed_dir / 'manage.py'
 
-        # setup for custom settings for this distributed server
-        self.settings_contents = self._generate_settings(**kwargs)
-
         uniq_name = ''.join(choice(string.ascii_lowercase) for _ in range(10))
+        self.db_path = ((self.distributed_dir / 'database' / uniq_name)
+                        .with_suffix('.sqlite'))
+
+        # setup for custom settings for this distributed server
         self.settings_name = uniq_name
+        self.settings_contents = self._generate_settings(**kwargs)
         self.settings_path = ((self.distributed_dir / self.settings_name)
                               .with_suffix('.py'))
 
@@ -29,13 +33,14 @@ class DistributedServer:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME"  : ":memory:",
+        "NAME"  : "%s",
         "OPTIONS": {
             "timeout": 60,
         },
     }
 }
         '''
+        new_settings = new_settings % self.db_path
 
         # super hack to not run migrations on the distributed servers.
         # Basically, we replace south's syncdb (which adds migrations)
@@ -117,13 +122,29 @@ INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
                           output_to_stderr=False)
         return self.wait()
 
+    def addmodel(self, modelname, **attrs):
+        self.call_command('createmodel',
+                          modelname,
+                          data=json.dumps(attrs),
+                          output_to_stdout=False,
+                          output_to_stderr=False)
+        model_id, err, ret = self.wait()
+
+        if ret != 0:
+            errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
+            raise subprocess.CalledProcessError(ret,
+                                                'createmodel',
+                                                output=errmsgtemplate % err)
+
+        return model_id
+
     def __enter__(self):
         # write our settings file
         with open(self.settings_path.as_posix(), 'w') as f:
             f.write(self.settings_contents)
 
         # prepare the DB
-        self.call_command('syncdb', noinput=True)
+        self.call_command('syncdb', noinput=True, output_to_stdout=False)
         self.wait()
 
         return self
@@ -132,3 +153,7 @@ INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
         # delete our settings file
         if self.settings_path.exists():
             self.settings_path.unlink()
+
+        # delete the db file
+        if self.db_path.exists():
+            self.db_path.unlink()

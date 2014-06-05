@@ -1,3 +1,4 @@
+import subprocess
 from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 
@@ -23,8 +24,10 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         self.test_zone.organization_set.add(self.test_org)
         self.test_zone.save()
 
+        self.settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
+
     def test_can_run_on_distributed_server(self):
-        with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
+        with DistributedServer(**self.settings) as d1:
             d1.call_command('validate')
 
             _stdout, stderr, ret = d1.wait()
@@ -34,9 +37,8 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             self.assertEquals(0, ret, "validate command return non-0 ret code")
 
     def test_can_instantiate_two_distributed_servers(self):
-        settings = {'CENTRAL_SERVER_HOST': self.live_server_url}
 
-        with DistributedServer(**settings) as d1, DistributedServer(**settings) as d2:
+        with DistributedServer(**self.settings) as d1, DistributedServer(**self.settings) as d2:
             d1.call_command('validate')
             d2.call_command('validate')
 
@@ -44,3 +46,15 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             _, _, ret2 = d2.wait()
 
             assert ret1 == ret2 == 0
+
+    def test_can_create_one_facility(self):
+        with DistributedServer(**self.settings) as d:
+            model_id = d.addmodel('kalite.facility.models.Facility',
+                                  name='test')
+
+            self.assertTrue(model_id, "addmodel didn't run as intended")
+
+    def test_create_incomplete_facility_fails(self):
+        with DistributedServer(**self.settings) as d:
+            with self.assertRaises(subprocess.CalledProcessError):
+                d.addmodel('kalite.facility.models.Facilty')  # lacks a name
