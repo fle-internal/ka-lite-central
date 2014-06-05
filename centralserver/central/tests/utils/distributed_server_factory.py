@@ -1,5 +1,6 @@
 import pathlib
 import string
+import json
 from random import choice
 from urlparse import urlparse
 
@@ -119,6 +120,20 @@ INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
                           output_to_stdout=False,
                           output_to_stderr=False)
         return self.wait()
+
+    def addmodel(self, modelname, **attrs):
+        self.call_command('createmodel',
+                          modelname,
+                          data=json.dumps(attrs),
+                          output_to_stdout=False,
+                          output_to_stderr=False)
+        model_id, err, ret = self.wait()
+
+        if ret != 0:
+            errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
+            raise Exception(errmsgtemplate % err)
+
+        return model_id
 
     def __enter__(self):
         # write our settings file
