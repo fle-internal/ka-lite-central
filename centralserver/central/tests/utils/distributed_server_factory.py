@@ -99,7 +99,7 @@ DATABASES = {
     def sync(self):
         '''
         Convenience function for running `syncmodels` on the distributed
-        server, waiting and then returning the stdout and stdin.
+        server, waiting and then returning the stdout, stderr and returncode.
         '''
         self.call_command('syncmodels',
                           output_to_stdout=False,
