@@ -136,7 +136,8 @@ INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
                                                 'createmodel',
                                                 output=errmsgtemplate % err)
 
-        return model_id
+        # Strip newlines before returning the model ID.
+        return model_id.strip()
 
     def __enter__(self):
         # write our settings file

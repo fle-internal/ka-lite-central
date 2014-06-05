@@ -70,41 +70,40 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
                 d.addmodel('kalite.facility.models.Facilty')  # lacks a name
 
 
-    def test_sync(self):
-        """Add the given fake facility users to each of the given fake facilities.
-        If no facilities are given, they are created."""
-        with DistributedServer(**self.settings) as d1:
-            # model_name = 'kalite.facility.models.Facility'
-            # d1.call_command('createmodel', model_name, data='{"name" : "kir1"}',
-            #                 output_to_stdout=False,
-            #                 output_to_stderr=False)
-            # _stdout, stderr, create_ret_code = d1.wait()
-            # self.assertEquals(0, create_ret_code)
-            # self.assertTrue(_stdout)
-            # id = _stdout.strip()
-            # # the command shouldn't have printed anything to stderr
-            # self.assertFalse(stderr)
-            # self.assertTrue(id)
+    def test_sync_two_dist_server_via_central_server(self):
+        with DistributedServer(**self.settings) as d1, DistributedServer(**self.settings) as d2:
+            model_name = 'kalite.facility.models.Facility'
 
-            # # Read the model back
-            # d1.call_command('readmodel', model_name, id=id,
-            #                 output_to_stdout=False,
-            #                 output_to_stderr=False)
-            # _stdout, stderr, read_ret_code = d1.wait()
-            # self.assertEquals(0, read_ret_code)
-            # self.assertTrue(_stdout)
-            # # Expecting to see the "name" field to be set to "kir1"
-            # self.assertRegexpMatches(_stdout, '"name": "kir1"')
-
+            # Register devices.
             d1.call_command('register', username="test_user", password="invalid",
                 zone=self.test_zone.id)
             d1.wait()
-            d1.call_command('syncmodels')
-            _stdout, stderr, create_ret_code = d1.wait()
-            # # the command shouldn't have printed anything to stderr
-            self.assertFalse(stderr)
-            # print Facility.objects.all()
 
+            d2.call_command('register', username="test_user", password="invalid",
+                zone=self.test_zone.id)
+            d2.wait()
 
-        
+            # Create object in d1.
+            model_id = d1.addmodel(model_name, name='kir1')
+            self.assertTrue(model_id)
+
+            # Sync d1 with central server.
+            d1.sync()
+
+            # The object should not at first exist in d1.
+            d2.call_command('readmodel', model_name, id=model_id,
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _, _, read_ret_code = d2.wait()
+            self.assertEquals(1, read_ret_code)
+
+            # Sync d2 with central server.
+            d2.sync()
+            # The object now exists in d2.
+            d2.call_command('readmodel', model_name, id=model_id,
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _stdout, _, _ = d2.wait()
+            # Expecting to see the "name" field to be set to "kir1"
+            self.assertRegexpMatches(_stdout, '"name": "kir1"')
 
