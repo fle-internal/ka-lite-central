@@ -1,7 +1,7 @@
 import pathlib
 import string
-from multiprocessing import Process
 from random import choice
+from urlparse import urlparse
 
 from django.conf import settings
 from fle_utils.django_utils import call_outside_command_with_output
@@ -9,7 +9,7 @@ from fle_utils.django_utils import call_outside_command_with_output
 
 class DistributedServer:
 
-    def __init__(self, dbname=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.distributed_dir = (pathlib.Path(settings.PROJECT_PATH).parent
                                 / 'ka-lite' / 'kalite')
         self.manage_py_path = self.distributed_dir / 'manage.py'
@@ -36,6 +36,16 @@ DATABASES = {
     }
 }
         '''
+
+        # we have to remove the protocol (http or https) from the url
+        # that the user gives to us
+        if 'CENTRAL_SERVER_HOST' in kwargs:
+            parse_result = urlparse(kwargs['CENTRAL_SERVER_HOST'])
+            kwargs['CENTRAL_SERVER_HOST'] = parse_result.netloc
+
+        other_settings = ['{} = "{}"'.format(k, v)
+                          for k, v in kwargs.iteritems()]
+        new_settings = '\n'.join([new_settings] + other_settings)
         old_settings_path = self.distributed_dir / 'settings.py'
         with open(old_settings_path.as_posix()) as f:
             old_settings = f.read()
