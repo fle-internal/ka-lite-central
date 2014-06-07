@@ -78,3 +78,30 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         with self.get_distributed_server() as d:
             with self.assertRaises(subprocess.CalledProcessError):
                 d.addmodel('kalite.facility.models.Facilty')  # lacks a name
+
+
+class CreateReadModelSingleDistServerTests(LiveServerTestCase):
+
+    def test_create_read_facility(self):
+        with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
+            model_name = 'kalite.facility.models.Facility'
+            d1.call_command('createmodel', model_name, data='{"name" : "kir1"}',
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _stdout, stderr, create_ret_code = d1.wait()
+            self.assertEquals(0, create_ret_code)
+            self.assertTrue(_stdout)
+            id = _stdout.strip()
+            # the command shouldn't have printed anything to stderr
+            self.assertFalse(stderr)
+            self.assertTrue(id)
+
+            # Read the model back
+            d1.call_command('readmodel', model_name, id=id,
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _stdout, stderr, read_ret_code = d1.wait()
+            self.assertEquals(0, read_ret_code)
+            self.assertTrue(_stdout)
+            # Expecting to see the "name" field to be set to "kir1"
+            self.assertRegexpMatches(_stdout, '"name": "kir1"')
