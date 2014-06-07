@@ -146,7 +146,8 @@ OWN_DEVICE_PRIVATE_KEY = %r
                                                 'createmodel',
                                                 output=errmsgtemplate % err)
 
-        return model_id
+        # Strip newlines before returning the model ID.
+        return model_id.strip()
 
     def __enter__(self):
         # write our settings file

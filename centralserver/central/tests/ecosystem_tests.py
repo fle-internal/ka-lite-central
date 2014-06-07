@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 
 from centralserver.central.models import Organization
+from kalite.facility.models import Facility
 from securesync.tests import SecuresyncTestCase
 from securesync.devices.models import Device, Zone
 
@@ -78,3 +79,42 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         with self.get_distributed_server() as d:
             with self.assertRaises(subprocess.CalledProcessError):
                 d.addmodel('kalite.facility.models.Facilty')  # lacks a name
+
+
+    def test_sync_two_dist_server_via_central_server(self):
+        with DistributedServer(**self.settings) as d1, DistributedServer(**self.settings) as d2:
+            model_name = 'kalite.facility.models.Facility'
+
+            # Register devices.
+            d1.call_command('register', username="test_user", password="invalid",
+                zone=self.test_zone.id)
+            d1.wait()
+
+            d2.call_command('register', username="test_user", password="invalid",
+                zone=self.test_zone.id)
+            d2.wait()
+
+            # Create object in d1.
+            model_id = d1.addmodel(model_name, name='kir1')
+            self.assertTrue(model_id)
+
+            # Sync d1 with central server.
+            d1.sync()
+
+            # The object should not at first exist in d1.
+            d2.call_command('readmodel', model_name, id=model_id,
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _, _, read_ret_code = d2.wait()
+            self.assertEquals(1, read_ret_code)
+
+            # Sync d2 with central server.
+            d2.sync()
+            # The object now exists in d2.
+            d2.call_command('readmodel', model_name, id=model_id,
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _stdout, _, _ = d2.wait()
+            # Expecting to see the "name" field to be set to "kir1"
+            self.assertRegexpMatches(_stdout, '"name": "kir1"')
+
