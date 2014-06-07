@@ -6,10 +6,10 @@ from random import choice
 from urlparse import urlparse
 
 from django.conf import settings
+from fle_utils.crypto import Key
 from fle_utils.django_utils import call_outside_command_with_output
 
-
-class DistributedServer:
+class DistributedServer(object):
 
     def __init__(self, *args, **kwargs):
         self.distributed_dir = (pathlib.Path(settings.PROJECT_PATH).parent
@@ -20,6 +20,8 @@ class DistributedServer:
         self.db_path = ((self.distributed_dir / 'database' / uniq_name)
                         .with_suffix('.sqlite'))
 
+        self.key = kwargs.get("key") or Key()
+
         # setup for custom settings for this distributed server
         self.settings_name = uniq_name
         self.settings_contents = self._generate_settings(**kwargs)
@@ -29,6 +31,7 @@ class DistributedServer:
         self.running_process = None
 
     def _generate_settings(self, **kwargs):
+
         new_settings = '''
 DATABASES = {
     "default": {
@@ -48,6 +51,13 @@ DATABASES = {
         new_settings += '''
 INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
         '''
+
+        # write some pregenerated pub/priv keys to the settings file,
+        # to avoid having to generate some on the fly (which is slow)
+        new_settings += '''
+OWN_DEVICE_PUBLIC_KEY = %r
+OWN_DEVICE_PRIVATE_KEY = %r
+        ''' % (self.key.get_public_key_string(), self.key.get_private_key_string())
 
         # we have to remove the protocol (http or https) from the url
         # that the user gives to us
