@@ -6,6 +6,7 @@ from centralserver.central.models import Organization
 from kalite.facility.models import Facility
 from securesync.tests import SecuresyncTestCase
 from securesync.devices.models import Device, Zone
+from kalite.facility.models import Facility
 
 from .utils.crypto_key_factory import KeyFactory
 from .utils.distributed_server_factory import DistributedServer
@@ -118,7 +119,31 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             self.assertRegexpMatches(_stdout, '"name": "kir1"')
 
 
-class CreateReadModelSingleDistServerTests(LiveServerTestCase):
+class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCase):
+
+    def setUp(self):
+        # TODO (aron): move this entire thing into its own mixins
+        Device.own_device = None
+        self.setUp_fake_device()
+
+        self.user = User.objects.create(username='test_user',
+                                        password='invalid')
+        self.user.set_password('invalid')
+        self.user.save()
+
+        self.test_org = Organization.objects.create(name='test_org',
+                                                    owner=self.user)
+        self.test_org.users.add(self.user)
+        self.test_org.save()
+
+        self.test_zone = Zone.objects.create(name='test_zone')
+        self.test_zone.organization_set.add(self.test_org)
+        self.test_zone.save()
+
+        self.settings = {
+            'CENTRAL_SERVER_HOST': self.live_server_url,
+            'SECURESYNC_PROTOCOL': 'http',
+        }
 
     def test_create_read_facility(self):
         with DistributedServer(CENTRAL_SERVER_HOST=self.live_server_url) as d1:
@@ -143,3 +168,22 @@ class CreateReadModelSingleDistServerTests(LiveServerTestCase):
             self.assertTrue(_stdout)
             # Expecting to see the "name" field to be set to "kir1"
             self.assertRegexpMatches(_stdout, '"name": "kir1"')
+
+    def test_sync_with_central(self):
+        with DistributedServer(**self.settings) as d1:
+            d1.call_command('register', username='test_user', password='invalid',
+                            zone=self.test_zone.id)
+            d1.wait()
+
+            model_name = 'kalite.facility.models.Facility'
+            d1.call_command('createmodel', model_name, data='{"name" : "kir1"}',
+                            output_to_stdout=False,
+                            output_to_stderr=False)
+            _stdout, stderr, create_ret_code = d1.wait()
+            self.assertEquals(0, create_ret_code)
+            self.assertTrue(_stdout)
+            id = _stdout.strip()
+            d1.call_command('syncmodels')
+            d1.wait()
+            kir1_facility = Facility.objects.get(pk=id)
+            self.assertTrue(kir1_facility)
