@@ -9,6 +9,7 @@ from django.conf import settings
 from fle_utils.crypto import Key
 from fle_utils.django_utils import call_outside_command_with_output
 
+
 class DistributedServer(object):
 
     def __init__(self, *args, **kwargs):
@@ -108,20 +109,24 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         return self
 
-    def wait(self):
+    def wait(self, noerr=False):
         '''
         Waits for the command run by `self.call_command` to finish. Returns
         a tuple (stdin, stderr, returncode). Returns the stdout and stderr
         of the command in the string, if output_to_stdout and
         output_to_stderr were given as False respectively. `returncode` is the
-        return code of the process.
+        return code of the process. Raises CalledProcessError if the command
+        returns a non-zero return code.
+
+        If `noerr` is True, then it won't raise an error, and simply returns the
+        return code as well.
 
         '''
         stdout, stderr = self.running_process.communicate()
         returncode = self.running_process.returncode
         self.running_process = None  # so we can run other commands
 
-        if returncode != 0:
+        if noerr or returncode != 0:
             errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
             raise subprocess.CalledProcessError(returncode,
                                                 'createmodel',
