@@ -48,8 +48,10 @@ class SameVersionTests(CreateAdminMixin,
             self.assertEquals(0, ret, "validate command return non-0 ret code")
 
     def test_can_instantiate_two_distributed_servers(self):
+        d1 = self.get_distributed_server()
+        d2 = self.get_distributed_server()
 
-        with self.get_distributed_server() as d1, self.get_distributed_server() as d2:
+        with d1, d2:
             d1.call_command('validate')
             d2.call_command('validate')
 
@@ -71,7 +73,9 @@ class SameVersionTests(CreateAdminMixin,
                 d.addmodel('kalite.facility.models.Facility')  # lacks a name
 
     def test_sync_two_dist_server_via_central_server(self):
-        with DistributedServer(**self.settings) as d1, DistributedServer(**self.settings) as d2:
+        d1 = self.get_distributed_server()
+        d2 = self.get_distributed_server()
+        with d1, d2:
             model_name = 'kalite.facility.models.Facility'
 
             # Register devices.
