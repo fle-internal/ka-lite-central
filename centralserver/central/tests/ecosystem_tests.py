@@ -75,19 +75,17 @@ class SameVersionTests(CreateAdminMixin,
             model_name = 'kalite.facility.models.Facility'
 
             # Register devices.
-            d1.call_command(
-                'register',
+            d1.register(
                 username=self.user.username,
                 password=self.user.real_password,
-                zone=self.zone.id
-            ).wait()
+                zone_id=self.zone.id
+            )
 
-            d2.call_command(
-                'register',
+            d2.register(
                 username=self.user.username,
                 password=self.user.real_password,
-                zone=self.zone.id
-            ).wait()
+                zone_id=self.zone.id
+            )
 
             # Create object in d1.
             model_id = d1.addmodel(model_name, name='kir1')
@@ -97,11 +95,15 @@ class SameVersionTests(CreateAdminMixin,
             d1.sync()
 
             # The object should not at first exist in d1.
-            d2.call_command('readmodel', model_name, id=model_id,
+            d2.call_command('readmodel',
+                            model_name,
+                            id=model_id,
                             output_to_stdout=False,
-                            output_to_stderr=False)
-            _, _, read_ret_code = d2.wait()
-            self.assertEquals(1, read_ret_code)
+                            output_to_stderr=False,
+            )
+
+            with self.assertRaises(subprocess.CalledProcessError):
+                d2.wait()
 
             # Sync d2 with central server.
             d2.sync()

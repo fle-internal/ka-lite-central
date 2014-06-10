@@ -155,6 +155,23 @@ OWN_DEVICE_PRIVATE_KEY = %r
         # Strip newlines before returning the model ID.
         return model_id.strip()
 
+    def register(self, username, password, zone_id):
+        '''
+        Registers the distributed server to the zone id, which the user
+        given by the username and password is a part of. Returns the
+        stdout, stderr and returncode.
+        '''
+        result = self.call_command(
+            'register',
+            username=username,
+            password=password,
+            zone=zone_id,
+            output_to_stdout=False,
+            output_to_stderr=False,
+        ).wait()
+
+        return result
+
     def __enter__(self):
         # write our settings file
         with open(self.settings_path.as_posix(), 'w') as f:
