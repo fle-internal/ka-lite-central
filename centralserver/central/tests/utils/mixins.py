@@ -88,3 +88,7 @@ class CreateZoneMixin(CreateOrganizationMixin):
         zone.save()
 
         return zone
+
+
+class CentralServerMixins(CreateZoneMixin, CreateOrganizationMixin):
+    pass

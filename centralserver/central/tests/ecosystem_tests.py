@@ -5,14 +5,14 @@ from securesync.tests import SecuresyncTestCase
 from securesync.devices.models import Device
 
 from .utils.crypto_key_factory import KeyFactory
-from .utils.mixins import CreateAdminMixin, CreateOrganizationMixin
-from .utils.mixins import CreateZoneMixin, FakeDeviceMixin
+from .utils.mixins import CreateAdminMixin, CentralServerMixins
+from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
+from kalite.facility.models import Facility
 
 
 class SameVersionTests(CreateAdminMixin,
-                       CreateZoneMixin,
-                       CreateOrganizationMixin,
+                       CentralServerMixins,
                        FakeDeviceMixin,
                        LiveServerTestCase):
 
@@ -110,7 +110,10 @@ class SameVersionTests(CreateAdminMixin,
             self.assertTrue(obj[0]['fields']['name'] == 'kir1')
 
 
-class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCase):
+class TwoDistributedServersTests(CreateAdminMixin,
+                                 CentralServerMixins,
+                                 FakeDeviceMixin,
+                                 LiveServerTestCase):
 
     def setUp(self):
         # TODO (aron): move this entire thing into its own mixins
