@@ -120,6 +120,13 @@ OWN_DEVICE_PRIVATE_KEY = %r
         stdout, stderr = self.running_process.communicate()
         returncode = self.running_process.returncode
         self.running_process = None  # so we can run other commands
+
+        if returncode != 0:
+            errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
+            raise subprocess.CalledProcessError(returncode,
+                                                'createmodel',
+                                                output=errmsgtemplate % stderr)
+
         return (stdout, stderr, returncode)
 
     def sync(self):
@@ -139,12 +146,6 @@ OWN_DEVICE_PRIVATE_KEY = %r
                           output_to_stdout=False,
                           output_to_stderr=False)
         model_id, err, ret = self.wait()
-
-        if ret != 0:
-            errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
-            raise subprocess.CalledProcessError(ret,
-                                                'createmodel',
-                                                output=errmsgtemplate % err)
 
         # Strip newlines before returning the model ID.
         return model_id.strip()
