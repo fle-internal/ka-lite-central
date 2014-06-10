@@ -118,8 +118,8 @@ OWN_DEVICE_PRIVATE_KEY = %r
         return code of the process. Raises CalledProcessError if the command
         returns a non-zero return code.
 
-        If `noerr` is True, then it won't raise an error, and simply returns the
-        return code as well.
+        If `noerr` is True, then it won't raise an error, and simply
+        returns the return code as well.
 
         '''
         stdout, stderr = self.running_process.communicate()
@@ -145,6 +145,12 @@ OWN_DEVICE_PRIVATE_KEY = %r
         return self.wait()
 
     def addmodel(self, modelname, **attrs):
+        '''
+        Create the model given by modelname in the distributed server,
+        with attributes given by attrs. Returns the id of the new
+        model.
+
+        '''
         self.call_command('createmodel',
                           modelname,
                           data=json.dumps(attrs),
