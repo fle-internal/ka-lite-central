@@ -11,6 +11,8 @@ from kalite.facility.models import Facility
 from .utils.crypto_key_factory import KeyFactory
 from .utils.distributed_server_factory import DistributedServer
 
+class 
+
 
 class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
 
@@ -19,13 +21,11 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
         Device.own_device = None
         self.setUp_fake_device()
 
-        self.user = User.objects.create(username='test_user',
-                                        password='invalid')
+        self.user = User.objects.create(username='test_user', password='invalid')
         self.user.set_password('invalid')
         self.user.save()
 
-        self.test_org = Organization.objects.create(name='test_org',
-                                                    owner=self.user)
+        self.test_org = Organization.objects.create(name='test_org', owner=self.user)
         self.test_org.users.add(self.user)
         self.test_org.save()
 
