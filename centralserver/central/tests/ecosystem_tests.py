@@ -68,7 +68,7 @@ class SameVersionTests(CreateAdminMixin,
     def test_create_incomplete_facility_fails(self):
         with self.get_distributed_server() as d:
             with self.assertRaises(subprocess.CalledProcessError):
-                d.addmodel('kalite.facility.models.Facilty')  # lacks a name
+                d.addmodel('kalite.facility.models.Facility')  # lacks a name
 
     def test_sync_two_dist_server_via_central_server(self):
         with DistributedServer(**self.settings) as d1, DistributedServer(**self.settings) as d2:
@@ -95,25 +95,19 @@ class SameVersionTests(CreateAdminMixin,
             d1.sync()
 
             # The object should not at first exist in d1.
-            d2.call_command('readmodel',
-                            model_name,
-                            id=model_id,
-                            output_to_stdout=False,
-                            output_to_stderr=False,
-            )
 
             with self.assertRaises(subprocess.CalledProcessError):
-                d2.wait()
+                d2.readmodel(model_name, id=model_id)
 
-            # Sync d2 with central server.
+            # now we sync with the second distributed server.
+            # we should now have kir1 in here
             d2.sync()
-            # The object now exists in d2.
-            d2.call_command('readmodel', model_name, id=model_id,
-                            output_to_stdout=False,
-                            output_to_stderr=False)
-            _stdout, _, _ = d2.wait()
-            # Expecting to see the "name" field to be set to "kir1"
-            self.assertRegexpMatches(_stdout, '"name": "kir1"')
+            obj = d2.readmodel(
+                model_name,
+                id=model_id,
+            )
+
+            self.assertTrue(obj[0]['fields']['name'] == 'kir1')
 
 
 class CreateReadModelSingleDistServerTests(SecuresyncTestCase, LiveServerTestCase):
