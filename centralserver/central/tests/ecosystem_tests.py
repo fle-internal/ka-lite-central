@@ -72,7 +72,7 @@ class SameVersionTests(CreateAdminMixin,
             with self.assertRaises(subprocess.CalledProcessError):
                 d.addmodel('kalite.facility.models.Facility')  # lacks a name
 
-    def test_sync_two_dist_server_via_central_server(self):
+    def test_simple_sync_between_two_servers(self):
         d1 = self.get_distributed_server()
         d2 = self.get_distributed_server()
         with d1, d2:
