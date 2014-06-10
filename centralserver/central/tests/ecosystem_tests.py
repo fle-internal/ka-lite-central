@@ -1,37 +1,26 @@
 import subprocess
-from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 
-from centralserver.central.models import Organization
-from kalite.facility.models import Facility
 from securesync.tests import SecuresyncTestCase
-from securesync.devices.models import Device, Zone
-from kalite.facility.models import Facility
+from securesync.devices.models import Device
 
 from .utils.crypto_key_factory import KeyFactory
+from .utils.mixins import CreateAdminMixin, CreateOrganizationMixin
+from .utils.mixins import CreateZoneMixin, FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
 
-class 
 
-
-class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
+class SameVersionTests(CreateAdminMixin,
+                       CreateZoneMixin,
+                       CreateOrganizationMixin,
+                       FakeDeviceMixin,
+                       LiveServerTestCase):
 
     def setUp(self):
-        # TODO (aron): move this entire thing into its own mixins
-        Device.own_device = None
-        self.setUp_fake_device()
-
-        self.user = User.objects.create(username='test_user', password='invalid')
-        self.user.set_password('invalid')
-        self.user.save()
-
-        self.test_org = Organization.objects.create(name='test_org', owner=self.user)
-        self.test_org.users.add(self.user)
-        self.test_org.save()
-
-        self.test_zone = Zone.objects.create(name='test_zone')
-        self.test_zone.organization_set.add(self.test_org)
-        self.test_zone.save()
+        self.setup_fake_device()
+        self.user = self.create_admin()
+        self.org = self.create_organization(owner=self.user)
+        self.zone = self.create_zone(organizations=[self.org])
 
         self._key_factory = KeyFactory()
 
@@ -86,13 +75,19 @@ class SameVersionTests(SecuresyncTestCase, LiveServerTestCase):
             model_name = 'kalite.facility.models.Facility'
 
             # Register devices.
-            d1.call_command('register', username="test_user", password="invalid",
-                zone=self.test_zone.id)
-            d1.wait()
+            d1.call_command(
+                'register',
+                username=self.user.username,
+                password=self.user.real_password,
+                zone=self.zone.id
+            ).wait()
 
-            d2.call_command('register', username="test_user", password="invalid",
-                zone=self.test_zone.id)
-            d2.wait()
+            d2.call_command(
+                'register',
+                username=self.user.username,
+                password=self.user.real_password,
+                zone=self.zone.id
+            ).wait()
 
             # Create object in d1.
             model_id = d1.addmodel(model_name, name='kir1')
