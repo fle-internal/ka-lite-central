@@ -172,6 +172,23 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         return result
 
+    def readmodel(self, modelname, **attrs):
+        '''
+        Reads the model with the modelname with the attributes given by
+        **attrs.  Returns a list of dictionaries corresponding to the
+        models matching the given attributes.
+        '''
+
+        stdout, _stderr, _ret = self.call_command(
+            'readmodel',
+            modelname,
+            output_to_stdout=False,
+            output_to_stderr=False,
+            **attrs
+        ).wait()
+
+        return json.loads(stdout)
+
     def __enter__(self):
         # write our settings file
         with open(self.settings_path.as_posix(), 'w') as f:
