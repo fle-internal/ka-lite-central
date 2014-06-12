@@ -1,14 +1,12 @@
 import subprocess
+from django.contrib.auth.models import make_password
 from django.test import LiveServerTestCase
-
-from securesync.tests import SecuresyncTestCase
-from securesync.devices.models import Device
 
 from .utils.crypto_key_factory import KeyFactory
 from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
-from kalite.facility.models import Facility, FacilityGroup
+from kalite.facility.models import FacilityGroup, FacilityUser
 
 
 class SameVersionTests(CreateAdminMixin,
@@ -149,3 +147,44 @@ class SameVersionTests(CreateAdminMixin,
 
             self.assertTrue(synced_groups[0]['pk'] == group_id,
                             'Group has a different ID')
+
+    def test_syncing_of_students_to_another_group_to_central_server(self):
+        # Addresses issue #2124 of learningequality/ka-lite
+
+        facility_model_name = 'kalite.facility.models.Facility'
+        group_model_name = 'kalite.facility.models.FacilityGroup'
+        student_model_name = 'kalite.facility.models.FacilityUser'
+
+        with self.get_distributed_server() as source:
+            source.register(
+                username=self.user.username,
+                password=self.user.real_password,
+                zone_id=self.zone.id
+            )
+
+            facility_id = source.addmodel(facility_model_name,
+                                          name='fac1')
+            old_group_id = source.addmodel(group_model_name,
+                                           name='group1',
+                                           facility_id=facility_id)
+            student_password = make_password('password', '10000', 'sha1')
+            student_id = source.addmodel(student_model_name,
+                                         username='student1',
+                                         password=student_password,
+                                         group_id=old_group_id,
+                                         facility_id=facility_id)
+
+            source.sync()
+
+            new_group_name = 'should-transfer-here'
+            new_group_id = source.addmodel(group_model_name,
+                                           name=new_group_name,
+                                           facility_id=facility_id)
+            source.modifymodel(student_model_name,
+                               student_id,
+                               group_id=new_group_id)
+
+            source.sync()
+
+            student = FacilityUser.objects.get(id=student_id)
+            self.assertEquals(student.group_id, new_group_id)
