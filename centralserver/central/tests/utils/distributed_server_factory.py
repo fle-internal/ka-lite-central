@@ -161,6 +161,21 @@ OWN_DEVICE_PRIVATE_KEY = %r
         # Strip newlines before returning the model ID.
         return model_id.strip()
 
+    def modifymodel(self, modelname, id, **attrs):
+        '''
+        Modify the model given by modelname and id with the keyword
+        arguments provided. Raises an error if modifying the model
+        fails.
+        '''
+
+        self.call_command('modifymodel',
+                          modelname,
+                          id,
+                          data=json.dumps(attrs),
+                          output_to_stdout=True,
+                          output_to_stderr=True)
+        self.wait()
+
     def register(self, username, password, zone_id):
         '''
         Registers the distributed server to the zone id, which the user
