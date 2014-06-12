@@ -8,7 +8,7 @@ from .utils.crypto_key_factory import KeyFactory
 from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
-from kalite.facility.models import Facility
+from kalite.facility.models import Facility, FacilityGroup
 
 
 class SameVersionTests(CreateAdminMixin,
@@ -111,3 +111,41 @@ class SameVersionTests(CreateAdminMixin,
             )
 
             self.assertTrue(obj[0]['fields']['name'] == 'kir1')
+
+    def test_groups_sync(self):
+
+        # TODO (aron): port to mixins once latest 0.12.0 has been merged
+        group_name = 'should-be-synced'
+        facility_model_name = 'kalite.facility.models.Facility'
+        group_model_name = 'kalite.facility.models.FacilityGroup'
+
+        with self.get_distributed_server() as source:
+            source.register(
+                username=self.user.username,
+                password=self.user.real_password,
+                zone_id=self.zone.id
+            )
+
+            facility_id = source.addmodel(facility_model_name, name='fac1')
+            group_id = source.addmodel(group_model_name,
+                                       name=group_name,
+                                       facility_id=facility_id)
+            source.sync()
+
+        # .get() shouldn't raise an error
+        FacilityGroup.objects.get(name=group_name)
+
+        with self.get_distributed_server() as sink:
+            sink.register(
+                username=self.user.username,
+                password=self.user.real_password,
+                zone_id=self.zone.id
+            )
+
+            sink.sync()
+
+            # this should not raise a CalledProcessError
+            synced_groups = sink.readmodel(group_model_name, id=group_id)
+
+            self.assertTrue(synced_groups[0]['pk'] == group_id,
+                            'Group has a different ID')
