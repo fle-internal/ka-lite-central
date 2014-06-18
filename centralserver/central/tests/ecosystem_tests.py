@@ -37,7 +37,7 @@ class SameVersionTests(CreateAdminMixin,
 
     def test_can_run_on_distributed_server(self):
         with self.get_distributed_server() as d:
-            d.call_command('validate')
+            d.validate()
 
             _stdout, stderr, ret = d.wait()
 
@@ -50,8 +50,8 @@ class SameVersionTests(CreateAdminMixin,
         d2 = self.get_distributed_server()
 
         with d1, d2:
-            d1.call_command('validate')
-            d2.call_command('validate')
+            d1.validate()
+            d2.validate()
 
             _, _, ret1 = d1.wait()
             _, _, ret2 = d2.wait()

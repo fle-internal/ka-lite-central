@@ -175,7 +175,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
                           data=json.dumps(attrs),
                           output_to_stdout=True,
                           output_to_stderr=True)
-        self.wait()
+        print self.wait()
 
     def register(self, username, password, zone_id):
         '''
@@ -210,6 +210,9 @@ OWN_DEVICE_PRIVATE_KEY = %r
         ).wait()
 
         return json.loads(stdout)
+
+    def validate(self):
+        return self.call_command('validate', output_to_stdout=False)
 
     def __enter__(self):
         # write our settings file
