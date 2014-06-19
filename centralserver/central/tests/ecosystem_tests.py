@@ -9,6 +9,12 @@ from .utils.distributed_server_factory import DistributedServer
 from kalite.facility.models import FacilityGroup, FacilityUser
 
 
+FACILITY_MODEL = 'kalite.facility.models.Facility'
+GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
+FACILITY_USER_MODEL = 'kalite.facility.models.FacilityUser'
+
+DUMMY_PASSWORD = make_password('password', '10000', 'sha1')
+
 class SameVersionTests(CreateAdminMixin,
                        CentralServerMixins,
                        FakeDeviceMixin,
@@ -25,6 +31,7 @@ class SameVersionTests(CreateAdminMixin,
         self.settings = {
             'CENTRAL_SERVER_HOST': self.live_server_url,
             'SECURESYNC_PROTOCOL': 'http',
+            'SYNCING_MAX_RECORDS_PER_REQUEST': 5,
         }
 
     def get_distributed_server(self, **kwargs):
@@ -34,6 +41,13 @@ class SameVersionTests(CreateAdminMixin,
         config.update(kwargs)
 
         return DistributedServer(**config)
+
+    def register(self, dist_server):
+        return dist_server.register(
+            username=self.user.username,
+            password=self.user.real_password,
+            zone_id=self.zone.id,
+        )
 
     def test_can_run_on_distributed_server(self):
         with self.get_distributed_server() as d:
@@ -74,23 +88,13 @@ class SameVersionTests(CreateAdminMixin,
         d1 = self.get_distributed_server()
         d2 = self.get_distributed_server()
         with d1, d2:
-            model_name = 'kalite.facility.models.Facility'
 
             # Register devices.
-            d1.register(
-                username=self.user.username,
-                password=self.user.real_password,
-                zone_id=self.zone.id
-            )
-
-            d2.register(
-                username=self.user.username,
-                password=self.user.real_password,
-                zone_id=self.zone.id
-            )
+            self.register(d1)
+            self.register(d2)
 
             # Create object in d1.
-            model_id = d1.addmodel(model_name, name='kir1')
+            model_id = d1.addmodel(FACILITY_MODEL, name='kir1')
             self.assertTrue(model_id)
 
             # Sync d1 with central server.
@@ -98,13 +102,13 @@ class SameVersionTests(CreateAdminMixin,
 
             # The object should not at first exist in d1.
             with self.assertRaises(subprocess.CalledProcessError):
-                d2.readmodel(model_name, id=model_id)
+                d2.readmodel(FACILITY_MODEL, id=model_id)
 
             # now we sync with the second distributed server.
             # we should now have kir1 in here
             d2.sync()
             obj = d2.readmodel(
-                model_name,
+                FACILITY_MODEL,
                 id=model_id,
             )
 
@@ -114,18 +118,13 @@ class SameVersionTests(CreateAdminMixin,
 
         # TODO (aron): port to mixins once latest 0.12.0 has been merged
         group_name = 'should-be-synced'
-        facility_model_name = 'kalite.facility.models.Facility'
-        group_model_name = 'kalite.facility.models.FacilityGroup'
 
         with self.get_distributed_server() as source:
-            source.register(
-                username=self.user.username,
-                password=self.user.real_password,
-                zone_id=self.zone.id
-            )
 
-            facility_id = source.addmodel(facility_model_name, name='fac1')
-            group_id = source.addmodel(group_model_name,
+            self.register(source)
+
+            facility_id = source.addmodel(FACILITY_MODEL, name='fac1')
+            group_id = source.addmodel(GROUP_MODEL,
                                        name=group_name,
                                        facility_id=facility_id)
             source.sync()
@@ -134,16 +133,13 @@ class SameVersionTests(CreateAdminMixin,
         FacilityGroup.objects.get(name=group_name)
 
         with self.get_distributed_server() as sink:
-            sink.register(
-                username=self.user.username,
-                password=self.user.real_password,
-                zone_id=self.zone.id
-            )
+
+            self.register(sink)
 
             sink.sync()
 
             # this should not raise a CalledProcessError
-            synced_groups = sink.readmodel(group_model_name, id=group_id)
+            synced_groups = sink.readmodel(GROUP_MODEL, id=group_id)
 
             self.assertTrue(synced_groups[0]['pk'] == group_id,
                             'Group has a different ID')
@@ -151,24 +147,16 @@ class SameVersionTests(CreateAdminMixin,
     def test_syncing_of_students_to_another_group_to_central_server(self):
         # Addresses issue #2124 of learningequality/ka-lite
 
-        facility_model_name = 'kalite.facility.models.Facility'
-        group_model_name = 'kalite.facility.models.FacilityGroup'
-        student_model_name = 'kalite.facility.models.FacilityUser'
-
         with self.get_distributed_server() as source:
-            source.register(
-                username=self.user.username,
-                password=self.user.real_password,
-                zone_id=self.zone.id
-            )
+            self.register(source)
 
-            facility_id = source.addmodel(facility_model_name,
+            facility_id = source.addmodel(FACILITY_MODEL,
                                           name='fac1')
-            old_group_id = source.addmodel(group_model_name,
+            old_group_id = source.addmodel(GROUP_MODEL,
                                            name='group1',
                                            facility_id=facility_id)
             student_password = make_password('password', '10000', 'sha1')
-            student_id = source.addmodel(student_model_name,
+            student_id = source.addmodel(FACILITY_USER_MODEL,
                                          username='student1',
                                          password=student_password,
                                          group_id=old_group_id,
@@ -177,10 +165,10 @@ class SameVersionTests(CreateAdminMixin,
             source.sync()
 
             new_group_name = 'should-transfer-here'
-            new_group_id = source.addmodel(group_model_name,
+            new_group_id = source.addmodel(GROUP_MODEL,
                                            name=new_group_name,
                                            facility_id=facility_id)
-            source.modifymodel(student_model_name,
+            source.modifymodel(FACILITY_USER_MODEL,
                                student_id,
                                group_id=new_group_id)
 
@@ -188,3 +176,24 @@ class SameVersionTests(CreateAdminMixin,
 
             student = FacilityUser.objects.get(id=student_id)
             self.assertEquals(student.group_id, new_group_id)
+
+    def test_more_models_than_batch(self):
+
+        with self.get_distributed_server() as source:
+
+            self.register(source)
+
+            facility_id = source.addmodel(FACILITY_MODEL, name='fac1')
+            old_group_id = source.addmodel(GROUP_MODEL, name='group1', facility_id=facility_id)
+
+            student_id = source.addmodel(FACILITY_USER_MODEL,
+                                         username='student1',
+                                         password=DUMMY_PASSWORD,
+                                         group_id=old_group_id,
+                                         facility_id=facility_id)
+
+            print source.sync()
+
+            student = FacilityUser.objects.get(id=student_id)
+            self.assertEquals(student.group_id, old_group_id)
+

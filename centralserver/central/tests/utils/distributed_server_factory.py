@@ -1,5 +1,6 @@
 import json
 import pathlib
+import re
 import string
 import subprocess
 from random import choice
@@ -21,7 +22,7 @@ class DistributedServer(object):
         self.db_path = ((self.distributed_dir / 'database' / uniq_name)
                         .with_suffix('.sqlite'))
 
-        self.key = kwargs.get("key") or Key()
+        self.key = kwargs.pop("key") or Key()
 
         # setup for custom settings for this distributed server
         self.settings_name = uniq_name
@@ -66,8 +67,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             parse_result = urlparse(kwargs['CENTRAL_SERVER_HOST'])
             kwargs['CENTRAL_SERVER_HOST'] = parse_result.netloc
 
-        other_settings = ['{} = "{}"'.format(k, v)
-                          for k, v in kwargs.iteritems()]
+        other_settings = ['%s = %r' % (k, v) for k, v in kwargs.iteritems()]
         new_settings = '\n'.join([new_settings] + other_settings)
         old_settings_path = self.distributed_dir / 'settings.py'
         with open(old_settings_path.as_posix()) as f:
@@ -141,11 +141,19 @@ OWN_DEVICE_PRIVATE_KEY = %r
         server, waiting and then returning the stdout, stderr and returncode.
         '''
         self.call_command('syncmodels',
+                          # verbose=True,
                           output_to_stdout=False,
                           output_to_stderr=False)
-        return self.wait()
 
-    def addmodel(self, modelname, **attrs):
+        results = self.wait()[0]
+
+        return {
+            "uploaded": int(re.search("Total uploaded: (\d+)", results).group(1)),
+            "downloaded": int(re.search("Total downloaded: (\d+)", results).group(1)),
+            "errors": int(re.search("Total errors: (\d+)", results).group(1)),
+        }
+
+    def addmodel(self, modelname, count=1, **attrs):
         '''
         Create the model given by modelname in the distributed server,
         with attributes given by attrs. Returns the id of the new
@@ -155,12 +163,19 @@ OWN_DEVICE_PRIVATE_KEY = %r
         self.call_command('createmodel',
                           modelname,
                           data=json.dumps(attrs),
+                          count=count,
                           output_to_stdout=False,
                           output_to_stderr=False)
         model_id, err, ret = self.wait()
 
         # Strip newlines before returning the model ID.
-        return model_id.strip()
+        model_id = model_id.strip()
+
+        # Split the IDs into a list if > 1
+        if "," in model_id:
+            model_id = model_id.split(",")
+
+        return model_id
 
     def modifymodel(self, modelname, id, **attrs):
         '''
@@ -175,7 +190,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
                           data=json.dumps(attrs),
                           output_to_stdout=True,
                           output_to_stderr=True)
-        print self.wait()
+        self.wait()
 
     def register(self, username, password, zone_id):
         '''
