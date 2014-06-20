@@ -9,6 +9,7 @@ from urlparse import urlparse
 from django.conf import settings
 from fle_utils.crypto import Key
 from fle_utils.django_utils import call_outside_command_with_output
+from fle_utils.importing import resolve_model
 
 
 class DistributedServer(object):
@@ -191,6 +192,21 @@ OWN_DEVICE_PRIVATE_KEY = %r
                           output_to_stdout=True,
                           output_to_stderr=True)
         self.wait()
+
+    def countmodels(self, modelpath):
+        '''
+        Return the number of instances of a particular model that exist on
+        this distributed server.
+        '''
+
+        model = resolve_model(modelpath)
+
+        code = '''
+        from %(module_path)s import %(model_name)s
+        count = %(model_name)s.objects.count()
+        ''' % {"model_name": model.__name__, "module_path": model.__module__}
+
+        return self.runcode(code)["count"]
 
     def register(self, username, password, zone_id):
         '''
