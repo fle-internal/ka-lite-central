@@ -188,28 +188,41 @@ class SameVersionTests(CreateAdminMixin,
 
             self.register(d1)
 
-            facility_id = d1.addmodel(FACILITY_MODEL, name='fac-%d', count=2)[0]
+            facility_id = d1.addmodel(FACILITY_MODEL, name='fac-%d')
+
 
             student_id = d1.addmodel(FACILITY_USER_MODEL,
                                          username='student-%d',
+                                         first_name='first-name-%d',
                                          password=DUMMY_PASSWORD,
                                          facility_id=facility_id,
-                                         count=1)
+                                         count=5)[0]
 
             sync_results = d1.sync()
 
-            student_id = d1.addmodel(FACILITY_USER_MODEL,
-                                         username='student-%db',
-                                         password=DUMMY_PASSWORD,
-                                         facility_id=facility_id,
-                                         count=1)
+            student = FacilityUser.objects.get(id=student_id)
+            student.first_name = "Bob"
+            student.zone_fallback = self.zone
+            student.save()
 
-            d1.modifymodel(FACILITY_MODEL, facility_id, name="fac1-mod")
+            facility = Facility.objects.get(id=facility_id)
+            facility.name = "Home"
+            facility.zone_fallback = self.zone
+            facility.save()
+
+            # student_id = d1.addmodel(FACILITY_USER_MODEL,
+            #                              username='student-%db',
+            #                              password=DUMMY_PASSWORD,
+            #                              facility_id=facility_id,
+            #                              count=1)
+
+            # d1.modifymodel(FACILITY_MODEL, facility_id, name="fac1-mod")
 
             sync_results = d1.sync()
             print sync_results["results"]
 
-            self.assertEqual(Facility.objects.get(id=facility_id).name, "fac1-mod")
+            self.assertEqual(d1.readmodel(FACILITY_USER_MODEL, id=student_id)["first_name"], "Bob")
+            self.assertEqual(d1.readmodel(FACILITY_MODEL, id=facility_id)["name"], "Home")
 
             self.assertEqual(Facility.objects.count(), d1.countmodels(FACILITY_MODEL))
             self.assertEqual(FacilityUser.objects.count(), d1.countmodels(FACILITY_USER_MODEL))
