@@ -19,7 +19,7 @@ class DistributedServer(object):
                                 / 'ka-lite' / 'kalite')
         self.manage_py_path = self.distributed_dir / 'manage.py'
 
-        uniq_name = ''.join(choice(string.ascii_lowercase) for _ in range(10))
+        uniq_name = 'settings_' + ''.join(choice(string.ascii_lowercase) for _ in range(10))
         self.db_path = ((self.distributed_dir / 'database' / uniq_name)
                         .with_suffix('.sqlite'))
 
@@ -128,7 +128,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
         self.running_process = None  # so we can run other commands
 
         if noerr or returncode != 0:
-            errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
+            errmsgtemplate = "command returned non-zero errcode: stderr is %s"
             print stderr
             raise subprocess.CalledProcessError(returncode,
                                                 'command',
@@ -226,7 +226,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         return result
 
-    def readmodel(self, modelname, **attrs):
+    def readmodel(self, modelname, id):
         '''
         Reads the model with the modelname with the attributes given by
         **attrs.  Returns a list of dictionaries corresponding to the
@@ -236,9 +236,9 @@ OWN_DEVICE_PRIVATE_KEY = %r
         stdout, _stderr, _ret = self.call_command(
             'readmodel',
             modelname,
+            id=id,
             output_to_stdout=False,
             output_to_stderr=False,
-            **attrs
         ).wait()
 
         return json.loads(stdout)

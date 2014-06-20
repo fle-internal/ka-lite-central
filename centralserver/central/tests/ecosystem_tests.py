@@ -24,7 +24,7 @@ class SameVersionTests(CreateAdminMixin,
                        LiveServerTestCase):
 
     def setUp(self):
-        self.setup_fake_device()
+        self.setup_fake_device(name="Central")
         self.user = self.create_admin()
         self.org = self.create_organization(owner=self.user)
         self.zone = self.create_zone(organizations=[self.org])
@@ -115,7 +115,7 @@ class SameVersionTests(CreateAdminMixin,
                 id=model_id,
             )
 
-            self.assertTrue(obj[0]['fields']['name'] == 'kir1')
+            self.assertTrue(obj['name'] == 'kir1')
 
     def test_groups_sync(self):
 
@@ -222,3 +222,21 @@ class SameVersionTests(CreateAdminMixin,
             # student = FacilityUser.objects.get(id=student_id)
 
 
+    def test_central_server_setting_zone_fallback(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            facility_id = d.addmodel(FACILITY_MODEL, name='Original')
+
+            d.sync()
+
+            facility = Facility.objects.get(id=facility_id)
+            facility.name = "New"
+            facility.save()
+
+            sync_results = d.sync()
+            print sync_results["results"]
+
+            self.assertEqual(d.readmodel(FACILITY_MODEL, id=facility_id)["name"], "New")
