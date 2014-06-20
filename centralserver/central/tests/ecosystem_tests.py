@@ -1,12 +1,14 @@
 import subprocess
+from django.conf import settings
 from django.contrib.auth.models import make_password
 from django.test import LiveServerTestCase
+from django.test.utils import override_settings
 
 from .utils.crypto_key_factory import KeyFactory
 from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
-from kalite.facility.models import FacilityGroup, FacilityUser
+from kalite.facility.models import Facility, FacilityGroup, FacilityUser
 
 
 FACILITY_MODEL = 'kalite.facility.models.Facility'
@@ -15,6 +17,7 @@ FACILITY_USER_MODEL = 'kalite.facility.models.FacilityUser'
 
 DUMMY_PASSWORD = make_password('password', '10000', 'sha1')
 
+# @override_settings(SYNCING_MAX_RECORDS_PER_REQUEST=10)
 class SameVersionTests(CreateAdminMixin,
                        CentralServerMixins,
                        FakeDeviceMixin,
@@ -31,7 +34,7 @@ class SameVersionTests(CreateAdminMixin,
         self.settings = {
             'CENTRAL_SERVER_HOST': self.live_server_url,
             'SECURESYNC_PROTOCOL': 'http',
-            'SYNCING_MAX_RECORDS_PER_REQUEST': 5,
+            'SYNCING_MAX_RECORDS_PER_REQUEST': settings.SYNCING_MAX_RECORDS_PER_REQUEST,
         }
 
     def get_distributed_server(self, **kwargs):
@@ -177,23 +180,45 @@ class SameVersionTests(CreateAdminMixin,
             student = FacilityUser.objects.get(id=student_id)
             self.assertEquals(student.group_id, new_group_id)
 
+    @override_settings(SYNCING_MAX_RECORDS_PER_REQUEST=2)
     def test_more_models_than_batch(self):
 
-        with self.get_distributed_server() as source:
+        config = {"SYNCING_MAX_RECORDS_PER_REQUEST": settings.SYNCING_MAX_RECORDS_PER_REQUEST}
 
-            self.register(source)
+        with self.get_distributed_server(**config) as d1, self.get_distributed_server(**config) as d2:
 
-            facility_id = source.addmodel(FACILITY_MODEL, name='fac1')
-            old_group_id = source.addmodel(GROUP_MODEL, name='group1', facility_id=facility_id)
+            self.register(d1)
 
-            student_id = source.addmodel(FACILITY_USER_MODEL,
-                                         username='student1',
+            facility_id = d1.addmodel(FACILITY_MODEL, name='fac-%d', count=2)[0]
+
+            student_id = d1.addmodel(FACILITY_USER_MODEL,
+                                         username='student-%d',
                                          password=DUMMY_PASSWORD,
-                                         group_id=old_group_id,
-                                         facility_id=facility_id)
+                                         facility_id=facility_id,
+                                         count=1)
 
-            print source.sync()
+            sync_results = d1.sync()
 
-            student = FacilityUser.objects.get(id=student_id)
-            self.assertEquals(student.group_id, old_group_id)
+            student_id = d1.addmodel(FACILITY_USER_MODEL,
+                                         username='student-%db',
+                                         password=DUMMY_PASSWORD,
+                                         facility_id=facility_id,
+                                         count=1)
+
+            d1.modifymodel(FACILITY_MODEL, facility_id, name="fac1-mod")
+
+            sync_results = d1.sync()
+            print sync_results["results"]
+
+            self.assertEqual(Facility.objects.get(id=facility_id).name, "fac1-mod")
+
+            self.assertEqual(Facility.objects.count(), d1.countmodels(FACILITY_MODEL))
+            self.assertEqual(FacilityUser.objects.count(), d1.countmodels(FACILITY_USER_MODEL))
+
+            # sync_results = d2.sync()
+            # print sync_results["results"]
+
+
+            # student = FacilityUser.objects.get(id=student_id)
+
 

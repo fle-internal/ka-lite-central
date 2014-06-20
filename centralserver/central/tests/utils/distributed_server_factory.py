@@ -23,7 +23,7 @@ class DistributedServer(object):
         self.db_path = ((self.distributed_dir / 'database' / uniq_name)
                         .with_suffix('.sqlite'))
 
-        self.key = kwargs.pop("key") or Key()
+        self.key = kwargs.pop("key", None) or Key()
 
         # setup for custom settings for this distributed server
         self.settings_name = uniq_name
@@ -131,18 +131,18 @@ OWN_DEVICE_PRIVATE_KEY = %r
             errmsgtemplate = "addmodel returned non-zero errcode: stderr is %s"
             print stderr
             raise subprocess.CalledProcessError(returncode,
-                                                'createmodel',
+                                                'command',
                                                 output=errmsgtemplate % stderr)
 
         return (stdout, stderr, returncode)
 
-    def sync(self):
+    def sync(self, verbose=False):
         '''
         Convenience function for running `syncmodels` on the distributed
         server, waiting and then returning the stdout, stderr and returncode.
         '''
         self.call_command('syncmodels',
-                          # verbose=True,
+                          verbose=verbose,
                           output_to_stdout=False,
                           output_to_stderr=False)
 
@@ -152,6 +152,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             "uploaded": int(re.search("Total uploaded: (\d+)", results).group(1)),
             "downloaded": int(re.search("Total downloaded: (\d+)", results).group(1)),
             "errors": int(re.search("Total errors: (\d+)", results).group(1)),
+            "results": results,
         }
 
     def addmodel(self, modelname, count=1, **attrs):
