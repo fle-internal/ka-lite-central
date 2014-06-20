@@ -226,6 +226,24 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         return json.loads(stdout)
 
+    def runcode(self, code):
+        '''
+        Runs a block of code and returns a dictionary with the serializable
+        portions of the resulting local namespace.
+        '''
+
+        # put it all into one line; note: may blow up anything with if statements, etc
+        code = re.sub("\s*\n\s*", "; ", code.strip())
+
+        stdout, _stderr, _ret = self.call_command(
+            'runcode',
+            code,
+            output_to_stdout=False,
+            output_to_stderr=False,
+        ).wait()
+
+        return json.loads(stdout)
+
     def validate(self):
         return self.call_command('validate', output_to_stdout=False)
 
