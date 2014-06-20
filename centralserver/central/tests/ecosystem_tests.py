@@ -144,8 +144,7 @@ class SameVersionTests(CreateAdminMixin,
             # this should not raise a CalledProcessError
             synced_groups = sink.readmodel(GROUP_MODEL, id=group_id)
 
-            self.assertTrue(synced_groups[0]['pk'] == group_id,
-                            'Group has a different ID')
+            self.assertTrue(synced_groups['id'] == group_id, 'Group has a different ID')
 
     def test_syncing_of_students_to_another_group_to_central_server(self):
         # Addresses issue #2124 of learningequality/ka-lite
@@ -237,6 +236,5 @@ class SameVersionTests(CreateAdminMixin,
             facility.save()
 
             sync_results = d.sync()
-            print sync_results["results"]
 
             self.assertEqual(d.readmodel(FACILITY_MODEL, id=facility_id)["name"], "New")
