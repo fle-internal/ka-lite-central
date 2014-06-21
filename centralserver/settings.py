@@ -57,6 +57,7 @@ DATABASES      = getattr(local_settings, "DATABASES", {
     }
 })
 
+ALLOWED_HOSTS = getattr(local_settings, "ALLOWED_HOSTS", ['*'])
 INTERNAL_IPS   = getattr(local_settings, "INTERNAL_IPS", ("127.0.0.1",))
 
 # Local time zone for this installation. Choices can be found here:
