@@ -1,4 +1,4 @@
-[submodule "ka-lite"]
-	path = ka-lite
+[submodule "ka-lite-submodule"]
+	path = ka-lite-submodule
 	url = git@github.com:learningequality/ka-lite.git
 	branch = central-ecosystem-merge

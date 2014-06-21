@@ -42,7 +42,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)  # shut up requests!
 # Not really a Django setting, but we treat it like one--it's eeeeverywhere.
 PROJECT_PATH = os.path.realpath(getattr(local_settings, "PROJECT_PATH", os.path.dirname(os.path.realpath(__file__)))) + "/"
 ROOT_DATA_PATH = os.path.realpath(getattr(local_settings, "ROOT_DATA_PATH", os.path.join(PROJECT_PATH, "..", "data"))) + "/"
-KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite') + "/"
+KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
 
 LOCALE_PATHS   = getattr(local_settings, "LOCALE_PATHS", (PROJECT_PATH + "/../locale",))
 LOCALE_PATHS   = tuple([os.path.realpath(lp) + "/" for lp in LOCALE_PATHS])
@@ -108,7 +108,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 ) + getattr(local_settings, 'TEMPLATE_CONTEXT_PROCESSORS', tuple())
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, '..', 'static-libraries'),
-    os.path.join(PROJECT_PATH, '..', 'ka-lite', 'static-libraries'),
+    os.path.join(PROJECT_PATH, '..', 'ka-lite-submodule', 'static-libraries'),
 )  # libraries common to all apps
 
 DEFAULT_ENCODING = 'utf-8'

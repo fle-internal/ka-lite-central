@@ -16,7 +16,7 @@ class DistributedServer(object):
 
     def __init__(self, *args, **kwargs):
         self.distributed_dir = (pathlib.Path(settings.PROJECT_PATH).parent
-                                / 'ka-lite' / 'kalite')
+                                / 'ka-lite-submodule' / 'kalite')
         self.manage_py_path = self.distributed_dir / 'manage.py'
 
         uniq_name = 'settings_' + ''.join(choice(string.ascii_lowercase) for _ in range(10))

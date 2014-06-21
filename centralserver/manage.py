@@ -15,9 +15,9 @@ if __name__ == "__main__":
     # Now build the paths that point to all of the project pieces
     PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
     PROJECT_PYTHON_PATHS = [
-        os.path.join(PROJECT_PATH, "..", "ka-lite", "python-packages"),  # libraries (python-packages)
+        os.path.join(PROJECT_PATH, "..", "ka-lite-submodule", "python-packages"),  # libraries (python-packages)
         os.path.join(PROJECT_PATH, ".."),  # centralserver.settings
-        os.path.join(PROJECT_PATH, "..", 'ka-lite'),  #kalite.*
+        os.path.join(PROJECT_PATH, "..", 'ka-lite-submodule'),  #kalite.*
     ]
     sys.path = [os.path.realpath(p) for p in PROJECT_PYTHON_PATHS] + sys.path
 
