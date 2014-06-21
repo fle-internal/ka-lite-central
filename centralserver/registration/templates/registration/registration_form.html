@@ -3,6 +3,10 @@
 
 {% block title %}{% trans "Sign up" %}{{ block.super }}{% endblock %}
 
+{% block signup_active %}
+  active
+{% endblock signup_active %}
+
 {% block headcss %}
     <style>
         /* hackish way to show org details, if there are any errors or content */
