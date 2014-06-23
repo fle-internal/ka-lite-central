@@ -34,6 +34,7 @@ logging.basicConfig()
 LOG.setLevel(LOGGING_LEVEL)
 logging.getLogger("requests").setLevel(logging.WARNING)  # shut up requests!
 
+ADMINS = (('FLE Errors', 'errors@learningequality.org'),)
 
 ##############################
 # Basic Django settings
