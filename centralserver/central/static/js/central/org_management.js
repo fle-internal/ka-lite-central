@@ -1,7 +1,7 @@
 $(function() {
     // makes correct link submit form for removing admin & revoking invites
-    $('.remove-admin-submit, .remove-invite-submit').click(function(ev) {
-        $(ev.srcElement).parents('form').submit();
+    $('.remove-admin-submit, .remove-invite-submit').click(function() {
+        $(this).parent('form').submit();
         return false;
     });
 
