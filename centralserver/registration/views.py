@@ -206,7 +206,6 @@ def register(request, backend, success_url=None, form_class=None,
         form_class = backend.get_form_class(request)
 
     do_subscribe = request.REQUEST.get("email_subscribe") == "on"
-
     # if they've been invited, don't force org creation
     invited_email = request.REQUEST.get("email_invite") 
     if request.method == 'POST':
@@ -253,8 +252,12 @@ def register(request, backend, success_url=None, form_class=None,
                 else:
                     raise e
         else:
+            # TODO(dylan) this isn't pretty or dry, but we have to recreate the org form correctly
+            # if the form fails validation, because we have to pass something back to the context
             if invited_email:
                 org_form = None
+            else:
+                org_form = OrganizationForm(data=request.POST, instance=Organization())
 
     # GET, not POST
     else:

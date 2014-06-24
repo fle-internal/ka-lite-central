@@ -31,7 +31,7 @@ def delete_organization(request, org_id):
 @api_response_causes_reload  # must go above @api_handle_error_with_json
 def delete_zone(request, zone_id):
     zone = Zone.objects.get(id=zone_id)
-    zone.delete()
+    zone.soft_delete()
     return JsonResponseMessageSuccess(_("You have successfully deleted Zone %(zone_name)s") % {"zone_name": zone.name})
 
 
