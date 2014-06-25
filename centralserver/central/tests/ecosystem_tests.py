@@ -251,3 +251,22 @@ class SameVersionTests(CreateAdminMixin,
             sync_results = d.sync()
 
             self.assertEqual(d.readmodel(FACILITY_MODEL, id=facility_id)["name"], "New")
+
+    def test_soft_deletion_sync(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            facility_id = d.addmodel(FACILITY_MODEL, name='Original')
+
+            d.sync()
+
+            d.runcode("from kalite.facility.models import Facility; Facility.objects.get(id='%s').soft_delete()" % facility_id)
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["uploaded"], 1, "Soft-deleted facility was not uploaded")
+
+            facility = Facility.all_objects.get(id=facility_id)
+            self.assertTrue(facility.deleted, "Soft-deleted facility not marked as deleted on central server")
