@@ -210,7 +210,7 @@ def register(request, backend, success_url=None, form_class=None,
     invited_email = request.REQUEST.get("email_invite") 
     if request.method == 'POST':
         form = form_class(data=request.POST, files=request.FILES)
-
+        validation_successful = True
         # Could register
         if form.is_valid():
             assert form.cleaned_data.get("username") == form.cleaned_data.get("email"), "Should be set equal in the call to clean()"
@@ -234,17 +234,13 @@ def register(request, backend, success_url=None, form_class=None,
                         zone.save()
                         org.add_zone(zone)
                         org.save()
+                    else:
+                        validation_successful = False
 
                 # Finally, try and subscribe the user to the mailing list
                 # (silently; don't return anything to the user)
                 if do_subscribe:
                     contact_subscribe(request, form.cleaned_data['email'])  # no "return"
-
-                if success_url is None:
-                    to, args, kwargs = backend.post_registration_redirect(request, new_user)
-                    return redirect(to, *args, **kwargs)
-                else:
-                    return redirect(success_url)
 
             except IntegrityError as e:
                 if e.message=='column username is not unique':
@@ -254,6 +250,15 @@ def register(request, backend, success_url=None, form_class=None,
         else:
             # TODO(dylan) this isn't pretty or dry, but we have to recreate the org form correctly
             # if the form fails validation, because we have to pass something back to the context
+            validation_successful = False
+
+        if validation_successful:
+            if success_url is None:
+                to, args, kwargs = backend.post_registration_redirect(request, new_user)
+                return redirect(to, *args, **kwargs)
+            else:
+                return redirect(success_url)
+        else:
             if invited_email:
                 org_form = None
             else:
