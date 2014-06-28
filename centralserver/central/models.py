@@ -163,10 +163,10 @@ class OrganizationInvitation(ExtendedModel):
         to_email = self.email_to_invite
         sender = settings.CENTRAL_FROM_EMAIL
         cdict = {
+            'invited_email': to_email,
             'organization': self.organization,
             'invited_by': self.invited_by,
             'central_server_host': request.get_host(),  # for central server actions, determine DYNAMICALLY to be safe
-
         }
         # Invite an existing user
         if User.objects.filter(email=to_email).count() > 0:

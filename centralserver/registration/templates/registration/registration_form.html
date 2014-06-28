@@ -62,6 +62,8 @@
         <div class="errorlist">{{ form.email.errors.as_text }}</div>
       {% endif %}
     </div>
+    {% if org_form %}
+    <!-- Begin org form -->
     <div class="form-section">
       <div class="form-label"><label for="id_org_name">Organization Name:</label></div>
       <div class="form-element">{{ org_form.name }}</div>
@@ -112,6 +114,8 @@
           {% endif %}
         </div>
     </div>
+    <!-- End org form -->
+    {% endif %}
     <div class="form-section">
       <div class="form-label"><label for="id_password1">Password:</label></div>
       <div class="form-element">{{ form.password1 }}</div>

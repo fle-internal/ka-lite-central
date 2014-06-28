@@ -243,7 +243,7 @@ class UserRegistrationCaseTest(KALiteCentralBrowserTestCase):
 
 class CentralEmptyFormSubmitCaseTest(KALiteCentralBrowserTestCase):
     """
-    Submit forms with no values, make sure there are no errors.
+    Submit forms with no values, make sure there are errors.
     """
     def test_login_form(self):
         self.empty_form_test(url=self.reverse("auth_login"), submission_element_id="id_username")
