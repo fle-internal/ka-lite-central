@@ -87,7 +87,8 @@ class Command(BaseCommand):
                 f.write(jsonp)
                 states = get_states(locations)
                 print "Countries (%d):" % len(countries)
-                print "\n".join(sorted(country.replace("United States", "U.S.A. (%d+ states)" % len(states)) for country in countries))
+                # print "\n".join(sorted(country.replace("United States", "U.S.A. (%d+ states)" % len(states)) for country in countries))
+                print "\n".join(sorted(country for country in countries))
 
 
 def ips_to_locations(ips):
@@ -108,18 +109,25 @@ def ips_to_locations(ips):
     
     return locations
 
+COUNTRY_STRINGS_TO_REMOVE = [", Republic of", ", United Republic of", ", Islamic Republic of"]
+
 def get_countries(locations, continent=None):
     countries = set([])
     for record in locations:
         if record:
             if continent and continent != record["continent"]:
                 continue
-            countries.add(record['country_name'].replace(", Republic of", "").replace(", United Republic of", ""))
+            country_name = record['country_name']
+            for substring in COUNTRY_STRINGS_TO_REMOVE:
+                country_name = country_name.replace(substring, "")
+            countries.add(country_name)
     return list(countries.union(["Bhutan", "Central African Republic"]) - set(['Anonymous Proxy', 'Satellite Provider', 'Asia/Pacific Region', 'Virgin Islands, U.S.']))
 
-def get_states(locations, country="United States"):
+def get_states(locations, country=["United States", "U.S.A."]):
+    if isinstance(country, basestring):
+        country = [country]
     states = set([])
     for record in locations:
-        if record and record["country_name"] == country and record["region_name"]:
+        if record and record["country_name"] in country and record["region_name"]:
             states.add(record["region_name"])
     return states
