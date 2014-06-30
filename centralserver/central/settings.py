@@ -69,7 +69,7 @@ TEMPLATE_LOADERS = (
 )
 if DEBUG:
     INSTALLED_APPS += ("django_snippets",)   # used in contact form and (debug) profiling middleware
-
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ##############################
 # KA Lite settings
