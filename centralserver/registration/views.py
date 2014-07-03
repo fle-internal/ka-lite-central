@@ -216,14 +216,20 @@ def register(request, backend, success_url=None, form_class=None,
             assert form.cleaned_data.get("username") == form.cleaned_data.get("email"), "Should be set equal in the call to clean()"
 
             try:
-                # Create the user
-                new_user = backend.register(request, **form.cleaned_data)
-
-                # only force add org if user was not invited
-                if not invited_email:
-                    org_form = OrganizationForm(data=request.POST, instance=Organization())
+                # if admin invited, just create user, do not worry about org stuff
+                if invited_email:
+                    new_user = backend.register(request, **form.cleaned_data)
+                else:
+                    post_data = request.POST.copy() # request.POST is immutable 
+                    org_form = OrganizationForm(data=post_data, instance=Organization())
+                    # Default the org name if they omit it to their first and last name
+                    # If they don't provide their first and last name we catch it in the org_form clean
+                    if not org_form.data.get('name'):
+                        if org_form.data.get('first_name') and org_form.data.get('last_name'):
+                            org_form.data['name'] = "%(first_name)s %(last_name)s's Organization" % {'first_name': org_form.data['first_name'], 'last_name': org_form.data['last_name']}  
                     if org_form.is_valid():
                         # Add an org.  Must create org before adding user.
+                        new_user = backend.register(request, **form.cleaned_data)   
                         org_form.instance.owner = new_user
                         org_form.save()
                         org = org_form.instance
@@ -248,8 +254,6 @@ def register(request, backend, success_url=None, form_class=None,
                 else:
                     raise e
         else:
-            # TODO(dylan) this isn't pretty or dry, but we have to recreate the org form correctly
-            # if the form fails validation, because we have to pass something back to the context
             validation_successful = False
 
         if validation_successful:
