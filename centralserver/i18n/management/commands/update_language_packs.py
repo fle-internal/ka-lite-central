@@ -287,12 +287,6 @@ def update_translations(lang_codes=None,
 
         for lang_code in (lang_codes or [None]):
 
-            # don't download po files for English, since original text is already in English
-            # (and KA has English po files in their crowdin repo, but they're full of non-English text)
-            if lang_code == "en":
-                package_metadata["en"] = {"percent_translated": 100}
-                continue
-
             lang_code = lcode_to_ietf(lang_code)
             lang_code_crowdin = get_supported_language_map(lang_code)['crowdin']
             if not lang_code_crowdin:
@@ -329,7 +323,9 @@ def update_translations(lang_codes=None,
             package_metadata[lang_code]["kalite_nphrases"]       = kalite_metadata["phrases"]
 
             # Download Khan Academy translations too
-            if not download_ka_translations:
+            # (don't download po files for English, since original text is already in English,
+            # and KA has English po files in their crowdin repo, but they're full of non-English text)
+            if not download_ka_translations or lang_code == "en":
                 logging.info("Skipping KA translations")
                 combined_po_file = None
             else:
