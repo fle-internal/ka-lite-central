@@ -286,6 +286,13 @@ def update_translations(lang_codes=None,
 
 
         for lang_code in (lang_codes or [None]):
+
+            # don't download po files for English, since original text is already in English
+            # (and KA has English po files in their crowdin repo, but they're full of non-English text)
+            if lang_code == "en":
+                package_metadata["en"] = {"percent_translated": 100}
+                continue
+
             lang_code = lcode_to_ietf(lang_code)
             lang_code_crowdin = get_supported_language_map(lang_code)['crowdin']
             if not lang_code_crowdin:
@@ -353,10 +360,6 @@ def update_translations(lang_codes=None,
                 else:
                     pmlc["percent_translated"] = 100. * (pmlc['kalite_ntranslations'] + pmlc['ka_ntranslations']) / float(pmlc['kalite_nphrases'] + pmlc['ka_nphrases'])
 
-
-            # english is always 100% translated
-            if lang_code == 'en':
-                pmlc['percent_translated'] = 100
 
     return package_metadata
 
@@ -463,7 +466,7 @@ def build_translations(project_id=None, project_key=None):
     if not project_id:
         project_id = settings.CROWDIN_PROJECT_ID
     if not project_key:
-       project_key = settings.CROWDIN_PROJECT_KEY
+        project_key = settings.CROWDIN_PROJECT_KEY
 
     logging.info("Requesting that CrowdIn build a fresh zip of our translations")
     request_url = "http://api.crowdin.net/api/project/%s/export?key=%s" % (project_id, project_key)

@@ -39,7 +39,7 @@ def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
         if "docs.google.com" not in download_url:
             logging.warn("Redirect location no longer in Google docs (%s)" % download_url)
         else:
-            download_url += "&output=csv&gid=0"
+            download_url = download_url.replace("/edit", "/export?format=csv")
 
     logging.info("Downloading dubbed video data from %s" % download_url)
     response = requests.get(download_url)
@@ -70,64 +70,55 @@ def generate_dubbed_video_mappings(csv_data=None):
     #   Value: corresponding youtube ID in the new language.
     video_map = {}
 
-    row_num = -1
-    try:
-        # Loop through each row in the spreadsheet.
-        while (True):
-            row_num += 1
-            row = reader.next()
+    # Loop through each row in the spreadsheet.
+    for row in reader:
 
+        # skip over the header rows
+        if row[0].strip() in ["", "UPDATED:"]:
+            continue
 
-            if row_num < 4:
-                # Rows 1-4 are crap.
-                continue
+        elif row[0] == "SERIAL":
+            # Read the header row.
+            header_row = [v.lower() for v in row]  # lcase all header row values (including language names)
+            slug_idx = header_row.index("title id")
+            english_idx = header_row.index("english")
+            assert slug_idx != -1, "Video slug column header should be found."
+            assert english_idx != -1, "English video column header should be found."
 
-            elif row_num == 4:
-                # Row 5 is the header row.
-                header_row = [v.lower() for v in row]  # lcase all header row values (including language names)
-                slug_idx = header_row.index("title id")
-                english_idx = header_row.index("english")
-                assert slug_idx != -1, "Video slug column header should be found."
-                assert english_idx != -1, "English video column header should be found."
+        else:
+            # Rows 6 and beyond are data.
+            assert len(row) == len(header_row), "Values line length equals headers line length"
 
-            else:
-                # Rows 6 and beyond are data.
-                assert len(row) == len(header_row), "Values line length equals headers line length"
+            # Grab the slug and english video ID.
+            video_slug = row[slug_idx]
+            english_video_id = row[english_idx]
+            assert english_video_id, "English Video ID should not be empty"
+            assert video_slug, "Slug should not be empty"
 
-                # Grab the slug and english video ID.
-                video_slug = row[slug_idx]
-                english_video_id = row[english_idx]
-                assert english_video_id, "English Video ID should not be empty"
-                assert video_slug, "Slug should not be empty"
+            # English video is the first video ID column,
+            #   and following columns (until the end) are other languages.
+            # Loop through those columns and, if a video exists,
+            #   add it to the dictionary.
+            for idx in range(english_idx, len(row)):
+                if not row[idx]:  # make sure there's a dubbed video
+                    continue
 
-                # English video is the first video ID column,
-                #   and following columns (until the end) are other languages.
-                # Loop through those columns and, if a video exists,
-                #   add it to the dictionary.
-                for idx in range(english_idx, len(row)):
-                    if not row[idx]:  # make sure there's a dubbed video
-                        continue
-
-                    lang = header_row[idx]
-                    if lang not in video_map:  # add the first level if it doesn't exist
-                        video_map[lang] = {}
-                    dubbed_youtube_id = row[idx]
-                    if english_video_id == dubbed_youtube_id and lang != "english":
-                        logging.error("Removing entry for (%s, %s): dubbed and english youtube ID are the same." % (lang, english_video_id))
-                    #elif dubbed_youtube_id in video_map[lang].values():
-                        # Talked to Bilal, and this is actually supposed to be OK.  Would throw us for a loop!
-                        #    For now, just keep one.
-                        #for key in video_map[lang].keys():
-                        #    if video_map[lang][key] == dubbed_youtube_id:
-                        #        del video_map[lang][key]
-                        #        break
-                        #logging.error("Removing entry for (%s, %s): the same dubbed video ID is used in two places, and we can only keep one in our current system." % (lang, english_video_id))
-                    else:
-                        video_map[lang][english_video_id] = row[idx]  # add the corresponding video id for the video, in this language.
-
-    except StopIteration:
-        # The loop ends when the CSV file hits the end and throws a StopIteration
-        pass
+                lang = header_row[idx]
+                if lang not in video_map:  # add the first level if it doesn't exist
+                    video_map[lang] = {}
+                dubbed_youtube_id = row[idx]
+                if english_video_id == dubbed_youtube_id and lang != "english":
+                    logging.error("Removing entry for (%s, %s): dubbed and english youtube ID are the same." % (lang, english_video_id))
+                #elif dubbed_youtube_id in video_map[lang].values():
+                    # Talked to Bilal, and this is actually supposed to be OK.  Would throw us for a loop!
+                    #    For now, just keep one.
+                    #for key in video_map[lang].keys():
+                    #    if video_map[lang][key] == dubbed_youtube_id:
+                    #        del video_map[lang][key]
+                    #        break
+                    #logging.error("Removing entry for (%s, %s): the same dubbed video ID is used in two places, and we can only keep one in our current system." % (lang, english_video_id))
+                else:
+                    video_map[lang][english_video_id] = row[idx]  # add the corresponding video id for the video, in this language.
 
     # Now, validate the mappings with our topic data
     known_videos = get_node_cache("Video").keys()

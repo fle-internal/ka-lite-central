@@ -31,6 +31,7 @@ INSTALLED_APPS = (
     "kalite.control_panel",  # in both apps
     "kalite.khanload",  # zip_kalite must know about the entire kalite project structure.  Boo, bad code placement!
     "kalite.testing",  # browser testing
+    "kalite.updates",
     # central-only apps
     "centralserver.contact",
     "centralserver.deployment",
