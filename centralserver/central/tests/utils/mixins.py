@@ -36,7 +36,7 @@ class CreateAdminMixin(object):
         fields.update(kwargs)
 
         user = User.objects.create(**fields)
-        user.real_password = fields.get('password', fields.get('password'))
+        user.real_password = fields['password']
         user.set_password(user.real_password)
         user.save()
 
