@@ -219,7 +219,6 @@ class SameVersionTests(CreateAdminMixin,
             # d1.modifymodel(FACILITY_MODEL, facility_id, name="fac1-mod")
 
             sync_results = d1.sync()
-            print sync_results["results"]
 
             self.assertEqual(d1.readmodel(FACILITY_USER_MODEL, id=student_id)["first_name"], "Bob")
             self.assertEqual(d1.readmodel(FACILITY_MODEL, id=facility_id)["name"], "Home")
@@ -252,7 +251,7 @@ class SameVersionTests(CreateAdminMixin,
 
             self.assertEqual(d.readmodel(FACILITY_MODEL, id=facility_id)["name"], "New")
 
-    def test_soft_deletion_sync(self):
+    def test_soft_deletion_sync_upload(self):
 
         with self.get_distributed_server() as d:
 
@@ -270,3 +269,46 @@ class SameVersionTests(CreateAdminMixin,
 
             facility = Facility.all_objects.get(id=facility_id)
             self.assertTrue(facility.deleted, "Soft-deleted facility not marked as deleted on central server")
+
+    def test_soft_deletion_sync_download(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            facility_id = d.addmodel(FACILITY_MODEL, name='Original')
+
+            d.sync()
+
+            Facility.all_objects.get(id=facility_id).soft_delete()
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["downloaded"], 1, "Soft-deleted facility was not downloaded")
+
+            result = d.runcode("from kalite.facility.models import Facility; deleted = Facility.all_objects.get(id='%s').deleted" % facility_id)
+
+            self.assertEqual(result["deleted"], True, "Soft-deleted facility not marked as deleted in distributed server")
+
+
+    def test_records_created_before_reg_still_sync(self):
+
+        with self.get_distributed_server() as d:
+
+            # Create a facility on central server, in correct zone
+            facility_central = Facility(name="Central Facility", zone_fallback=self.zone)
+            facility_central.save()
+
+            # Create a facility on distributed server
+            facility_distributed_id = d.addmodel(FACILITY_MODEL, name='Distributed Facility')
+
+            self.register(d)
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["downloaded"], 2, "Wrong number of records downloaded") # =2 because DeviceZone is redownloaded
+            self.assertEqual(sync_results["uploaded"], 1, "Wrong number of records uploaded")
+
+            self.assertEqual(Facility.objects.filter(id=facility_distributed_id).count(), 1, "Distributed server facility not found centrally.")
+            results = d.runcode("from kalite.facility.models import Facility; count = Facility.objects.filter(id='%s').count()" % facility_central.id)
+            self.assertEqual(results["count"], 1, "Central server facility not found on distributed.")
