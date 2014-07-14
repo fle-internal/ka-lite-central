@@ -159,11 +159,11 @@ TEST_RUNNER = CENTRALSERVER_TEST_RUNNER
 
 RUNNING_IN_TRAVIS = bool(os.environ.get("TRAVIS"))
 
-LOG.debug("======== MIDDLEWARE ========")
-LOG.debug("\n".join(MIDDLEWARE_CLASSES))
-LOG.debug("====== INSTALLED_APPS ======")
-LOG.debug("\n".join(INSTALLED_APPS))
-LOG.debug("============================")
+# LOG.debug("======== MIDDLEWARE ========")
+# LOG.debug("\n".join(MIDDLEWARE_CLASSES))
+# LOG.debug("====== INSTALLED_APPS ======")
+# LOG.debug("\n".join(INSTALLED_APPS))
+# LOG.debug("============================")
 
 ########################
 # Now that we've imported the settings from all other installed apps,
