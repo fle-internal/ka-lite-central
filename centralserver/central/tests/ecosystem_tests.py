@@ -9,7 +9,7 @@ from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
 from kalite.facility.models import Facility, FacilityGroup, FacilityUser
-
+from securesync.models import Device
 
 FACILITY_MODEL = 'kalite.facility.models.Facility'
 GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
@@ -45,11 +45,11 @@ class SameVersionTests(CreateAdminMixin,
 
         return DistributedServer(**config)
 
-    def register(self, dist_server):
+    def register(self, dist_server, zone_id=None):
         return dist_server.register(
             username=self.user.username,
             password=self.user.real_password,
-            zone_id=self.zone.id,
+            zone_id=zone_id or self.zone.id,
         )
 
     def test_can_run_on_distributed_server(self):
@@ -312,3 +312,19 @@ class SameVersionTests(CreateAdminMixin,
             self.assertEqual(Facility.objects.filter(id=facility_distributed_id).count(), 1, "Distributed server facility not found centrally.")
             results = d.runcode("from kalite.facility.models import Facility; count = Facility.objects.filter(id='%s').count()" % facility_central.id)
             self.assertEqual(results["count"], 1, "Central server facility not found on distributed.")
+
+    def test_distributed_server_cannot_overwrite_central_device(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            sync_results = d.sync()
+
+            results = d.runcode("from securesync.models import Device; d = Device(id='%s', name='Hahaha'); d.save()" % Device.get_own_device().id)
+
+            with self.assertRaises(Exception):
+                sync_results = d.sync()
+
+            self.assertNotEqual(Device.get_own_device().name, "Hahaha", "Eek! Distributed server overwrote central server Device.")
+
