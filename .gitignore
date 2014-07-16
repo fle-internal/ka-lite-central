@@ -31,6 +31,7 @@ writeup/
 /centralserver/local_settings.py
 /centralserver/local_settings_secrets.py
 /centralserver/media
+/centralserver/static
 /static-libraries/css
 /data/content
 /data/i18n
