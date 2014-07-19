@@ -110,7 +110,7 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
-    url(r'^contact/', include(centralserver.contact.urls)),
+    url(r'^contact/', lambda request: HttpResponseRedirect("https://learningequality.org/ka-lite/map/add/#contact")),
     url(r'^faq/', include(centralserver.faq.urls)),
     url(r'^accounts/', include(centralserver.registration.urls)),
 )
