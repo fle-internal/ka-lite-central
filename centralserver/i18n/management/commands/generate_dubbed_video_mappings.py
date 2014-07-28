@@ -174,6 +174,10 @@ class Command(BaseCommand):
         # Use cached data to generate the video map
         raw_map = generate_dubbed_video_mappings(csv_data=csv_data)
 
+        # Remove any dummy (empty) entries, as this breaks everything on the client
+        if "" in raw_map:
+            del raw_map[""]
+
         # Now we've built the map.  Save it.
         ensure_dir(os.path.dirname(DUBBED_VIDEOS_MAPPING_FILEPATH))
         logging.info("Saving data to %s" % DUBBED_VIDEOS_MAPPING_FILEPATH)
@@ -189,10 +193,10 @@ class Command(BaseCommand):
             logging.info("*** Added support for %2d languages; removed support for %2d languages. ***" % (len(added_languages), len(removed_languages)))
 
         for lang_code in sorted(list(set(new_map.keys()).union(set(old_map.keys())))):
-            added_videos = set(new_map[lang_code].keys()) - set(old_map[lang_code].keys())
-            removed_videos = set(old_map[lang_code].keys()) - set(new_map[lang_code].keys())
-            shared_keys = set(new_map[lang_code].keys()).intersection(set(old_map[lang_code].keys()))
-            changed_videos = [vid for vid in shared_keys if old_map[lang_code][vid] != new_map[lang_code][vid]]
+            added_videos = set(new_map.get(lang_code, {}).keys()) - set(old_map.get(lang_code, {}).keys())
+            removed_videos = set(old_map.get(lang_code, {}).keys()) - set(new_map.get(lang_code, {}).keys())
+            shared_keys = set(new_map.get(lang_code, {}).keys()).intersection(set(old_map.get(lang_code, {}).keys()))
+            changed_videos = [vid for vid in shared_keys if old_map.get(lang_code, {})[vid] != new_map.get(lang_code, {})[vid]]
             logging.info("\t%5s: Added %d videos, removed %3d videos, changed %3d videos." % (lang_code, len(added_videos), len(removed_videos), len(changed_videos)))
 
         logging.info("Done.")

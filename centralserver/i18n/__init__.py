@@ -170,6 +170,10 @@ def get_dubbed_video_map(lang_code=None, reload=None, force=False):
             logging.info("Failed to get dubbed video mappings (%s); defaulting to empty.")
             DUBBED_VIDEO_MAP_RAW = {}  # setting this will avoid triggering reload on every call
 
+        # Remove any empty items, as they break things
+        if "" in DUBBED_VIDEO_MAP_RAW:
+            del DUBBED_VIDEO_MAP_RAW[""]
+
         DUBBED_VIDEO_MAP = {}
         for lang_name, video_map in DUBBED_VIDEO_MAP_RAW.iteritems():
             logging.debug("Adding dubbed video map entry for %s (name=%s)" % (get_langcode_map(lang_name), lang_name))
