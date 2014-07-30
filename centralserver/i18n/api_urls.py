@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 
-from centralserver.version import VERSION
+from kalite.version import VERSION
 
 
 urlpatterns = patterns(__package__ + '.api_views',

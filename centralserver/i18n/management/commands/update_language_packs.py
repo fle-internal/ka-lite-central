@@ -43,7 +43,7 @@ from django.core.mail import mail_admins
 
 from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
-from centralserver.version import VERSION
+from kalite.version import VERSION
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
 from kalite.updates import get_all_remote_video_sizes
 
