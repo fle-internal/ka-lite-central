@@ -5,6 +5,7 @@ import json
 import os
 import pygeoip
 import re
+import simplekml
 
 from optparse import make_option
 
@@ -44,6 +45,12 @@ class Command(BaseCommand):
                     default="",
                     metavar="FILE",
                     help="Output filename for country list"),
+        make_option("-k", "--kml",
+                    action="store",
+                    dest="kml_file",
+                    default="",
+                    metavar="FILE",
+                    help="Output filename for KML file"),
     )
 
     def handle(self, *args, **options):
@@ -72,12 +79,18 @@ class Command(BaseCommand):
                 jsonp = "display_locations(%s);" % json.dumps(locations)
                 f.write(jsonp)
 
-        if options.get("location_file"):
+        if options.get("location_csv_file"):
             with open(options["location_csv_file"], "w") as f:
                 self.stdout.write("Writing locations of IPs as CSV data to %s!\n" % options["location_csv_file"])
                 cf = csv.writer(f)
                 cf.writerow(["name", "latitude", "longitude", "description"])
                 cf.writerows([[r["name"], r["latitude"], r["longitude"], ""] for r in locations])
+
+        if options.get("kml_file"):
+            kml = simplekml.Kml()
+            for r in locations:
+                kml.newpoint(name=r["name"], coords=[(r["latitude"], r["longitude"])])
+            kml.save(options["kml_file"])
 
         if options.get("country_file"):
             with open(options["country_file"], "w") as f:
