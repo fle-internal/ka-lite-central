@@ -89,7 +89,9 @@ class Command(BaseCommand):
         if options.get("kml_file"):
             kml = simplekml.Kml()
             for r in locations:
-                kml.newpoint(name=r["name"], coords=[(r["longitude"], r["latitude"])])
+                pnt = kml.newpoint(name=r["name"].split(",")[0], coords=[(r["longitude"], r["latitude"])])
+                pnt.style.iconstyle.scale = 5
+                pnt.style.iconstyle.color = "ff0000ff"
             kml.save(options["kml_file"])
 
         if options.get("country_file"):
