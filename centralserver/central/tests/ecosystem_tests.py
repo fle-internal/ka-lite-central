@@ -328,3 +328,25 @@ class SameVersionTests(CreateAdminMixin,
 
             self.assertNotEqual(Device.get_own_device().name, "Hahaha", "Eek! Distributed server overwrote central server Device.")
 
+
+    def test_syncing_of_remotely_created_model_modified_locally(self):
+
+        with self.get_distributed_server() as d:
+
+            # Create a facility on central server
+            facility_central = Facility(name="Central Facility", zone_fallback=self.zone)
+            facility_central.save()
+
+            self.register(d)
+
+            sync_results = d.sync()
+
+            d.modifymodel(FACILITY_MODEL,
+                          facility_central.id,
+                          name="Central Facility - Mod")
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["uploaded"], 1, "Wrong number of records uploaded")
+
+            self.assertEqual(Facility.objects.get(id=facility_central.id).name, "Central Facility - Mod", "Updated Facility name not synced back to central server")
