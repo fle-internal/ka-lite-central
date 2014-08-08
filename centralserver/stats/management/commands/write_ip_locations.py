@@ -89,7 +89,7 @@ class Command(BaseCommand):
         if options.get("kml_file"):
             kml = simplekml.Kml()
             for r in locations:
-                kml.newpoint(name=r["name"], coords=[(r["latitude"], r["longitude"])])
+                kml.newpoint(name=r["name"], coords=[(r["longitude"], r["latitude"])])
             kml.save(options["kml_file"])
 
         if options.get("country_file"):
