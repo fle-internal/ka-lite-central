@@ -137,7 +137,7 @@ class Command(BaseCommand):
                 counts = count_devices_by_region(ip_metadata, "country_name")
                 rows = sorted(counts.items(), key=lambda x: -x[1])
                 cc = csv.writer(f)
-                cc.writerows(["country", "registered_devices"])
+                cc.writerow(["country", "registered_devices"])
                 cc.writerows(rows)
 
         if options.get("continent_csv"):
@@ -145,7 +145,7 @@ class Command(BaseCommand):
                 counts = count_devices_by_region(ip_metadata, "continent")
                 rows = sorted(counts.items(), key=lambda x: -x[1])
                 cc = csv.writer(f)
-                cc.writerows(["continent", "registered_devices"])
+                cc.writerow(["continent", "registered_devices"])
                 cc.writerows(rows)
 
 def ips_to_locations(ips):
@@ -177,7 +177,10 @@ def count_devices_by_region(ip_metadata, region_field):
     for ip, data in ip_metadata.items():
         region = data["location"].get(region_field)
         if region and region != "--":
-            regions[region] = regions.get(region, 0) + len(data["devices"])
+            regions[region] = regions.get(region, set([]))
+            regions[region].update(data["devices"])
+    for region in regions:
+        regions[region] = len(regions[region])
     return regions
 
 def get_countries(locations, continent=None):
