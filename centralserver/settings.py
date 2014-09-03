@@ -102,6 +102,7 @@ INSTALLED_APPS = (
     "django_extensions", # needed for clean_pyc (testing)
     "centralserver.central",
     "centralserver.testing",
+    "fle_utils.handlebars",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 MIDDLEWARE_CLASSES = (
     "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
@@ -175,3 +176,7 @@ SYNC_SESSIONS_MAX_RECORDS = getattr(local_settings, "SYNC_SESSIONS_MAX_RECORDS",
 
 LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/logout/'
+
+CONFIG_PACKAGE = []
+AUTH_PROFILE_MODULE = "central.UserProfile"
+TASTYPIE_DEFAULT_FORMATS = ['json']

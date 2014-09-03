@@ -80,6 +80,11 @@
                                     <span class="icon-pencil icon-large" title="Edit this organization's information."></span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{% url 'data_export' %}?org_id={{ org.id }}">
+                                    <span class="icon-circle-arrow-down icon-large" title="Download organization data"></span>
+                                </a>
+                            </li>
                         {% endif %}
                         {% if org.owner == request.user %}
                             <li>
