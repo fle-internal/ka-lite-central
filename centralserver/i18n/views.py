@@ -10,7 +10,7 @@ from . import get_language_pack_availability_filepath
 
 
 @render_to('i18n/language_dashboard.html')
-def lanuguage_dashboard(request):
+def language_dashboard(request):
     """
         Return context for language dashboard, organized by version
 
@@ -22,7 +22,8 @@ def lanuguage_dashboard(request):
             ] 
         }
     """
-    lang_availability = json.load(open(get_language_pack_availability_filepath()))
+    with open(get_language_pack_availability_filepath()) as f:
+        lang_availability = json.load(f)
     ordered_versions = sort_version_list([lang_pack["software_version"] for lang_pack in lang_availability], reverse=True)
     lang_pack_by_version = OrderedDict((version, []) for version in ordered_versions)
 
