@@ -34,6 +34,7 @@ def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
         conn.request("GET", "/r/translationmapping")
         r1 = conn.getresponse()
         if not r1.status == 302:
+            # TODO: have django email admins when we hit this exception
             raise Exception("Expected redirect response from Khan Academy redirect url.")
         download_url = r1.getheader('Location')
         if "docs.google.com" not in download_url:
