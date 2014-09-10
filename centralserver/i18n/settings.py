@@ -36,3 +36,5 @@ AMARA_USERNAME          = getattr(local_settings, "AMARA_USERNAME", None)
 AMARA_API_KEY           = getattr(local_settings, "AMARA_API_KEY", None)
 
 I18N_CENTRAL_DATA_PATH = os.path.join(os.path.dirname(__file__), "data")
+
+DUBBED_LANGUAGES_FETCHED_IN_API = ["es", "fr"]
