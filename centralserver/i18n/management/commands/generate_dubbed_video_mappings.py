@@ -20,10 +20,12 @@ from fle_utils.general import ensure_dir, datediff
 from kalite.i18n import get_code2lang_map
 from kalite.topic_tools import get_node_cache
 
+
 def dubbed_video_data_from_api(lang_code):
     k = Khan(lang=lang_code)
     videos = k.get_videos()
-    return {v["youtube_id"]: v["translated_youtube_id"] for v in videos}
+    return {v["youtube_id"]: v["translated_youtube_id"] for v in videos if v["youtube_id"] != v["translated_youtube_id"]}
+
 
 def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
 
