@@ -1,0 +1,164 @@
+{% extends base_template %}
+{% load i18n %}
+{% load staticfiles %}
+{% load my_filters %}
+
+{% block content %}
+    
+    <h1>Language Availability Dashboard</h1>
+    
+    {# Nav tabs #}
+    <ul class="nav nav-tabs" role="tablist">
+        {% for version in lang_pack_by_version.keys %}
+            <li {% if forloop.first %}class="active"{% endif %}>
+                <a href="#{{ version|slugify }}" role="tab" data-toggle="tab">
+                    Version {{ version }}
+                </a>
+            </li>
+        {% endfor %}
+        <li>
+            <a href="#faq" role="tab" data-toggle="tab">
+                FAQ &amp; Help
+            </a>
+        </li>
+    </ul>
+
+    {# Tables (tab content) #}
+    <div class="tab-content">
+    {% for version, packs in lang_pack_by_version.items %}
+      <div class="tab-pane {% if forloop.first %}active{% endif %}" id="{{ version|slugify }}">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Native Name
+                    </th>
+                    <th>
+                        Full Name
+                    </th>
+                    <th>
+                        Language Code
+                    </th>
+                    <th>
+                        % Translated Overall
+                    </th>
+                    <th>
+                        # Videos Dubbed
+                    </th>
+                    <th>
+                        # Videos Subtitled
+                    </th>
+                    <th>
+                        % KA Lite Content Translated
+                    </th>
+                    <th>
+                        % Khan Academy Content Translated
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pack in packs %}
+                    <tr>
+                        <td>
+                            {{ pack.native_name }}
+                        </td>
+                        <td>
+                            {{ pack.name }}
+                        </td>
+                        <td>
+                            {{ pack.code }}
+                        </td>
+                        <td>
+                            {{ pack.percent_translated|floatformat }}%
+                        </td>
+                        <td>
+                            {{ pack.num_dubbed_videos }}
+                        </td>
+                        <td>
+                            {{ pack.subtitle_count }}
+                        </td>
+                        <td>
+                            <a href="{{ crowdin_base_url }}{{ pack.code }}" title="Translate now!">{{ pack.kalite_ntranslations|compute_percent:pack.kalite_nphrases }}</a>
+                        </td>
+                        <td>
+                            {{ pack.ka_ntranslations|compute_percent:pack.ka_nphrases }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    {% endfor %}
+    {# FAQ #}
+    <div class="tab-pane" id="faq">
+        <ol>
+            <li>
+                <h4>
+                    What is this page for?
+                </h4>
+                <p>
+                    As of release 0.11.1 on March 13, 2014, <a href="https://learningequality.org/blog/2014/i18n-released/">KA Lite supports internationalized content</a>, or content that has been translated into languages other than English. The Language Availability Dashboard is a tool for translators and KA Lite project administrators to check up on the progress of the translation of KA Lite content into their language. You can view the most up to date information on the languages you care about, including the number of videos that have been dubbed and subtitled, and the percentages of the KA Lite interface, and Khan Academy exercises that have been translated.
+                </p>
+            </li>            
+            <li>
+                <h4>
+                    How can I contribute translations?
+                </h4>
+                <p>
+                    We're glad you asked! You absolutely can!  
+                </p>
+                <p>
+                    <b>Dubbing &amp; subtitling videos:</b> Only videos that are included on official Khan Academy YouTube language channels will be included in KA Lite. Read more about how you can contribute to these lanugage channels on <a href="http://khanacademy.desk.com/customer/portal/articles/353905-can-i-dub-your-videos-in-another-language-">Khan Academy's website</a>. 
+                </p>
+                <p>
+                    <b>Translating the user interface:</b> we use a website called CrowdIn to translate the KA Lite interface. It's easy to get started. Just visit the <a href="https://crowdin.net/project/ka-lite">KA Lite CrowdIn Project</a> and start contributing! 
+                </p>
+                <p>
+                    <b>Translating the exercise content:</b> the exercises in KA Lite come straight from Khan Academy, so in order to translate these, you just need to visit <a href="https://crowdin.net/project/khanacademy">Khan Academy's CrowdIn project</a>. <b>Important note:</b> Not all files and strings are used in KA Lite. In order to focus your efforts only on content that will be used for KA Lite, please <a href="https://github.com/learningequality/ka-lite/wiki/Internationalization:-Contributing-Translations#finished-all-of-the-ka-lite-content">visit our wiki</a> to learn how to find shared KA Lite content within the Khan Academy project.
+                </p>
+            </li>
+            <li>
+                <h4>
+                    What is a "BETA" language? And how is it different from languages without the BETA tag?
+                </h4>
+                <p>
+                    A lanugage becomes a beta language once it reaches a minimum threshold of one of the following:
+                    <ul>
+                        <li>
+                            20 videos dubbed or subtitled
+                        </li>
+                        <li>
+                            10% or more of the overall user interface and exercises translated
+                        </li>
+                    </ul>
+                    Once a language is in beta, it can be and downloaded onto KA Lite, but with a warning to users that it is not officially supported yet by our team, due to the relatively few translations. In order for a language to "graduate" from beta to a fully supported language, two criteria must be met:
+                    <ul>
+                        <li>
+                            The language must have over 90% of the overall user interface and exercises translated
+                        </li>
+                        <li>
+                            The language must have a "language advocate". This is a person who coordinates with the KA Lite development team and other translators to maintain high quality translations for that language and ensure it stays above the 90% required to be a fully supported language. Do you want to be a language advocate for your language? <a href="mailto:translations@learningequality.org">Let us know!</a> 
+                        </li>
+                    </ul>
+                </p>
+            </li>
+            <li>
+                <h4>
+                    How often is this page updated?
+                </h4>
+                <p>
+                    Once per day.
+                </p>
+            </li>
+            <li>
+                <h4>
+                    You people are awesome. How can I stay in touch?
+                </h4>
+                <p>
+                    You're awesome too! Sign up for the <a href="http://eepurl.com/Nhvs1">KA Lite Volunteer Translation Corp.</a> mailing list to receive updates on the translation project.
+                </p>
+            </li>
+        </ol>
+    </div>
+    </div>
+{% endblock content %}
