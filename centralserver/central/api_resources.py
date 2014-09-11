@@ -3,14 +3,14 @@ from tastypie.exceptions import NotFound
 from tastypie.resources import ModelResource
 
 from central.models import Organization
-from kalite.shared.api_auth import ObjectAdminAuthorization, UserObjectsOnlyAuthorization
+from kalite.shared.api_auth import UserObjectsOnlyAuthorization
 from securesync.models import Zone
 
 class ZoneResource(ModelResource):
     class Meta:
         queryset = Zone.objects.all()
         resource_name = 'zone'
-        authorization = ObjectAdminAuthorization()
+        authorization = UserObjectsOnlyAuthorization()
 
     def obj_get_list(self, bundle, **kwargs):
         # Filter by zone objects by org ID
