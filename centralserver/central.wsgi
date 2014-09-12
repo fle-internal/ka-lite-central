@@ -7,7 +7,7 @@ PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path = [
     os.path.join(PROJECT_PATH, "../ka-lite-submodule/python-packages/"),
     os.path.join(PROJECT_PATH, "../"),
-    #os.path.join(PROJECT_PATH, "../centralserver"),
+    os.path.join(PROJECT_PATH, "../centralserver"),
     os.path.join(PROJECT_PATH, "../", "ka-lite-submodule"),
 ] + sys.path
 
