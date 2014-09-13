@@ -20,7 +20,6 @@ DEBUG          = getattr(local_settings, "DEBUG", False)
 
 CENTRAL_SERVER = True  # Hopefully will be removed soon.
 
-
 ##############################
 # Basic setup of logging
 ##############################
@@ -179,4 +178,7 @@ LOGOUT_URL = '/accounts/logout/'
 
 CONFIG_PACKAGE = []
 AUTH_PROFILE_MODULE = "central.UserProfile"
+
+# Tastypie stuff
 TASTYPIE_DEFAULT_FORMATS = ['json']
+API_LIMIT_PER_PAGE = 0
