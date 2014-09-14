@@ -92,6 +92,7 @@ LANGUAGE_COOKIE_NAME    = "django_language_central"
 SESSION_COOKIE_NAME     = "sessionid_central"
 
 ROOT_URLCONF = "centralserver.central.urls"
+
 INSTALLED_APPS = (
     "django.contrib.admin",  # this and the following are needed to enable django admin.
     "django.contrib.auth",
@@ -99,16 +100,22 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.sessions",
     "django_extensions", # needed for clean_pyc (testing)
+    "debug_toolbar",
     "centralserver.central",
     "centralserver.testing",
     "fle_utils.handlebars",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
+
 MIDDLEWARE_CLASSES = (
+    "centralserver.middleware.DummySessionForAPIUrls",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
+
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages",  # needed for django admin
 ) + getattr(local_settings, 'TEMPLATE_CONTEXT_PROCESSORS', tuple())
+
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, '..', 'static-libraries'),
     os.path.join(PROJECT_PATH, '..', 'ka-lite-submodule', 'static-libraries'),
