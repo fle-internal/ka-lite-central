@@ -38,6 +38,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 
 from fle_utils.internet import JsonResponse, JsonResponseMessageError, set_query_params
+from kalite.i18n import get_video_id
 from kalite.main.models import ExerciseLog, VideoLog
 from kalite.shared.decorators import require_login
 from kalite.topic_tools import get_node_cache
@@ -243,7 +244,7 @@ def update_all_central_callback(request):
         message_type = "error"
         message = _("Loading json object: %s") % e
 
-    # If something broke on the distribute d server, we are SCREWED.
+    # If something broke on the distributed server, we have no way to recover.
     #   For now, just show the error to users.
     #
     # Ultimately, we have a message, would like to share with the distributed server.
