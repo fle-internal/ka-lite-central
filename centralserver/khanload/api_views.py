@@ -106,7 +106,7 @@ def update_all_central(request):
 
     # TODO-BLOCKER(jamalex): oauth not working right now, so direct the user back with an error
     dest = request.META.get("HTTP_REFERER", "").split("?")[0] or "/"
-    dest += "?message=Khan%20Academy%20export%20feature%20not%20currently%20available.%20Please%20try%20later.&message_type=error&message_id=id_khanload"
+    dest += "?message=Khan%20Academy%20export%20feature%20not%20currently%20available.%20Please%20try%20later.&message_type=warning&message_id=id_khanload"
     return HttpResponseRedirect(dest)
 
     # Store information in a session
