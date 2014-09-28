@@ -16,11 +16,12 @@ from django.utils.translation import ugettext as _
 from ..models import Organization
 from centralserver.registration.models import RegistrationProfile
 from kalite.facility.models import Facility
-from kalite.testing import BrowserTestCase
+from kalite.testing.base import KALiteBrowserTestCase
+from kalite.testing.mixins import BrowserActionMixins
 from securesync.models import Zone, Device, DeviceZone
 
 
-class KALiteCentralBrowserTestCase(BrowserTestCase):
+class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
     """
     Base class for browser-based central server test cases.
     """
