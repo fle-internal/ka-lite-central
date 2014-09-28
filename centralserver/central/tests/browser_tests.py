@@ -19,7 +19,7 @@ from kalite.facility.models import Facility
 from kalite.testing.base import KALiteBrowserTestCase
 from kalite.testing.mixins import BrowserActionMixins
 from securesync.models import Zone, Device, DeviceZone
-
+from .utils.mixins import CreateAdminMixin, CentralServerMixins
 
 class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
     """
@@ -127,7 +127,7 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
             return elements[0].text.startswith(username + " ")
 
 
-class SuperUserTest(KALiteCentralBrowserTestCase):
+class SuperUserTest(KALiteCentralBrowserTestCase, CreateAdminMixin):
     """Log in the super user"""
 
     def test_superuser_login(self):
@@ -135,7 +135,8 @@ class SuperUserTest(KALiteCentralBrowserTestCase):
         Tests that an existing admin user can log in.
         """
 
-        self.browser_login_user(self.admin_user.username, "test")
+        admin_user = self.create_admin(username="adminuser", password="test")
+        self.browser_login_user("adminuser", "test")
 
 
 class OrgUserRegistrationTest(KALiteCentralBrowserTestCase):
@@ -318,6 +319,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
 
 
 class ZoneDeletionTestCase(OrganizationManagementTestCase):
+
     def setUp(self):
         super(ZoneDeletionTestCase, self).setUp()
         self.zone = Zone(name=self.ZONE_NAME)
@@ -325,13 +327,13 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.org.add_zone(self.zone)
         self.org.save()
 
-
     def test_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
         self.browser.switch_to_alert().accept()
         self.browser_wait_for_no_element(".zone-delete-link")
+        time.sleep(1)
         self.browser_check_django_message(message_type="success", contains="successfully deleted")
         with self.assertRaises(NoSuchElementException):
             self.assertEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link no longer exists.")
