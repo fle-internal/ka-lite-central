@@ -9,6 +9,7 @@ sys.path = [
     os.path.join(PROJECT_PATH, "../"),
     os.path.join(PROJECT_PATH, "../centralserver"),
     os.path.join(PROJECT_PATH, "../", "ka-lite-submodule"),
+    os.path.join(PROJECT_PATH, "../", "ka-lite-submodule", "kalite"),
 ] + sys.path
 
 from django.core.handlers.wsgi import WSGIHandler
