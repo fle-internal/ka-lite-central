@@ -1,6 +1,7 @@
 language: python
 python:
 - '2.7'
+# TODO-BLOCKER(dylanjbarth): use latest version of firefox once we have upgraded our selenium
 addons:
   firefox: '28.0'
 before_install:
