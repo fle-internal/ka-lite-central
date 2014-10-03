@@ -372,7 +372,6 @@ class CentralFacilityUserFormTestCase(OrganizationManagementTestCase):
         self.browser.find_element_by_id('id_username').send_keys('s')
         self.browser.find_element_by_id('id_password_first').send_keys('password')
         self.browser.find_element_by_id('id_password_recheck').send_keys('password')
-        import pdb; pdb.set_trace()
         self.browser.find_elements_by_class_name('submit')[0].click()
         self.browser_check_django_message(message_type="success", contains="successfully created")
 
