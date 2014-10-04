@@ -8,6 +8,9 @@
         "crowdin": "es-ES"
     },
     "fr": null,
+    "my": {
+        "beta": true
+    },
     "pl": null,
     "lo": null,
     "pt-BR": {
