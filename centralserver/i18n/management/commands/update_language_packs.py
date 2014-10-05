@@ -183,6 +183,7 @@ def update_language_packs(lang_codes, options):
 
     for lang_code in lang_codes:
         lang_code_map = get_supported_language_map(lang_code)
+        lang_code_map.update(get_beta_language_map(lang_code))
         lang_metadata = {}
 
         # Step 1: Update / collect srts.  No version needed, we want to share latest always.
