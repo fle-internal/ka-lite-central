@@ -15,5 +15,8 @@
     "lo": null,
     "pt-BR": {
         "dubbed_videos": "pt"
+    },
+    "xh": {
+        "beta": true
     }
 }
