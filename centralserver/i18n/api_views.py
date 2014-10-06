@@ -45,12 +45,6 @@ def get_available_language_packs(request, version):
         logging.debug("Unexpected error getting available language packs: %s" % e)
         language_packs_available = {}
 
-    # alter data before returning
-    for code, pack in language_packs_available.items():
-        # append '(beta)' to names of languages that are in beta
-        if pack["beta"]:
-            language_packs_available[code]["name"] += ' (BETA)'
-
     # Finally, get rid of lang code key and alphabetize
     available_packs = sorted(language_packs_available.values(), key=lambda lp: lp["name"].lower())
     
