@@ -61,10 +61,7 @@ class Command(test_wrappings.Command):
         if options["upload"]:
             if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
                 raise CommandError("CROWDIN_PROJECT_KEY must be set in order to upload.")
-            upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY, files={
-                os.path.join(POT_DIRPATH, "django.pot"): os.path.join("KA Lite UI", "kalite.pot"),
-                os.path.join(POT_DIRPATH, "djangojs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
-            })
+            upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY)
 
 
 def delete_current_templates():
@@ -121,6 +118,8 @@ def update_templates(po_filepaths):
 
 def upload_to_crowdin(project_key, project_id="ka-lite", update_files_only=False):
 
+    logging.info("Uploading to CrowdIn.")
+
     # url template for our API calls
     url_template = "https://api.crowdin.com/api/project/{project_id}/{api_call}"
     get_params = {"key": project_key}
@@ -150,6 +149,7 @@ def upload_to_crowdin(project_key, project_id="ka-lite", update_files_only=False
     r = requests.post(url, params=get_params, files=files_to_upload)
     try:
         r.raise_for_status()
-    except requests.exceptions.HTTPError:
+    except requests.exceptions.HTTPError as e:
         # This is probably because the files already exist on CrowdIn. If so, just update them.
-        upload_to_crowdin(project_key, update_files_only=True)
+        if "File with such name is already uploaded" in e.response.text:
+            upload_to_crowdin(project_key, update_files_only=True)
