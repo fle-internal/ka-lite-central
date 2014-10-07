@@ -44,7 +44,11 @@ def get_available_language_packs(request, version):
     except Exception as e:
         logging.debug("Unexpected error getting available language packs: %s" % e)
         language_packs_available = {}
-    return JsonResponse(sorted(language_packs_available.values(), key=lambda lp: lp["name"].lower()))
+
+    # Finally, get rid of lang code key and alphabetize
+    available_packs = sorted(language_packs_available.values(), key=lambda lp: lp["name"].lower())
+    
+    return JsonResponse(available_packs)
 
 
 @api_handle_error_with_json

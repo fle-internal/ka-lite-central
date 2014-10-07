@@ -24,13 +24,13 @@ def language_dashboard(request):
     """
     with open(get_language_pack_availability_filepath()) as f:
         lang_availability = json.load(f)
-    ordered_versions = sort_version_list([lang_pack["software_version"] for lang_pack in lang_availability], reverse=True)
+    ordered_versions = sort_version_list([pack["software_version"] for code, pack in lang_availability.items()], reverse=True)
     lang_pack_by_version = OrderedDict((version, []) for version in ordered_versions)
 
-    for lang_pack in lang_availability:
-        software_version = lang_pack["software_version"]
-        del lang_pack["software_version"] # won't be used other than to sort
-        lang_pack_by_version[software_version].append(lang_pack)
+    for code, pack in lang_availability.items():
+        software_version = pack["software_version"]
+        del pack["software_version"] # won't be used other than to sort
+        lang_pack_by_version[software_version].append(pack)
     context = {
         "lang_pack_by_version": lang_pack_by_version,
         "crowdin_base_url": "https://crowdin.com/project/ka-lite/",

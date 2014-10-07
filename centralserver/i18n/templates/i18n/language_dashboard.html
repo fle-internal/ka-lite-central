@@ -32,10 +32,13 @@
                         Native Name
                     </th>
                     <th>
-                        Full Name
+                        English Name
                     </th>
                     <th>
                         Language Code
+                    </th>
+                    <th>
+                        Status
                     </th>
                     <th>
                         % Translated Overall
@@ -66,6 +69,17 @@
                         <td>
                             {{ pack.code }}
                         </td>
+                        {% if pack.beta %}
+                            <td>
+                                <p class="text-warning">
+                                    Beta
+                                </p>
+                            </td>
+                        {% else %}
+                            <td>
+                                Supported
+                            </td>
+                        {% endif %}
                         <td>
                             {{ pack.percent_translated|floatformat }}%
                         </td>
