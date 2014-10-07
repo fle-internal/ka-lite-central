@@ -1,20 +1,22 @@
 language: python
 python:
-  - "2.7"
+- '2.7'
+# TODO-BLOCKER(dylanjbarth): use latest version of firefox once we have upgraded our selenium
+addons:
+  firefox: '28.0'
 before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile
+  --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
 install:
-  - npm install
-  - npm install -g grunt-cli
-  - pip install -r requirements.txt
+- npm install
+- npm install -g grunt-cli
+- pip install -r requirements.txt
 script:
-  - grunt jshint  # run jshint
-  - python centralserver/manage.py test --traceback
-  - python ka-lite-submodule/python-packages/fle_utils/tests.py  # ka-lite regressions
-  - python ka-lite-submodule/kalite/manage.py test --traceback
+- grunt jshint
+- python centralserver/manage.py test --traceback
 notifications:
-  email:
-    - jamie@learningequality.org
-    - richard@learningequality.org
+  hipchat:
+    rooms:
+      secure: AEhKZjmpdgyRBcdb+/XZ1UfuFLJixyG7LnX+cSE+WhRpj7McY0AvemyPmh9X4MwoFpYBOh1fdTTW9NiHPAMo/V7uLGgTXp2dsNUuya/uz7g25E1nkMf+WeK+kXIMgTQ+SWPgYdGWknVc7LHBNsGikndVPx8PlEEXfzGuw6Mlatk=

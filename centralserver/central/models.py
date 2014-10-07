@@ -156,7 +156,11 @@ class UserProfile(ExtendedModel):
             return False
 
         # allow access if the object's zone belongs to an org of which the user is a member
-        for org in Organization.from_zone(object.get_zone()):
+        if isinstance(object, Zone):
+            zone = object
+        else:
+            zone = object.get_zone()
+        for org in Organization.from_zone(zone):
             if org.is_member(self.user):
                 return True
 

@@ -19,6 +19,7 @@ import kalite.control_panel.urls
 import kalite.facility.urls
 import securesync.urls
 from . import api_urls
+from fle_utils import handlebars
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
 
 
@@ -103,6 +104,11 @@ urlpatterns += patterns(__package__ + '.api_views',
 urlpatterns += patterns('kalite.control_panel.views',
     # Zone, facility, device
     url(r'^', include(kalite.control_panel.urls)),
+)
+
+# Handlebars
+urlpatterns += patterns('',
+    url(r'^handlebars/', include(fle_utils.handlebars.urls)),
 )
 
 urlpatterns += patterns('',

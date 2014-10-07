@@ -8,18 +8,26 @@ import httplib
 import json
 import os
 import requests
-from optparse import make_option
 from StringIO import StringIO
+from khan_api_python.api_models import Khan
+from optparse import make_option
 
 from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import DUBBED_VIDEOS_MAPPING_FILEPATH, get_dubbed_video_map
 from fle_utils.general import ensure_dir, datediff
+from kalite.i18n import get_code2lang_map
 from kalite.topic_tools import get_node_cache
 
 
-def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
+def dubbed_video_data_from_api(lang_code):
+    k = Khan(lang=lang_code)
+    videos = k.get_videos()
+    return {v["youtube_id"]: v["translated_youtube_id"] for v in videos if v["youtube_id"] != v["translated_youtube_id"]}
+
+
+def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
 
     """
     Function to do the heavy lifting in getting the dubbed videos map.
@@ -34,6 +42,7 @@ def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
         conn.request("GET", "/r/translationmapping")
         r1 = conn.getresponse()
         if not r1.status == 302:
+            # TODO: have django email admins when we hit this exception
             raise Exception("Expected redirect response from Khan Academy redirect url.")
         download_url = r1.getheader('Location')
         if "docs.google.com" not in download_url:
@@ -58,7 +67,7 @@ def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
     return csv_data
 
 
-def generate_dubbed_video_mappings(csv_data=None):
+def generate_dubbed_video_mappings_from_csv(csv_data=None):
 
     # This CSV file is in standard format: separated by ",", quoted by '"'
     logging.info("Parsing csv file.")
@@ -164,19 +173,21 @@ class Command(BaseCommand):
         cache_filepath = options["cache_filepath"] or os.path.join(settings.MEDIA_ROOT, 'khan_dubbed_videos.csv')
         max_cache_age = (not options["force"] and options["max_cache_age"]) or 0.0
 
-        if os.path.exists(cache_filepath) and datediff(datetime.datetime.now(), datetime.datetime.fromtimestamp(os.path.getctime(cache_filepath)), units="days") <= max_cache_age:
-            # Use cached data to generate the video map
-            csv_data = open(cache_filepath, "r").read()
-
-        else:
-            csv_data = download_ka_dubbed_video_mappings(cache_filepath=cache_filepath)
+        csv_data = download_ka_dubbed_video_csv(cache_filepath=cache_filepath)
 
         # Use cached data to generate the video map
-        raw_map = generate_dubbed_video_mappings(csv_data=csv_data)
+        raw_map = generate_dubbed_video_mappings_from_csv(csv_data=csv_data)
 
         # Remove any dummy (empty) entries, as this breaks everything on the client
         if "" in raw_map:
             del raw_map[""]
+
+        for lang_code in settings.DUBBED_LANGUAGES_FETCHED_IN_API:
+            logging.info("Updating {} from the API".format(lang_code))
+            map_from_api = dubbed_video_data_from_api(lang_code)
+            lang_metadata = get_code2lang_map(lang_code)
+            lang_ka_name = lang_metadata["ka_name"]
+            raw_map[lang_ka_name].update(map_from_api)
 
         # Now we've built the map.  Save it.
         ensure_dir(os.path.dirname(DUBBED_VIDEOS_MAPPING_FILEPATH))

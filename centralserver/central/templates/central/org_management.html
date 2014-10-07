@@ -80,6 +80,11 @@
                                     <span class="icon-pencil icon-large" title="Edit this organization's information."></span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{% url 'data_export' %}?org_id={{ org.id }}">
+                                    <span class="icon-circle-arrow-down icon-large" title="Download organization data"></span>
+                                </a>
+                            </li>
                         {% endif %}
                         {% if org.owner == request.user %}
                             <li>
@@ -95,9 +100,14 @@
 
             <div class="row-fluid organization-container">
                 <div class="span6">
+                    {# We only say "Affiliated networks" if there is an org #}
                     <div class="tooltip-container">
+                    {% if org.name != HEADLESS_ORG_NAME %}
                         <h3>Affiliated Sharing Networks</h3>
                         <div id="button-popover-zone" class="button-popover" data-toggle="popover" data-placement="right" data-content="A Sharing Network is a set of devices that may connect to share data with each other." title="" data-original-title="Sharing Network">?</div>
+                    {% else %}
+                        <h3>Unaffiliated Sharing Networks</h3>
+                    {% endif %}
                     </div>
                     <table class="table">
                         {% for zone in zones|get_item:pk %}
@@ -114,85 +124,84 @@
                         </tr>
                         {% endfor %}
                     </table>
-
+                    {% if org.name != HEADLESS_ORG_NAME %}
                     <form method="link" action="{% url 'zone_add_to_org' org_id=org.id zone_id='new' %}">
                         <input class="button--small" type="submit" value="Create a new sharing network">
                     </form>
+                    {% endif %}
                 </div>
 
             <div class="span6">
-                <div class="tooltip-container">
-                    <h3>Organization Admins</h3>
-                    <div id="button-popover-orgadmin-{{ forloop.counter0 }}" class="button-popover" data-toggle="popover" data-placement="right" data-content="An Organization Admin is a user responsible for overseeing an organization." title="" data-original-title="Organization admin">?</div>
-                </div>
+                {% if org.name != HEADLESS_ORG_NAME %}
+                    <div class="tooltip-container">
+                        <h3>Organization Admins</h3>
+                        <div id="button-popover-orgadmin-{{ forloop.counter0 }}" class="button-popover" data-toggle="popover" data-placement="right" data-content="An Organization Admin is a user responsible for overseeing an organization." title="" data-original-title="Organization admin">?</div>
+                    </div>
 
-                {% for member in org.get_members %}{# this is slow #}
-                <table class="table">
-                    <tr>
-                        <td title="{{member.email }}" >
-                            {% firstof member.get_full_name member.username %}
-                        </td>
-                        <td>
-                            {% if org.owner == member and member == request.user %}
-                            (You are the owner)
-                            {% elif member == request.user %}
-                            (You)
-                            {% elif org.owner == member %}
-                            (Owner)
-                            {% else %}
-                            <form method="post" action="{% url 'delete_admin' org_id=org.id user_id=member.id %}">
-                                {% csrf_token %}
-                                (<a href="" class="remove-admin-submit">Remove Admin</a>)
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-
-                    {% for invite in org.invitations.all %}{# TODO(bcipolli) this is inefficient, convert to list (how?) #}
-
-
-                    <tr id="invited-tag">
-                        <td>
-                            {{ invite.email_to_invite }} (invited)
-
-                        </td>
-
-                        <td>
-                            <form method="post" action="{% url 'delete_invite' org_id=org.id invite_id=invite.pk %}">
-                                {% csrf_token %}
-                                <a href="" class="remove-invite-submit">(Revoke Invite)</a>
-
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-
-                <div class="add">
-                    <form method="post" class="form-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="organization" value="{{ org.pk }}">
-                        {{ org.form.invited_by }}
-
-                        <h4>Add Admin</h4>
-                        <input type="text" placeholder="example@email.com" name="email_to_invite">
-                        <input type="submit" class="button--small" value="Send invite!">
-
-
-                        {% for error in org.form.non_field_errors %}
-                        <div class="errors">{{ error }}</div>
+                    {% for member in org.get_members %}{# this is slow #}
+                    <table class="table">
+                        <tr>
+                            <td title="{{member.email }}" >
+                                {% firstof member.get_full_name member.username %}
+                            </td>
+                            <td>
+                                {% if org.owner == member and member == request.user %}
+                                (You are the owner)
+                                {% elif member == request.user %}
+                                (You)
+                                {% elif org.owner == member %}
+                                (Owner)
+                                {% else %}
+                                <form method="post" action="{% url 'delete_admin' org_id=org.id user_id=member.id %}">
+                                    {% csrf_token %}
+                                    (<a href="" class="remove-admin-submit">Remove Admin</a>)
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </form>
-                </div>
+
+                        {% for invite in org.invitations.all %}{# TODO(bcipolli) this is inefficient, convert to list (how?) #}
+
+
+                        <tr id="invited-tag">
+                            <td>
+                                {{ invite.email_to_invite }} (invited)
+
+                            </td>
+
+                            <td>
+                                <form method="post" action="{% url 'delete_invite' org_id=org.id invite_id=invite.pk %}">
+                                    {% csrf_token %}
+                                    <a href="" class="remove-invite-submit">(Revoke Invite)</a>
+
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+
+                    <div class="add">
+                        <form method="post" class="form-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="organization" value="{{ org.pk }}">
+                            {{ org.form.invited_by }}
+
+                            <h4>Add Admin</h4>
+                            <input type="text" placeholder="example@email.com" name="email_to_invite">
+                            <input type="submit" class="button--small" value="Send invite!">
+
+
+                            {% for error in org.form.non_field_errors %}
+                            <div class="errors">{{ error }}</div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                {% endif %}<!-- Endif for checking for unaffiliated networks -->
             </div><!-- .span6 -->
         </div> <!-- .row -->
         <br />
     {% endfor %}
 {% endif %}
-
-<p>
-    {% blocktrans %}You're ready to <a href="{{ download_url }}">download and install KA Lite</a>{% endblocktrans %}
-</p>
 
 {% endblock content %}
