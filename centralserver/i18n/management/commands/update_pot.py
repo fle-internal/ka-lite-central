@@ -12,26 +12,26 @@ hope of making it easy to identify unwrapped strings.
 This can be run independently of the "update_language_packs" command
 """
 import glob
+import pathlib
 import polib
-import re
 import os
+import requests
 import shutil
-import subprocess
-import sys
 from optparse import make_option
 
-from django.conf import settings; logging = settings.LOG
-from django.core.management import call_command
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import POT_DIRPATH
-from fle_utils.django_utils import call_command_with_output
 from fle_utils.general import ensure_dir
 from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
+from kalite import version
 
+logging = settings.LOG
 
-TRANSLATOR_VARIABLE_COMMENT = "Translators: please do not change variable names (anything with the format %(xxxx)s), but it is OK to change its position."
+TRANSLATOR_VARIABLE_COMMENT = "Translators: do not change variable names (anything with format %(xxxx)s)."
+
 
 class Command(test_wrappings.Command):
     option_list = BaseCommand.option_list + (
@@ -58,14 +58,10 @@ class Command(test_wrappings.Command):
 
         update_templates(po_filepaths)
 
-
         if options["upload"]:
             if not getattr(settings, "CROWDIN_PROJECT_KEY", None):
                 raise CommandError("CROWDIN_PROJECT_KEY must be set in order to upload.")
-            upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY, files={
-                os.path.join(POT_DIRPATH, "django.pot"): os.path.join("KA Lite UI", "kalite.pot"),
-                os.path.join(POT_DIRPATH, "djangojs.pot"): os.path.join("KA Lite UI", "kalitejs.pot"),
-            })
+            upload_to_crowdin(project_key=settings.CROWDIN_PROJECT_KEY)
 
 
 def delete_current_templates():
@@ -79,12 +75,16 @@ def delete_current_templates():
 def run_makemessages(verbosity=0):
 
     python_package_dirs = glob.glob(os.path.join(test_wrappings.PROJECT_ROOT, 'ka-lite', 'python-packages', '*'))
-    ignored_packages = [os.path.join('*/python-packages/', os.path.basename(pp)) for pp in python_package_dirs if os.path.basename(pp) not in ['securesync', 'fle_utils']]
+    ignored_packages = [os.path.join('*/python-packages/', os.path.basename(pp))
+                        for pp in python_package_dirs
+                        if os.path.basename(pp) not in ['securesync', 'fle_utils']]
 
     # Central-specific patterns, added on the distributed versions
     ignore_patterns_py = ignore_patterns_js = ignored_packages + ['*/centralserver/*']
 
-    test_wrappings.run_makemessages(ignore_patterns_py=ignore_patterns_py, ignore_patterns_js=ignore_patterns_js, verbosity=verbosity)
+    test_wrappings.run_makemessages(ignore_patterns_py=ignore_patterns_py,
+                                    ignore_patterns_js=ignore_patterns_js,
+                                    verbosity=verbosity)
 
     # Return the list of files created.
     return glob.glob(os.path.join(get_po_filepath(lang_code="en"), "*.po"))
@@ -104,8 +104,6 @@ def insert_translator_comments(po_filepaths):
         pofile.save()
 
 
-
-
 def update_templates(po_filepaths):
     """Update template po files"""
     logging.info("Copying english po files to %s" % POT_DIRPATH)
@@ -118,16 +116,40 @@ def update_templates(po_filepaths):
         shutil.copy(po_filepath, pot_filepath)
 
 
-def upload_to_crowdin(files, project_key, project_id="ka-lite"):
-    for src_filepath, dest_filepath in files.iteritems():
-        cmd = ['curl', '-F', 'files[%(dest_filepath)s]=@%(src_filepath)s' % {
-            "src_filepath": src_filepath,
-            "dest_filepath": dest_filepath,
-        },  'http://api.crowdin.net/api/project/%(project_id)s/update-file?key=%(project_key)s' % {
-            "project_key": project_key,
-            "project_id": project_id,
-        }]
-        logging.info("Uploading %s" % os.path.basename(src_filepath))
-        upload_output = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-        if "success" not in upload_output:
-            logging.error("Failed to upload %s: %s" % (src_filepath, upload_output))
+def upload_to_crowdin(project_key, project_id="ka-lite", update_files_only=False):
+
+    logging.info("Uploading to CrowdIn.")
+
+    # url template for our API calls
+    url_template = "https://api.crowdin.com/api/project/{project_id}/{api_call}"
+    get_params = {"key": project_key}
+
+    # first we have to ensure that the directory that we're gonna put
+    # our po files in crowdin is present. We also don't care that it fails.
+    api_call = "add-directory"
+    url = url_template.format(project_id=project_id,
+                              api_call=api_call)
+    data = {"name": "/versioned/"}
+    requests.post(url, params=get_params, data=data)
+
+    api_call = "update-file" if update_files_only else "add-file"
+
+    url = "https://api.crowdin.com/api/project/{project_id}/{api_call}"
+    url = url_template.format(project_id=project_id,
+                              api_call=api_call)
+
+    version_namespace = "%s.%s" % (version.MAJOR_VERSION, version.MINOR_VERSION)
+
+    pot_path = pathlib.Path(POT_DIRPATH)
+    files_to_upload = {
+        "files[/versioned/%s-django.po]" % version_namespace: open((pot_path / "django.pot").resolve().__str__()),
+        "files[/versioned/%s-djangojs.po]" % version_namespace: open((pot_path / "djangojs.pot").resolve().__str__())
+    }
+    get_params = {"key": project_key}
+    r = requests.post(url, params=get_params, files=files_to_upload)
+    try:
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        # This is probably because the files already exist on CrowdIn. If so, just update them.
+        if "File with such name is already uploaded" in e.response.text:
+            upload_to_crowdin(project_key, update_files_only=True)
