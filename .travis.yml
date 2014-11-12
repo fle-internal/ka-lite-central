@@ -1,18 +1,15 @@
 language: python
 python:
 - '2.7'
-# TODO-BLOCKER(dylanjbarth): use latest version of firefox once we have upgraded our selenium
-addons:
-  firefox: '28.0'
 before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile
   --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
 install:
-- npm install
-- npm install -g grunt-cli
-- pip install -r requirements.txt
+- pushd $TRAVIS_BUILD_DIR; npm install; popd
+- pushd $TRAVIS_BUILD_DIR; npm install -g grunt-cli; popd
+- pushd $TRAVIS_BUILD_DIR; pip install -r requirements.txt; popd
 script:
 - grunt jshint
 - python centralserver/manage.py test --traceback
