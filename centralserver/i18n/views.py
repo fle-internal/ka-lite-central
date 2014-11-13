@@ -3,7 +3,11 @@
 import json
 from collections import OrderedDict
 
+from django.core.urlresolvers import reverse, NoReverseMatch
+
 from annoying.decorators import render_to
+
+from kalite.version import SHORTVERSION
 
 from fle_utils.general import sort_version_list
 from . import get_language_pack_availability_filepath
@@ -28,12 +32,19 @@ def language_dashboard(request):
     lang_pack_by_version = OrderedDict((version, []) for version in ordered_versions)
 
     for code, pack in lang_availability.items():
+        # add a url to download the language pack
+        language_code = pack["code"]
+        try:
+            url = reverse("download_language_pack", kwargs={"version": SHORTVERSION, "lang_code": language_code})
+        except NoReverseMatch:
+            url = ""
+        pack["download_language_url"] = url
+
         software_version = pack["software_version"]
-        del pack["software_version"] # won't be used other than to sort
+        del pack["software_version"]  # won't be used other than to sort
         lang_pack_by_version[software_version].append(pack)
     context = {
         "lang_pack_by_version": lang_pack_by_version,
-        "crowdin_base_url": "https://crowdin.com/project/ka-lite/",
+        "crowdin_base_url": "https://crowdin.com/project/ka-lite/"
     }
     return context
-
