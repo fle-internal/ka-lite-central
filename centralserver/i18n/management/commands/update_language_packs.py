@@ -414,7 +414,7 @@ def download_latest_translations(project_id=None,
         if rebuild:
             build_translations()
 
-        request_url = "http://api.crowdin.net/api/project/%s/download/%s.zip?key=%s" % (project_id, lang_code, project_key)
+        request_url = "%s/%s/download/%s.zip?key=%s" % (CROWDIN_API_URL, project_id, lang_code, project_key)
         try:
             resp = requests.get(request_url)
             resp.raise_for_status()
@@ -476,7 +476,7 @@ def build_translations(project_id=None, project_key=None):
         project_key = settings.CROWDIN_PROJECT_KEY
 
     logging.info("Requesting that CrowdIn build a fresh zip of our translations")
-    request_url = "http://api.crowdin.net/api/project/%s/export?key=%s" % (project_id, project_key)
+    request_url = "%s/%s/export?key=%s" % (CROWDIN_API_URL, project_id, project_key)
     try:
         resp = requests.get(request_url)
         resp.raise_for_status()
@@ -732,7 +732,7 @@ def download_crowdin_metadata(project_id=None, project_key=None):
     if not project_key:
         project_key = settings.CROWDIN_PROJECT_KEY
 
-    request_url = "http://api.crowdin.net/api/project/%s/status?key=%s&json=True" % (project_id, project_key)
+    request_url = "%s/%s/status?key=%s&json=True" % (CROWDIN_API_URL, project_id, project_key)
     try:
         resp = requests.get(request_url)
         resp.raise_for_status()

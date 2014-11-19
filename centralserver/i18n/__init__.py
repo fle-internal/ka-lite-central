@@ -47,6 +47,8 @@ LOCALE_ROOT = settings.LOCALE_PATHS[0]
 
 POT_DIRPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
 
+CROWDIN_API_URL = "https://api.crowdin.com/api/project"
+
 
 def get_lang_map_filepath(lang_code):
     return os.path.join(SUBTITLES_DATA_ROOT, "languages", lang_code + LANGUAGE_SRT_SUFFIX)
