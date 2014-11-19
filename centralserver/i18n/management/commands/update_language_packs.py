@@ -438,6 +438,10 @@ def download_latest_translations(project_id=None,
 
         try:
             if zip_file:
+                # Make sure that the crowdin cache directory exists as specified
+                # in the `centralserver.i18n.CROWDIN_CACHE_DIR`
+                if isinstance(zip_file, basestring) and CROWDIN_CACHE_DIR in zip_file:
+                    ensure_dir(CROWDIN_CACHE_DIR)
                 with open(zip_file, "wb") as fp:  # save the zip file
                     fp.write(resp.content)
         except Exception as e:
