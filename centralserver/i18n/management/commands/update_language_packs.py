@@ -558,8 +558,8 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
                 js_po_file.save_as_mofile(js_mo_file)
             else:
                 # Make sure we only concatenate .po files of the same version that we need.
-                versioned_po_filename = os.path.join("kalite-%s", "versioned", "%s-django") % (lang_code, version,)
-                kalite_po_filename = os.path.join("kalite-%s", "KA Lite UI", "kalite-%s.po") % (lang_code, lang_code,)
+                versioned_po_filename = os.path.join("versioned", "%s-django") % (version,)
+                kalite_po_filename = os.path.join("KA Lite UI", "kalite-%s.po") % (lang_code,)
                 if versioned_po_filename in src_file or kalite_po_filename in src_file:
                     logging.debug('Concatenating %s with %s...' % (src_file, build_file))
                     src_po = polib.pofile(src_file)
