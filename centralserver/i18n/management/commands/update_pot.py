@@ -24,7 +24,7 @@ from django.conf import settings; logging = settings.LOG
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
-from ... import POT_DIRPATH
+from ... import POT_DIRPATH, CROWDIN_API_URL
 from fle_utils.django_utils import call_command_with_output
 from fle_utils.general import ensure_dir
 from kalite.i18n import get_po_filepath
@@ -123,7 +123,8 @@ def upload_to_crowdin(files, project_key, project_id="ka-lite"):
         cmd = ['curl', '-F', 'files[%(dest_filepath)s]=@%(src_filepath)s' % {
             "src_filepath": src_filepath,
             "dest_filepath": dest_filepath,
-        },  'http://api.crowdin.net/api/project/%(project_id)s/update-file?key=%(project_key)s' % {
+        },  '%(crowdin_api_url)s/%(project_id)s/update-file?key=%(project_key)s' % {
+            "crowdin_api_url": CROWDIN_API_URL,
             "project_key": project_key,
             "project_id": project_id,
         }]

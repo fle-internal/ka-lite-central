@@ -414,7 +414,7 @@ def download_latest_translations(project_id=None,
         if rebuild:
             build_translations()
 
-        request_url = "http://api.crowdin.net/api/project/%s/download/%s.zip?key=%s" % (project_id, lang_code, project_key)
+        request_url = "%s/%s/download/%s.zip?key=%s" % (CROWDIN_API_URL, project_id, lang_code, project_key)
         try:
             resp = requests.get(request_url)
             resp.raise_for_status()
@@ -438,6 +438,10 @@ def download_latest_translations(project_id=None,
 
         try:
             if zip_file:
+                # Make sure that the crowdin cache directory exists as specified
+                # in the `centralserver.i18n.CROWDIN_CACHE_DIR`
+                if isinstance(zip_file, basestring) and CROWDIN_CACHE_DIR in zip_file:
+                    ensure_dir(CROWDIN_CACHE_DIR)
                 with open(zip_file, "wb") as fp:  # save the zip file
                     fp.write(resp.content)
         except Exception as e:
@@ -472,7 +476,7 @@ def build_translations(project_id=None, project_key=None):
         project_key = settings.CROWDIN_PROJECT_KEY
 
     logging.info("Requesting that CrowdIn build a fresh zip of our translations")
-    request_url = "http://api.crowdin.net/api/project/%s/export?key=%s" % (project_id, project_key)
+    request_url = "%s/%s/export?key=%s" % (CROWDIN_API_URL, project_id, project_key)
     try:
         resp = requests.get(request_url)
         resp.raise_for_status()
@@ -553,9 +557,16 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
                 js_po_file.save(os.path.join(dest_path, 'djangojs.po'))
                 js_po_file.save_as_mofile(js_mo_file)
             else:
-                logging.debug('Concatenating %s with %s...' % (src_file, build_file))
-                src_po = polib.pofile(src_file)
-                build_po.merge(src_po)
+                # Make sure we only concatenate .po files of the same version that we need.
+                versioned_po_filename = os.path.join("versioned", "%s-django") % (version,)
+                kalite_po_filename = os.path.join("KA Lite UI", "kalite-%s.po") % (lang_code,)
+                if versioned_po_filename in src_file or kalite_po_filename in src_file:
+                    logging.debug('Concatenating %s with %s...' % (src_file, build_file))
+                    src_po = polib.pofile(src_file)
+                    build_po.merge(src_po)
+                else:
+                    logging.debug("Ignoring %s because it's NOT for version %s." %
+                                  (src_file, version,))
 
         # de-obsolete messages
         for poentry in build_po:
@@ -728,7 +739,7 @@ def download_crowdin_metadata(project_id=None, project_key=None):
     if not project_key:
         project_key = settings.CROWDIN_PROJECT_KEY
 
-    request_url = "http://api.crowdin.net/api/project/%s/status?key=%s&json=True" % (project_id, project_key)
+    request_url = "%s/%s/status?key=%s&json=True" % (CROWDIN_API_URL, project_id, project_key)
     try:
         resp = requests.get(request_url)
         resp.raise_for_status()
