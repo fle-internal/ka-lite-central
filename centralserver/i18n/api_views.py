@@ -35,9 +35,9 @@ def get_subtitle_counts(request):
 @allow_jsonp
 @api_handle_error_with_json
 def get_available_language_packs(request, version):
-    """Return dict of available language packs"""
+    """Return list of available language packs"""
 
-    # On central, loop through available language packs in static/language_packs/
+    # Open language pack availability file
     try:
         with open(get_language_pack_availability_filepath(version=version), "r") as fp:
             language_packs_available = json.load(fp)
@@ -45,7 +45,7 @@ def get_available_language_packs(request, version):
         logging.debug("Unexpected error getting available language packs: %s" % e)
         language_packs_available = {}
 
-    # Finally, get rid of lang code key and alphabetize
+    # Turn the dictionary into a sorted list of language packs, alphabetized by name
     available_packs = sorted(language_packs_available.values(), key=lambda lp: lp["name"].lower())
     
     return JsonResponse(available_packs)
