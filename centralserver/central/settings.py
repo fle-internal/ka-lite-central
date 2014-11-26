@@ -29,7 +29,7 @@ INSTALLED_APPS = (
     "kalite.facility",
     "kalite.coachreports",  # in both apps; reachable on central via control_panel
     "kalite.control_panel",  # in both apps
-    "kalite.khanload",  # zip_kalite must know about the entire kalite project structure.  Boo, bad code placement!
+    "kalite.contentload",  # zip_kalite must know about the entire kalite project structure.  Boo, bad code placement!
     "kalite.playlist",
     "kalite.testing",  # browser testing
     "kalite.updates",
