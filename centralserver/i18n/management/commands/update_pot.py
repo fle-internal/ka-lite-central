@@ -11,6 +11,7 @@ hope of making it easy to identify unwrapped strings.
 
 This can be run independently of the "update_language_packs" command
 """
+import contextlib
 import glob
 import pathlib
 import polib
@@ -20,11 +21,11 @@ import shutil
 from optparse import make_option
 
 from django.conf import settings
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import POT_DIRPATH
 from fle_utils.general import ensure_dir
-from kalite.i18n import get_po_filepath
 from kalite.i18n.management.commands import test_wrappings
 from kalite import version
 
@@ -74,20 +75,21 @@ def delete_current_templates():
 
 def run_makemessages(verbosity=0):
 
-    python_package_dirs = glob.glob(os.path.join(test_wrappings.PROJECT_ROOT, 'ka-lite', 'python-packages', '*'))
-    ignored_packages = [os.path.join('*/python-packages/', os.path.basename(pp))
-                        for pp in python_package_dirs
-                        if os.path.basename(pp) not in ['securesync', 'fle_utils']]
+    @contextlib.contextmanager
+    def inside_kalite():
+        olddir = os.getcwd()
+        os.chdir(settings.PROJECT_PATH)
 
-    # Central-specific patterns, added on the distributed versions
-    ignore_patterns_py = ignore_patterns_js = ignored_packages + ['*/centralserver/*']
+        yield
 
-    test_wrappings.run_makemessages(ignore_patterns_py=ignore_patterns_py,
-                                    ignore_patterns_js=ignore_patterns_js,
-                                    verbosity=verbosity)
+        os.chdir(olddir)
 
-    # Return the list of files created.
-    return glob.glob(os.path.join(get_po_filepath(lang_code="en"), "*.po"))
+    with inside_kalite():
+        ensure_dir("locale")
+        call_command("makemessages", locale="en", ignore_patterns=["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js"], no_obsolete=True, domain="django")
+        call_command("makemessages", locale="en", ignore_patterns=["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js"], no_obsolete=True, domain="djangojs")
+
+        return glob.glob(os.path.join(settings.KALITE_PATH, "locale", "en", "LC_MESSAGES", "*.po"))
 
 
 def insert_translator_comments(po_filepaths):
