@@ -136,11 +136,11 @@ def upload_to_crowdin(project_key, project_id="ka-lite", update_files_only=False
 
     api_call = "update-file" if update_files_only else "add-file"
 
-    url = "https://api.crowdin.com/api/project/{project_id}/{api_call}"
     url = url_template.format(project_id=project_id,
+                              crowdin_api_url=CROWDIN_API_URL,
                               api_call=api_call)
 
-    version_namespace = "%s.%s" % (version.MAJOR_VERSION, version.MINOR_VERSION)
+    version_namespace = version.SHORTVERSION
 
     pot_path = pathlib.Path(POT_DIRPATH)
     files_to_upload = {
