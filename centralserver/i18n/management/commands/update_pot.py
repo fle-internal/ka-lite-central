@@ -33,6 +33,8 @@ logging = settings.LOG
 
 TRANSLATOR_VARIABLE_COMMENT = "Translators: do not change variable names (anything with format %(xxxx)s)."
 
+CROWDIN_API_URL = "https://api.crowdin.com/api/project"
+
 
 class Command(test_wrappings.Command):
     option_list = BaseCommand.option_list + (
