@@ -94,8 +94,7 @@ def run_makemessages(verbosity=0):
         ensure_dir("locale")
         call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="django")
         call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="djangojs")
-
-        return glob.glob(os.path.join(settings.KALITE_PATH, "locale", "en", "LC_MESSAGES", "*.po"))
+        return glob.glob(os.path.join(''.join(settings.LOCALE_PATHS), "en", "LC_MESSAGES", "*.po"))
 
 
 def insert_translator_comments(po_filepaths):
