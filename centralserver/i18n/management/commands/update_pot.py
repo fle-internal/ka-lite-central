@@ -33,6 +33,8 @@ logging = settings.LOG
 
 TRANSLATOR_VARIABLE_COMMENT = "Translators: do not change variable names (anything with format %(xxxx)s)."
 
+CROWDIN_API_URL = "https://api.crowdin.com/api/project"
+
 
 class Command(test_wrappings.Command):
     option_list = BaseCommand.option_list + (
@@ -78,18 +80,21 @@ def run_makemessages(verbosity=0):
     @contextlib.contextmanager
     def inside_kalite():
         olddir = os.getcwd()
-        os.chdir(settings.PROJECT_PATH)
+        # Include the ka-lite-submodule when processing the *.po files.
+        p = os.path.join(settings.PROJECT_PATH, "..")
+        os.chdir(p)
 
         yield
 
         os.chdir(olddir)
 
+    ignore_patterns = ["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js",
+                       "*/i18n/build/*", "*/media/language_packs/*"]
     with inside_kalite():
         ensure_dir("locale")
-        call_command("makemessages", locale="en", ignore_patterns=["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js"], no_obsolete=True, domain="django")
-        call_command("makemessages", locale="en", ignore_patterns=["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js"], no_obsolete=True, domain="djangojs")
-
-        return glob.glob(os.path.join(settings.KALITE_PATH, "locale", "en", "LC_MESSAGES", "*.po"))
+        call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="django")
+        call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="djangojs")
+        return glob.glob(os.path.join(''.join(settings.LOCALE_PATHS), "en", "LC_MESSAGES", "*.po"))
 
 
 def insert_translator_comments(po_filepaths):
