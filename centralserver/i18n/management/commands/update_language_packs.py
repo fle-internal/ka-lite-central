@@ -756,6 +756,19 @@ def increment_language_pack_version(stored_meta, updated_meta):
     return language_pack_version
 
 
+def download_icu_js(lang_code):
+    download_url = "http://www.localeplanet.com/api/%s/icu.js" % lang_code
+    resp = requests.get(download_url)
+
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        logging.warning("Can't download icu.js for lang_code %s", % lang_code)
+        return ""
+
+    return requests.content
+
+
 def zip_language_packs(lang_codes=None, version=VERSION):
     """Zip up and expose all language packs
 
