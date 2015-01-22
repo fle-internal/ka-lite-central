@@ -27,19 +27,16 @@ import polib
 import re
 import requests
 import shutil
-import subprocess
-import sys
 import tempfile
 import zipfile
 import StringIO
-from collections_local_copy import Iterable, defaultdict
+from collections_local_copy import defaultdict
 from itertools import chain, ifilter
 from optparse import make_option
 
 from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
-from django.core.mail import mail_admins
 
 from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
