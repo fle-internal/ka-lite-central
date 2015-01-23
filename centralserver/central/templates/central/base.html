@@ -41,7 +41,7 @@
           <script type="text/javascript" src="{% static 'js/purl.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/backbone-min.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/backbone-tastypie.js' %}"></script>
+          <script type="text/javascript" src="{% static 'js/backbone/backbone-tastypie.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
           <script type="text/javascript" src='{% static "js/bootstrap-timepicker.min.js" %}'></script>
           <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
@@ -89,7 +89,7 @@
           <script src="{% static "js/handlebars/handlebars-v1.3.0.js" %}"></script>
           <script src="{% static "js/handlebars/handlebars-helpers.js" %}"></script>
           <script src="{% static "js/handlebars/handlebars-wrapper.js" %}"></script>
-          
+
           {% block headjs %}{% endblock headjs %}
           {% block analytics %}{% include 'central/web_analytics.html' %}{% endblock analytics %}
       </head>
