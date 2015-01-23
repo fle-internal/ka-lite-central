@@ -1,23 +1,34 @@
 """
 Test support harness to make setup.py test work.
 """
-import functools
-import os
-import pdb
-import sys
+import importlib
+import pathlib
 
 from django.conf import settings
-from django.core import management
+from django.test.simple import DjangoTestSuiteRunner, build_test
+from django.test.utils import setup_test_environment, teardown_test_environment
+from django.utils import unittest
 
-from kalite.testing import KALiteTestRunner
 
+class CentralTestRunner(DjangoTestSuiteRunner):
 
-class CentralTestRunner(KALiteTestRunner):
-    """Forces us to start in liveserver mode, and only includes relevant apps to test"""
+    def build_suite(self, test_labels=None, *args, **kwargs):
 
-    def run_tests(self, test_labels=None, **kwargs):
-        """By default, only run relevant app tests.  If you specify... you're on your own!"""
-        if not test_labels:  # by default, come in as empty list
-            test_labels = set(['central'])
+        if not test_labels:
+            suite = unittest.defaultTestLoader.discover(settings.PROJECT_PATH, pattern="*.py")
+        else:
+            # remove all kalite.* apps
+            test_labels = [label for label in test_labels if "kalite." not in label]
+            suite = self.make_test_suite(test_labels)
 
-        return super(CentralTestRunner,self).run_tests(test_labels=test_labels, **kwargs)
+        return suite
+
+    def make_test_suite(self, labels):
+        suite = unittest.TestSuite()
+        for label in labels:
+            suite.addTests(self.collect_tests_for_label(label))
+
+        return suite
+
+    def collect_tests_for_label(self, label):
+        return unittest.defaultTestLoader.loadTestsFromName(label)
