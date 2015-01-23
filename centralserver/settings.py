@@ -104,6 +104,8 @@ INSTALLED_APPS = (
     "centralserver.central",
     "centralserver.testing",
     "fle_utils.handlebars",
+    "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
+    "i18n",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
