@@ -12,7 +12,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
 from centralserver.i18n import CROWDIN_CACHE_DIR, get_dubbed_video_map
-from kalite.khanload import KHANLOAD_CACHE_DIR
 from fle_utils.general import ensure_dir
 from fle_utils.platforms import is_windows, not_system_specific_scripts, system_specific_zipping, _default_callback_zip
 from securesync.models import Device
@@ -34,7 +33,7 @@ def select_package_dirs(dirnames, key_base, **kwargs):
     base_name = os.path.split(key_base)[-1]
 
     if key_base == "":  # base directory
-        in_dirs = set(dirnames) - set((".git", "content", "node_modules", os.path.basename(KHANLOAD_CACHE_DIR), os.path.basename(CROWDIN_CACHE_DIR)))
+        in_dirs = set(dirnames) - set((".git", "content", "node_modules", os.path.basename(CROWDIN_CACHE_DIR)))
 
     elif base_name in ["locale", "localflavor"]:
         if  kwargs.get("locale") not in [None, "", "all"]:
