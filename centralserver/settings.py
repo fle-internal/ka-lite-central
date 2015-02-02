@@ -43,6 +43,7 @@ SERVER_EMAIL = 'kalite@learningequality.org'
 # Not really a Django setting, but we treat it like one--it's eeeeverywhere.
 PROJECT_PATH = os.path.realpath(getattr(local_settings, "PROJECT_PATH", os.path.dirname(os.path.realpath(__file__)))) + "/"
 ROOT_DATA_PATH = os.path.realpath(getattr(local_settings, "ROOT_DATA_PATH", os.path.join(PROJECT_PATH, "..", "data"))) + "/"
+STATS_PATH = ROOT_DATA_PATH
 KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
 
 LOCALE_PATHS   = getattr(local_settings, "LOCALE_PATHS", (PROJECT_PATH + "/../locale",))
@@ -105,7 +106,8 @@ INSTALLED_APPS = (
     "centralserver.testing",
     "fle_utils.handlebars",
     "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
-    "i18n",
+    "kalite.topic_tools",
+    "centralserver.i18n",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
