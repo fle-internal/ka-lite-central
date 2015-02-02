@@ -29,6 +29,8 @@ class CentralTestRunner(DjangoTestSuiteRunner):
             for validapp in validapps:
                 subsuite = build_suite(validapp)
                 suite.addTest(subsuite)
+        else:
+            suite.addTest(self.make_test_suite(test_labels))
 
         return suite
 
