@@ -5,7 +5,8 @@ import importlib
 import pathlib
 
 from django.conf import settings
-from django.test.simple import DjangoTestSuiteRunner, build_test
+from django.db.models import get_apps
+from django.test.simple import DjangoTestSuiteRunner, build_test, build_suite
 from django.test.utils import setup_test_environment, teardown_test_environment
 from django.utils import unittest
 
@@ -14,12 +15,17 @@ class CentralTestRunner(DjangoTestSuiteRunner):
 
     def build_suite(self, test_labels=None, *args, **kwargs):
 
+        suite = unittest.TestSuite()
+        # we don't do unittest.defaultTestLoader.discover since modules will get double-imported,
+        # registering modules twice on the admin app. That's not a good thing.
+
+        # so instead we loop over all apps and use the builtin
+        # django function build_suite to find tests within those
+        # apps.
         if not test_labels:
-            suite = unittest.defaultTestLoader.discover(settings.PROJECT_PATH, pattern="*.py")
-        else:
-            # remove all kalite.* apps
-            test_labels = [label for label in test_labels if "kalite." not in label]
-            suite = self.make_test_suite(test_labels)
+            for validapp in (app for app in get_apps() if "kalite." not in app.__name__):
+                subsuite = build_suite(validapp)
+                suite.addTest(subsuite)
 
         return suite
 
