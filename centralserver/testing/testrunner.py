@@ -23,7 +23,10 @@ class CentralTestRunner(DjangoTestSuiteRunner):
         # django function build_suite to find tests within those
         # apps.
         if not test_labels:
-            for validapp in (app for app in get_apps() if "kalite." not in app.__name__):
+            validapps = (app for app in get_apps()
+                         if "kalite." not in app.__name__
+                         if "securesync." not in app.__name__)
+            for validapp in validapps:
                 subsuite = build_suite(validapp)
                 suite.addTest(subsuite)
 
