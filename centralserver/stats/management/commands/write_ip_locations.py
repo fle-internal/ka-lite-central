@@ -15,7 +15,6 @@ from django.core.management.base import BaseCommand, CommandError
 from securesync.models import SyncSession
 
 GEOIPDAT = os.path.join(settings.ROOT_DATA_PATH, "GeoLiteCity.dat")
-gic = pygeoip.GeoIP(GEOIPDAT)
 
 class Command(BaseCommand):
     help = "Generate IP address list."
@@ -154,6 +153,7 @@ def ips_to_locations(ips):
     existing_locations = set([(0, 0), (None, None)])
     for ip in ips:
         ip = ip.strip()
+        gic = pygeoip.GeoIP(GEOIPDAT)
         record = gic.record_by_addr(ip) or {}
         record["city"] = record.get("city") or ""
         record["region_name"] = record.get("region_name") or ""
@@ -165,7 +165,7 @@ def ips_to_locations(ips):
         if (record.get("latitude"), record.get("longitude")) not in existing_locations:
             locations.append(record)
             existing_locations.add((record["latitude"], record["longitude"]))
-    
+
     return locations, all_locations
 
 
