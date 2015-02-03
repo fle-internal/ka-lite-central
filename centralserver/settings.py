@@ -107,6 +107,7 @@ INSTALLED_APPS = (
     "fle_utils.handlebars",
     "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
     "kalite.topic_tools",
+    "kalite.store",
     "centralserver.i18n",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
