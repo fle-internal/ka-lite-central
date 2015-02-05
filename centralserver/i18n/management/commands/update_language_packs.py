@@ -557,19 +557,15 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
                 # Make sure we only concatenate .po files of the same version that we need.
                 versioned_po_filename = os.path.join("kalite-%s", "versioned", "%s-django") % (lang_code, version,)
                 kalite_po_filename = os.path.join("kalite-%s", "KA Lite UI", "kalite-%s.po") % (lang_code, lang_code,)
-                if versioned_po_filename in src_file or kalite_po_filename in src_file:
-                    logging.debug("Concatenating %s with %s..." % (src_file, build_file))
-                    src_po = polib.pofile(
-                        src_file)
+                if os.path.basename(src_file).endswith('%s.po' % lang_code):
+                    ka_po_file = src_file
+                elif versioned_po_filename in src_file or kalite_po_filename in src_file or src_file in ka_po_file:
+                    logging.debug('Concatenating %s with %s...' % (src_file, build_file))
+                    src_po = polib.pofile(src_file)
                     build_po.merge(src_po)
                 else:
-                    if os.path.basename(src_file):
-                        logging.info("Found file %s", os.path.basename(src_file))
-                        src_po = polib.pofile(src_file)
-                        build_po.merge(src_po)
-                    else:
-                        logging.info("Ignoring %s because it's NOT for version %s or the .po files are not existed" %
-                                      (src_file, version,))
+                    logging.debug("Ignoring %s because it's NOT for version %s." %
+                                  (src_file, version,))
 
 
         # de-obsolete messages
