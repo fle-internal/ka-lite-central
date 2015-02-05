@@ -559,7 +559,8 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
                 kalite_po_filename = os.path.join("kalite-%s", "KA Lite UI", "kalite-%s.po") % (lang_code, lang_code,)
                 if os.path.basename(src_file).endswith('%s.po' % lang_code):
                     ka_po_file = src_file
-                elif versioned_po_filename in src_file or kalite_po_filename in src_file or src_file in ka_po_file:
+                    
+                if versioned_po_filename in src_file or kalite_po_filename in src_file or src_file in ka_po_file:
                     logging.debug('Concatenating %s with %s...' % (src_file, build_file))
                     src_po = polib.pofile(src_file)
                     build_po.merge(src_po)
