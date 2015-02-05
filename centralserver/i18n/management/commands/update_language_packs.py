@@ -563,16 +563,13 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
                         src_file)
                     build_po.merge(src_po)
                 else:
-                    if os.path.basename(src_file).endswith(".po"):
+                    if os.path.basename(src_file):
                         logging.info("Found file %s", os.path.basename(src_file))
                         src_po = polib.pofile(src_file)
                         build_po.merge(src_po)
                     else:
-                        if versioned_po_filename not in src_file or kalite_po_filename not in src_file:
-                            logging.info("Ignoring %s because it's NOT for version %s" %
+                        logging.info("Ignoring %s because it's NOT for version %s or the .po files are not existed" %
                                       (src_file, version,))
-                        else:
-                            logging.info("The .po files are not existed")
 
 
         # de-obsolete messages
