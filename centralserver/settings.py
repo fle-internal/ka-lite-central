@@ -101,7 +101,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.sessions",
     "django_extensions", # needed for clean_pyc (testing)
-    "debug_toolbar",
+    "securesync.devices",
     "centralserver.central",
     "centralserver.testing",
     "fle_utils.handlebars",
@@ -113,7 +113,6 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     "centralserver.middleware.DummySessionForAPIUrls",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
 
