@@ -147,13 +147,14 @@ OWN_DEVICE_PRIVATE_KEY = %r
                           output_to_stdout=False,
                           output_to_stderr=False)
 
-        results = self.wait()[0]
+        results, _, retcode = self.wait()
 
         return {
             "uploaded": int(re.search("Total uploaded: (\d+)", results).group(1)),
             "downloaded": int(re.search("Total downloaded: (\d+)", results).group(1)),
             "errors": int(re.search("Total errors: (\d+)", results).group(1)),
             "results": results,
+            "retcode": retcode,
         }
 
     def addmodel(self, modelname, count=1, **attrs):
