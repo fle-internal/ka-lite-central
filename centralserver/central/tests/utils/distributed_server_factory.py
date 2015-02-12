@@ -131,7 +131,6 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         if noerr or returncode != 0:
             errmsgtemplate = "command returned non-zero errcode: stderr is %s"
-            print stderr
             raise subprocess.CalledProcessError(returncode,
                                                 'command',
                                                 output=errmsgtemplate % stderr)
