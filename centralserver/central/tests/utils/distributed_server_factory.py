@@ -222,8 +222,8 @@ OWN_DEVICE_PRIVATE_KEY = %r
             username=username,
             password=password,
             zone=zone_id,
-            output_to_stdout=True,
-            output_to_stderr=True,
+            output_to_stdout=False,
+            output_to_stderr=False,
         ).wait()
 
         return result
