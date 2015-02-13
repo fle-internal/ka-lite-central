@@ -193,3 +193,5 @@ AUTH_PROFILE_MODULE = "central.UserProfile"
 # Tastypie stuff
 TASTYPIE_DEFAULT_FORMATS = ['json']
 API_LIMIT_PER_PAGE = 0
+
+POSTMARK_API_KEY = ""
