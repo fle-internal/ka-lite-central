@@ -494,37 +494,40 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
     def prep_inputs(src_path, lang_code, filter_type):
         src_po_files = [po for po in all_po_files(src_path)]
 
+        # Note: The filter below was commented due to some circumstance that the approve crowdin tranlastion for the
+        #       perseus exercises  was not included in the .mo file
+
         # remove all exercise po that is not about math
-        if filter_type == "ka":
-
-            # Magic # 4 below: 3 for .po, 1 for -  (-fr.po)
-            src_po_files_learn     = ifilter(lambda fn: any([os.path.basename(fn).startswith(str) for str in ["learn."]]), src_po_files)
-            src_po_files_learn     = [po for po in src_po_files_learn]
-
-            src_po_files_videos    = ifilter(lambda fn: ".videos" in fn, src_po_files_learn)
-            src_po_files_exercises = ifilter(lambda fn: ".exercises" in fn, src_po_files_learn)
-            src_po_files_topics    = ifilter(lambda fn:  sum([po.startswith(fn[:-len(lang_code)-4]) for po in src_po_files_learn]) > 1, src_po_files_learn)
-            src_po_files_topics    = chain(
-                src_po_files_topics,
-                ifilter(lambda fn: any([os.path.basename(fn).startswith(str) for str in ["content.chrome", "_other_"]]), src_po_files)
-            )
-
-            # before we call msgcat, process each exercise po file and leave out only the metadata
-            filter_rules = ((r'.*(of|for) exercise', src_po_files_exercises),
-                            (r'.*(of|for) video', src_po_files_videos),
-                            (r'.*(of|for) topic', src_po_files_topics))
-            for rule, src_file_list in filter_rules:
-                for po_file in src_file_list:
-                    try:
-                        remove_nonmetadata(po_file, rule)
-                        yield po_file
-                    except IOError: # either a parse error from polib, or file doesnt exist
-                        # TODO (ARON): capture all po files that return this error, show it to user
-                        continue
-
-        else:
-            for po_file in src_po_files:
-                yield po_file
+        # if filter_type == "ka":
+        #
+        #     # Magic # 4 below: 3 for .po, 1 for -  (-fr.po)
+        #     src_po_files_learn     = ifilter(lambda fn: any([os.path.basename(fn).startswith(str) for str in ["learn."]]), src_po_files)
+        #     src_po_files_learn     = [po for po in src_po_files_learn]
+        #
+        #     src_po_files_videos    = ifilter(lambda fn: ".videos" in fn, src_po_files_learn)
+        #     src_po_files_exercises = ifilter(lambda fn: ".exercises" in fn, src_po_files_learn)
+        #     src_po_files_topics    = ifilter(lambda fn:  sum([po.startswith(fn[:-len(lang_code)-4]) for po in src_po_files_learn]) > 1, src_po_files_learn)
+        #     src_po_files_topics    = chain(
+        #         src_po_files_topics,
+        #         ifilter(lambda fn: any([os.path.basename(fn).startswith(str) for str in ["content.chrome", "_other_"]]), src_po_files)
+        #     )
+        #
+        #     # before we call msgcat, process each exercise po file and leave out only the metadata
+        #     filter_rules = ((r'.*(of|for) exercise', src_po_files_exercises),
+        #                     (r'.*(of|for) video', src_po_files_videos),
+        #                     (r'.*(of|for) topic', src_po_files_topics))
+        #     for rule, src_file_list in filter_rules:
+        #         for po_file in src_file_list:
+        #             try:
+        #                 remove_nonmetadata(po_file, rule)
+        #                 yield po_file
+        #             except IOError: # either a parse error from polib, or file doesnt exist
+        #                 # TODO (ARON): capture all po files that return this error, show it to user
+        #                 continue
+        #
+        # else:
+        for po_file in src_po_files:
+            yield po_file
 
         if combine_with_po_file:
             yield combine_with_po_file
