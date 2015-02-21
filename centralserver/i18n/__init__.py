@@ -23,7 +23,7 @@ from django.views.i18n import javascript_catalog
 ###   we CANNOT import main.models in here.  ###
 ###                                          ###
 ################################################
-from centralserver.version import VERSION
+from kalite.version import VERSION
 from fle_utils.general import ensure_dir, softload_json
 from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_langcode_map, get_code2lang_map
 
@@ -149,8 +149,7 @@ def get_dubbed_video_map(lang_code=None, reload=None, force=False):
         try:
             if not os.path.exists(DUBBED_VIDEOS_MAPPING_FILEPATH) or force:
                 try:
-                    # Never call commands that could fail from the distributed server.
-                    #   Always create a central server API to abstract things (see below)
+                    # Generate from the spreadsheet
                     logging.debug("Generating dubbed video mappings.")
                     call_command("generate_dubbed_video_mappings", force=force)
                 except Exception as e:
@@ -170,10 +169,15 @@ def get_dubbed_video_map(lang_code=None, reload=None, force=False):
             logging.info("Failed to get dubbed video mappings (%s); defaulting to empty.")
             DUBBED_VIDEO_MAP_RAW = {}  # setting this will avoid triggering reload on every call
 
+        # Remove any empty items, as they break things
+        if "" in DUBBED_VIDEO_MAP_RAW:
+            del DUBBED_VIDEO_MAP_RAW[""]
+
         DUBBED_VIDEO_MAP = {}
         for lang_name, video_map in DUBBED_VIDEO_MAP_RAW.iteritems():
-            logging.debug("Adding dubbed video map entry for %s (name=%s)" % (get_langcode_map(lang_name), lang_name))
-            DUBBED_VIDEO_MAP[get_langcode_map(lang_name)] = video_map
+            if lang_name:
+                logging.debug("Adding dubbed video map entry for %s (name=%s)" % (get_langcode_map(lang_name), lang_name))
+                DUBBED_VIDEO_MAP[get_langcode_map(lang_name)] = video_map
 
     return DUBBED_VIDEO_MAP.get(lang_code, {}) if lang_code else DUBBED_VIDEO_MAP
 

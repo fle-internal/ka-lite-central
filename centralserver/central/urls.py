@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 import centralserver.contact.urls
 import centralserver.deployment.urls
 import centralserver.faq.urls
+import centralserver.i18n.urls
 import centralserver.registration.urls
 import centralserver.stats.api_urls
 import centralserver.stats.urls
@@ -18,6 +19,7 @@ import kalite.control_panel.urls
 import kalite.facility.urls
 import securesync.urls
 from . import api_urls
+from fle_utils import handlebars
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
 
 
@@ -104,13 +106,18 @@ urlpatterns += patterns('kalite.control_panel.views',
     url(r'^', include(kalite.control_panel.urls)),
 )
 
+# Handlebars
+urlpatterns += patterns('',
+    url(r'^handlebars/', include(fle_utils.handlebars.urls)),
+)
+
 urlpatterns += patterns('',
     # Reporting
     url(r'^coachreports/', include(kalite.coachreports.urls)),
 )
 
 urlpatterns += patterns('',
-    url(r'^contact/', include(centralserver.contact.urls)),
+    url(r'^contact/', lambda request: HttpResponseRedirect("https://learningequality.org/ka-lite/map/add/#contact")),
     url(r'^faq/', include(centralserver.faq.urls)),
     url(r'^accounts/', include(centralserver.registration.urls)),
 )
@@ -118,6 +125,7 @@ urlpatterns += patterns('',
 urlpatterns += patterns('',
     url(r'^stats/', include(centralserver.stats.urls)),
     url(r'^deployments/', include(centralserver.deployment.urls)),
+    url(r'^languages/', include(centralserver.i18n.urls)),
 )
 
 handler403 = __package__ + '.views.handler_403'

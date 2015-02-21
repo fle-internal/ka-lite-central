@@ -43,7 +43,7 @@ from django.core.mail import mail_admins
 
 from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
-from centralserver.version import VERSION
+from kalite.version import VERSION
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
 from kalite.updates import get_all_remote_video_sizes
 
@@ -183,7 +183,9 @@ def update_language_packs(lang_codes, options):
 
     for lang_code in lang_codes:
         lang_code_map = get_supported_language_map(lang_code)
-        lang_metadata = {}
+        lang_metadata = {
+            "beta": True if lang_code_map["beta"] != lang_code else False,
+        }
 
         # Step 1: Update / collect srts.  No version needed, we want to share latest always.
         if options['update_srts']:
@@ -286,6 +288,7 @@ def update_translations(lang_codes=None,
 
 
         for lang_code in (lang_codes or [None]):
+
             lang_code = lcode_to_ietf(lang_code)
             lang_code_crowdin = get_supported_language_map(lang_code)['crowdin']
             if not lang_code_crowdin:
@@ -322,7 +325,9 @@ def update_translations(lang_codes=None,
             package_metadata[lang_code]["kalite_nphrases"]       = kalite_metadata["phrases"]
 
             # Download Khan Academy translations too
-            if not download_ka_translations:
+            # (don't download po files for English, since original text is already in English,
+            # and KA has English po files in their crowdin repo, but they're full of non-English text)
+            if not download_ka_translations or lang_code == "en":
                 logging.info("Skipping KA translations")
                 combined_po_file = None
             else:
@@ -348,15 +353,11 @@ def update_translations(lang_codes=None,
             # here we compute the percent translated
             if download_ka_translations or download_kalite_translations:
                 pmlc = package_metadata[lang_code] # shorter name, less characters
-                if pmlc['kalite_nphrases'] == pmlc['ka_nphrases'] == 0:
+                if pmlc['kalite_nphrases'] + pmlc['ka_nphrases'] == 0:
                     pmlc['percent_translated'] = 0
                 else:
                     pmlc["percent_translated"] = 100. * (pmlc['kalite_ntranslations'] + pmlc['ka_ntranslations']) / float(pmlc['kalite_nphrases'] + pmlc['ka_nphrases'])
 
-
-            # english is always 100% translated
-            if lang_code == 'en':
-                pmlc['percent_translated'] = 100
 
     return package_metadata
 
@@ -463,7 +464,7 @@ def build_translations(project_id=None, project_key=None):
     if not project_id:
         project_id = settings.CROWDIN_PROJECT_ID
     if not project_key:
-       project_key = settings.CROWDIN_PROJECT_KEY
+        project_key = settings.CROWDIN_PROJECT_KEY
 
     logging.info("Requesting that CrowdIn build a fresh zip of our translations")
     request_url = "http://api.crowdin.net/api/project/%s/export?key=%s" % (project_id, project_key)

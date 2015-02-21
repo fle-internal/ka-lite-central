@@ -3,13 +3,14 @@
 import datetime
 import re
 
+from hashlib import sha1 as sha_constructor
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.core import management
 from django.test import TestCase
-from django.utils.hashcompat import sha_constructor
 
 from ..models import RegistrationProfile
 

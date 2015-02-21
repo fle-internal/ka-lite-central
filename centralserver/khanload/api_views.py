@@ -38,6 +38,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 
 from fle_utils.internet import JsonResponse, JsonResponseMessageError, set_query_params
+from kalite.i18n import get_video_id
 from kalite.main.models import ExerciseLog, VideoLog
 from kalite.shared.decorators import require_login
 from kalite.topic_tools import get_node_cache
@@ -102,6 +103,11 @@ def update_all_central(request):
     Update can't proceed without authentication.
     Start that process here.
     """
+
+    # TODO-BLOCKER(jamalex): oauth not working right now, so direct the user back with an error
+    dest = request.META.get("HTTP_REFERER", "").split("?")[0] or "/"
+    dest += "?message=Khan%20Academy%20export%20feature%20not%20currently%20available.%20Please%20try%20later.&message_type=warning&message_id=id_khanload"
+    return HttpResponseRedirect(dest)
 
     # Store information in a session
     request.session["distributed_user_id"] = request.GET["user_id"]
@@ -243,7 +249,7 @@ def update_all_central_callback(request):
         message_type = "error"
         message = _("Loading json object: %s") % e
 
-    # If something broke on the distribute d server, we are SCREWED.
+    # If something broke on the distributed server, we have no way to recover.
     #   For now, just show the error to users.
     #
     # Ultimately, we have a message, would like to share with the distributed server.

@@ -1,1 +1,1 @@
-from version import *
+from kalite.version import *

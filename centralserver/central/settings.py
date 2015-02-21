@@ -29,8 +29,11 @@ INSTALLED_APPS = (
     "kalite.facility",
     "kalite.coachreports",  # in both apps; reachable on central via control_panel
     "kalite.control_panel",  # in both apps
-    "kalite.khanload",  # zip_kalite must know about the entire kalite project structure.  Boo, bad code placement!
+    "kalite.contentload",  # zip_kalite must know about the entire kalite project structure.  Boo, bad code placement!
+    "kalite.playlist",
     "kalite.testing",  # browser testing
+    "kalite.updates",
+    "kalite.student_testing",
     # central-only apps
     "centralserver.contact",
     "centralserver.deployment",
@@ -50,7 +53,6 @@ MIDDLEWARE_CLASSES = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "fle_utils.django_utils.middleware.GetNextParam",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "securesync.middleware.DBCheck",
 ) + MIDDLEWARE_CLASSES  # append local_settings middleware, in case of dependencies
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -69,7 +71,7 @@ TEMPLATE_LOADERS = (
 )
 if DEBUG:
     INSTALLED_APPS += ("django_snippets",)   # used in contact form and (debug) profiling middleware
-
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ##############################
 # KA Lite settings

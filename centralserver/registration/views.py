@@ -17,7 +17,7 @@ from django.utils.translation import ugettext as _
 
 from .backends import get_backend
 from centralserver.central.forms import OrganizationForm
-from centralserver.central.models import Organization
+from centralserver.central.models import Organization, OrganizationInvitation
 from centralserver.contact.views import contact_subscribe
 from fle_utils.internet import set_query_params
 from securesync.models import Zone
@@ -206,52 +206,76 @@ def register(request, backend, success_url=None, form_class=None,
         form_class = backend.get_form_class(request)
 
     do_subscribe = request.REQUEST.get("email_subscribe") == "on"
-
+    # if they've been invited, don't force org creation
+    invited_email = request.REQUEST.get("email_invite") 
     if request.method == 'POST':
         form = form_class(data=request.POST, files=request.FILES)
-        org_form = OrganizationForm(data=request.POST, instance=Organization())
-
+        validation_successful = True
         # Could register
-        if form.is_valid() and org_form.is_valid():
+        if form.is_valid():
             assert form.cleaned_data.get("username") == form.cleaned_data.get("email"), "Should be set equal in the call to clean()"
 
             try:
-                # Create the user
-                new_user = backend.register(request, **form.cleaned_data)
+                # if admin invited, just create user, do not worry about org stuff
+                if invited_email:
+                    new_user = backend.register(request, **form.cleaned_data)
+                else:
+                    post_data = request.POST.copy() # request.POST is immutable 
+                    org_form = OrganizationForm(data=post_data, instance=Organization())
+                    # Default the org name if they omit it to their first and last name
+                    # If they don't provide their first and last name we catch it in the org_form clean
+                    if not org_form.data.get('name'):
+                        if org_form.data.get('first_name') and org_form.data.get('last_name'):
+                            org_form.data['name'] = "%(first_name)s %(last_name)s's Organization" % {'first_name': org_form.data['first_name'], 'last_name': org_form.data['last_name']}  
+                    if org_form.is_valid():
+                        # Add an org.  Must create org before adding user.
+                        new_user = backend.register(request, **form.cleaned_data)   
+                        org_form.instance.owner = new_user
+                        org_form.save()
+                        org = org_form.instance
+                        org.add_member(new_user)
 
-                # Add an org.  Must create org before adding user.
-                org_form.instance.owner = new_user
-                org_form.save()
-                org = org_form.instance
-                org.add_member(new_user)
-
-                # Now add a zone, and link to the org
-                zone = Zone(name=org_form.instance.name + " Sharing Network")
-                zone.save()
-                org.add_zone(zone)
+                        # Now add a zone, and link to the org
+                        zone = Zone(name=org_form.instance.name + " Sharing Network")
+                        zone.save()
+                        org.add_zone(zone)
+                        org.save()
+                    else:
+                        validation_successful = False
 
                 # Finally, try and subscribe the user to the mailing list
                 # (silently; don't return anything to the user)
                 if do_subscribe:
                     contact_subscribe(request, form.cleaned_data['email'])  # no "return"
-                org.save()
-
-                if success_url is None:
-                    to, args, kwargs = backend.post_registration_redirect(request, new_user)
-                    return redirect(to, *args, **kwargs)
-                else:
-                    return redirect(success_url)
 
             except IntegrityError as e:
                 if e.message=='column username is not unique':
                     form._errors['__all__'] = _("An account with this email address has already been created.  Please login at the link above.")
                 else:
                     raise e
+        else:
+            validation_successful = False
+
+        if validation_successful:
+            if success_url is None:
+                to, args, kwargs = backend.post_registration_redirect(request, new_user)
+                return redirect(to, *args, **kwargs)
+            else:
+                return redirect(success_url)
+        else:
+            if invited_email:
+                org_form = None
+            else:
+                org_form = OrganizationForm(data=request.POST, instance=Organization())
 
     # GET, not POST
     else:
-        form = form_class()
-        org_form = OrganizationForm()
+        if invited_email:
+            form = form_class(initial={'email': invited_email})
+            org_form = None
+        else:
+            form = form_class()
+            org_form = OrganizationForm()
 
     if extra_context is None:
         extra_context = {}

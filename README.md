@@ -6,7 +6,7 @@ This is the code for the KA Lite Central Server: [https://kalite.learningequalit
 
 1. Install requirements:
     - [install node](http://nodejs.org/download/) if you don't have it already.
-2. Get the codebase: `git clone https://github.com/fle-internal/ka-lite-central.git` (if you're planning to make changes, you should fork the repo and clone your fork instead)
+2. Get the codebase: `git clone --recursive https://github.com/fle-internal/ka-lite-central.git` (if you're planning to make changes, you should fork the repo and clone your fork instead)
 3. Install the dependencies listed in packages.json: `sudo npm install`
 4. Install grunt: `sudo npm install -g grunt-cli`
 5. Go into the centralserver directory: `cd centralserver`

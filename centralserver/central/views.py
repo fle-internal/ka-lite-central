@@ -34,6 +34,8 @@ from securesync.models import Zone
 
 @render_to("central/homepage.html")
 def homepage(request):
+    if request.is_logged_in:
+        return HttpResponseRedirect(reverse("org_management"))
     feed = FeedListing.objects.order_by('-posted_date')[:5]
     return {
         "feed": feed,
@@ -131,7 +133,7 @@ def delete_invite(request, org_id, invite_id):
     deletion = DeletionRecord(organization=org, deleter=request.user, deleted_invite=invite)
     deletion.save()
     invite.delete()
-    messages.success(request, _("You have successfully revoked the invitation for %(email).") % {"email": invite.email_to_invite})
+    messages.success(request, _("You have successfully revoked the invitation for %(email)s.") % {"email": invite.email_to_invite})
     return HttpResponseRedirect(reverse("org_management"))
 
 

@@ -8,18 +8,26 @@ import httplib
 import json
 import os
 import requests
-from optparse import make_option
 from StringIO import StringIO
+from khan_api_python.api_models import Khan
+from optparse import make_option
 
 from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import DUBBED_VIDEOS_MAPPING_FILEPATH, get_dubbed_video_map
 from fle_utils.general import ensure_dir, datediff
+from kalite.i18n import get_code2lang_map
 from kalite.topic_tools import get_node_cache
 
 
-def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
+def dubbed_video_data_from_api(lang_code):
+    k = Khan(lang=lang_code)
+    videos = k.get_videos()
+    return {v["youtube_id"]: v["translated_youtube_id"] for v in videos if v["youtube_id"] != v["translated_youtube_id"]}
+
+
+def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
 
     """
     Function to do the heavy lifting in getting the dubbed videos map.
@@ -34,12 +42,13 @@ def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
         conn.request("GET", "/r/translationmapping")
         r1 = conn.getresponse()
         if not r1.status == 302:
+            # TODO: have django email admins when we hit this exception
             raise Exception("Expected redirect response from Khan Academy redirect url.")
         download_url = r1.getheader('Location')
         if "docs.google.com" not in download_url:
             logging.warn("Redirect location no longer in Google docs (%s)" % download_url)
         else:
-            download_url += "&output=csv&gid=0"
+            download_url = download_url.replace("/edit", "/export?format=csv")
 
     logging.info("Downloading dubbed video data from %s" % download_url)
     response = requests.get(download_url)
@@ -58,7 +67,7 @@ def download_ka_dubbed_video_mappings(download_url=None, cache_filepath=None):
     return csv_data
 
 
-def generate_dubbed_video_mappings(csv_data=None):
+def generate_dubbed_video_mappings_from_csv(csv_data=None):
 
     # This CSV file is in standard format: separated by ",", quoted by '"'
     logging.info("Parsing csv file.")
@@ -70,64 +79,55 @@ def generate_dubbed_video_mappings(csv_data=None):
     #   Value: corresponding youtube ID in the new language.
     video_map = {}
 
-    row_num = -1
-    try:
-        # Loop through each row in the spreadsheet.
-        while (True):
-            row_num += 1
-            row = reader.next()
+    # Loop through each row in the spreadsheet.
+    for row in reader:
 
+        # skip over the header rows
+        if row[0].strip() in ["", "UPDATED:"]:
+            continue
 
-            if row_num < 4:
-                # Rows 1-4 are crap.
-                continue
+        elif row[0] == "SERIAL":
+            # Read the header row.
+            header_row = [v.lower() for v in row]  # lcase all header row values (including language names)
+            slug_idx = header_row.index("title id")
+            english_idx = header_row.index("english")
+            assert slug_idx != -1, "Video slug column header should be found."
+            assert english_idx != -1, "English video column header should be found."
 
-            elif row_num == 4:
-                # Row 5 is the header row.
-                header_row = [v.lower() for v in row]  # lcase all header row values (including language names)
-                slug_idx = header_row.index("title id")
-                english_idx = header_row.index("english")
-                assert slug_idx != -1, "Video slug column header should be found."
-                assert english_idx != -1, "English video column header should be found."
+        else:
+            # Rows 6 and beyond are data.
+            assert len(row) == len(header_row), "Values line length equals headers line length"
 
-            else:
-                # Rows 6 and beyond are data.
-                assert len(row) == len(header_row), "Values line length equals headers line length"
+            # Grab the slug and english video ID.
+            video_slug = row[slug_idx]
+            english_video_id = row[english_idx]
+            assert english_video_id, "English Video ID should not be empty"
+            assert video_slug, "Slug should not be empty"
 
-                # Grab the slug and english video ID.
-                video_slug = row[slug_idx]
-                english_video_id = row[english_idx]
-                assert english_video_id, "English Video ID should not be empty"
-                assert video_slug, "Slug should not be empty"
+            # English video is the first video ID column,
+            #   and following columns (until the end) are other languages.
+            # Loop through those columns and, if a video exists,
+            #   add it to the dictionary.
+            for idx in range(english_idx, len(row)):
+                if not row[idx]:  # make sure there's a dubbed video
+                    continue
 
-                # English video is the first video ID column,
-                #   and following columns (until the end) are other languages.
-                # Loop through those columns and, if a video exists,
-                #   add it to the dictionary.
-                for idx in range(english_idx, len(row)):
-                    if not row[idx]:  # make sure there's a dubbed video
-                        continue
-
-                    lang = header_row[idx]
-                    if lang not in video_map:  # add the first level if it doesn't exist
-                        video_map[lang] = {}
-                    dubbed_youtube_id = row[idx]
-                    if english_video_id == dubbed_youtube_id and lang != "english":
-                        logging.error("Removing entry for (%s, %s): dubbed and english youtube ID are the same." % (lang, english_video_id))
-                    #elif dubbed_youtube_id in video_map[lang].values():
-                        # Talked to Bilal, and this is actually supposed to be OK.  Would throw us for a loop!
-                        #    For now, just keep one.
-                        #for key in video_map[lang].keys():
-                        #    if video_map[lang][key] == dubbed_youtube_id:
-                        #        del video_map[lang][key]
-                        #        break
-                        #logging.error("Removing entry for (%s, %s): the same dubbed video ID is used in two places, and we can only keep one in our current system." % (lang, english_video_id))
-                    else:
-                        video_map[lang][english_video_id] = row[idx]  # add the corresponding video id for the video, in this language.
-
-    except StopIteration:
-        # The loop ends when the CSV file hits the end and throws a StopIteration
-        pass
+                lang = header_row[idx]
+                if lang not in video_map:  # add the first level if it doesn't exist
+                    video_map[lang] = {}
+                dubbed_youtube_id = row[idx]
+                if english_video_id == dubbed_youtube_id and lang != "english":
+                    logging.error("Removing entry for (%s, %s): dubbed and english youtube ID are the same." % (lang, english_video_id))
+                #elif dubbed_youtube_id in video_map[lang].values():
+                    # Talked to Bilal, and this is actually supposed to be OK.  Would throw us for a loop!
+                    #    For now, just keep one.
+                    #for key in video_map[lang].keys():
+                    #    if video_map[lang][key] == dubbed_youtube_id:
+                    #        del video_map[lang][key]
+                    #        break
+                    #logging.error("Removing entry for (%s, %s): the same dubbed video ID is used in two places, and we can only keep one in our current system." % (lang, english_video_id))
+                else:
+                    video_map[lang][english_video_id] = row[idx]  # add the corresponding video id for the video, in this language.
 
     # Now, validate the mappings with our topic data
     known_videos = get_node_cache("Video").keys()
@@ -173,15 +173,21 @@ class Command(BaseCommand):
         cache_filepath = options["cache_filepath"] or os.path.join(settings.MEDIA_ROOT, 'khan_dubbed_videos.csv')
         max_cache_age = (not options["force"] and options["max_cache_age"]) or 0.0
 
-        if os.path.exists(cache_filepath) and datediff(datetime.datetime.now(), datetime.datetime.fromtimestamp(os.path.getctime(cache_filepath)), units="days") <= max_cache_age:
-            # Use cached data to generate the video map
-            csv_data = open(cache_filepath, "r").read()
-
-        else:
-            csv_data = download_ka_dubbed_video_mappings(cache_filepath=cache_filepath)
+        csv_data = download_ka_dubbed_video_csv(cache_filepath=cache_filepath)
 
         # Use cached data to generate the video map
-        raw_map = generate_dubbed_video_mappings(csv_data=csv_data)
+        raw_map = generate_dubbed_video_mappings_from_csv(csv_data=csv_data)
+
+        # Remove any dummy (empty) entries, as this breaks everything on the client
+        if "" in raw_map:
+            del raw_map[""]
+
+        for lang_code in settings.DUBBED_LANGUAGES_FETCHED_IN_API:
+            logging.info("Updating {} from the API".format(lang_code))
+            map_from_api = dubbed_video_data_from_api(lang_code)
+            lang_metadata = get_code2lang_map(lang_code)
+            lang_ka_name = lang_metadata["ka_name"]
+            raw_map[lang_ka_name].update(map_from_api)
 
         # Now we've built the map.  Save it.
         ensure_dir(os.path.dirname(DUBBED_VIDEOS_MAPPING_FILEPATH))
@@ -198,10 +204,10 @@ class Command(BaseCommand):
             logging.info("*** Added support for %2d languages; removed support for %2d languages. ***" % (len(added_languages), len(removed_languages)))
 
         for lang_code in sorted(list(set(new_map.keys()).union(set(old_map.keys())))):
-            added_videos = set(new_map[lang_code].keys()) - set(old_map[lang_code].keys())
-            removed_videos = set(old_map[lang_code].keys()) - set(new_map[lang_code].keys())
-            shared_keys = set(new_map[lang_code].keys()).intersection(set(old_map[lang_code].keys()))
-            changed_videos = [vid for vid in shared_keys if old_map[lang_code][vid] != new_map[lang_code][vid]]
+            added_videos = set(new_map.get(lang_code, {}).keys()) - set(old_map.get(lang_code, {}).keys())
+            removed_videos = set(old_map.get(lang_code, {}).keys()) - set(new_map.get(lang_code, {}).keys())
+            shared_keys = set(new_map.get(lang_code, {}).keys()).intersection(set(old_map.get(lang_code, {}).keys()))
+            changed_videos = [vid for vid in shared_keys if old_map.get(lang_code, {})[vid] != new_map.get(lang_code, {})[vid]]
             logging.info("\t%5s: Added %d videos, removed %3d videos, changed %3d videos." % (lang_code, len(added_videos), len(removed_videos), len(changed_videos)))
 
         logging.info("Done.")

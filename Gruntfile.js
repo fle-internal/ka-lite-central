@@ -7,25 +7,25 @@ module.exports = function(grunt) {
 		less: {
 			compile: {
 				options: {
-					paths:["./centralserver/static/less"], //Directory to check for @imports
+					paths:["./static-libraries/less"], //Directory to check for @imports
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
 				files: {
-					"./centralserver/static/css/style.css": "./centralserver/static/less/style.less",
+					"./static-libraries/css/style.css": "./static-libraries/less/style.less",
 				},
 
 			},
 
 			bootstrap: {
 				options: {
-					paths:["./centralserver/static/less/bootstrap"],
+					paths:["./static-libraries/less/bootstrap"],
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
 				files: {
-					"./centralserver/static/css/bootstrap/bootstrap.css": "./centralserver/static/less/bootstrap/bootstrap.less",
-					"./centralserver/static/css/bootstrap/responsive.css": "./centralserver/static/less/bootstrap/responsive.less"
+					"./static-libraries/css/bootstrap/bootstrap.css": "./static-libraries/less/bootstrap/bootstrap.less",
+					"./static-libraries/css/bootstrap/responsive.css": "./static-libraries/less/bootstrap/responsive.less"
 				},
 			}
 		},

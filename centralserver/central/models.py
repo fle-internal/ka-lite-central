@@ -145,6 +145,28 @@ class UserProfile(ExtendedModel):
 
         return orgs
 
+    def has_permission_for_object(self, object):
+
+        # super users have access to every object
+        if self.user.is_superuser:
+            return True
+
+        # we can only grant permissions for syncable models (might be good to raise an exception here instead)
+        if not hasattr(object, "get_zone"):
+            return False
+
+        # allow access if the object's zone belongs to an org of which the user is a member
+        if isinstance(object, Zone):
+            zone = object
+        else:
+            zone = object.get_zone()
+        for org in Organization.from_zone(zone):
+            if org.is_member(self.user):
+                return True
+
+        # if we didn't find any reason to grant access -- don't!
+        return False
+
 
 class OrganizationInvitation(ExtendedModel):
     email_to_invite = models.EmailField(verbose_name="Email of invitee", max_length=75)
@@ -163,10 +185,10 @@ class OrganizationInvitation(ExtendedModel):
         to_email = self.email_to_invite
         sender = settings.CENTRAL_FROM_EMAIL
         cdict = {
+            'invited_email': to_email,
             'organization': self.organization,
             'invited_by': self.invited_by,
             'central_server_host': request.get_host(),  # for central server actions, determine DYNAMICALLY to be safe
-
         }
         # Invite an existing user
         if User.objects.filter(email=to_email).count() > 0:

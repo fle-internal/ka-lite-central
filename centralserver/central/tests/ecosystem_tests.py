@@ -9,7 +9,7 @@ from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
 from kalite.facility.models import Facility, FacilityGroup, FacilityUser
-
+from securesync.models import Device
 
 FACILITY_MODEL = 'kalite.facility.models.Facility'
 GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
@@ -45,11 +45,11 @@ class SameVersionTests(CreateAdminMixin,
 
         return DistributedServer(**config)
 
-    def register(self, dist_server):
+    def register(self, dist_server, zone_id=None):
         return dist_server.register(
             username=self.user.username,
             password=self.user.real_password,
-            zone_id=self.zone.id,
+            zone_id=zone_id or self.zone.id,
         )
 
     def test_can_run_on_distributed_server(self):
@@ -219,7 +219,6 @@ class SameVersionTests(CreateAdminMixin,
             # d1.modifymodel(FACILITY_MODEL, facility_id, name="fac1-mod")
 
             sync_results = d1.sync()
-            print sync_results["results"]
 
             self.assertEqual(d1.readmodel(FACILITY_USER_MODEL, id=student_id)["first_name"], "Bob")
             self.assertEqual(d1.readmodel(FACILITY_MODEL, id=facility_id)["name"], "Home")
@@ -251,3 +250,103 @@ class SameVersionTests(CreateAdminMixin,
             sync_results = d.sync()
 
             self.assertEqual(d.readmodel(FACILITY_MODEL, id=facility_id)["name"], "New")
+
+    def test_soft_deletion_sync_upload(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            facility_id = d.addmodel(FACILITY_MODEL, name='Original')
+
+            d.sync()
+
+            d.runcode("from kalite.facility.models import Facility; Facility.objects.get(id='%s').soft_delete()" % facility_id)
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["uploaded"], 1, "Soft-deleted facility was not uploaded")
+
+            facility = Facility.all_objects.get(id=facility_id)
+            self.assertTrue(facility.deleted, "Soft-deleted facility not marked as deleted on central server")
+
+    def test_soft_deletion_sync_download(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            facility_id = d.addmodel(FACILITY_MODEL, name='Original')
+
+            d.sync()
+
+            Facility.all_objects.get(id=facility_id).soft_delete()
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["downloaded"], 1, "Soft-deleted facility was not downloaded")
+
+            result = d.runcode("from kalite.facility.models import Facility; deleted = Facility.all_objects.get(id='%s').deleted" % facility_id)
+
+            self.assertEqual(result["deleted"], True, "Soft-deleted facility not marked as deleted in distributed server")
+
+
+    def test_records_created_before_reg_still_sync(self):
+
+        with self.get_distributed_server() as d:
+
+            # Create a facility on central server, in correct zone
+            facility_central = Facility(name="Central Facility", zone_fallback=self.zone)
+            facility_central.save()
+
+            # Create a facility on distributed server
+            facility_distributed_id = d.addmodel(FACILITY_MODEL, name='Distributed Facility')
+
+            self.register(d)
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["downloaded"], 2, "Wrong number of records downloaded") # =2 because DeviceZone is redownloaded
+            self.assertEqual(sync_results["uploaded"], 1, "Wrong number of records uploaded")
+
+            self.assertEqual(Facility.objects.filter(id=facility_distributed_id).count(), 1, "Distributed server facility not found centrally.")
+            results = d.runcode("from kalite.facility.models import Facility; count = Facility.objects.filter(id='%s').count()" % facility_central.id)
+            self.assertEqual(results["count"], 1, "Central server facility not found on distributed.")
+
+    def test_distributed_server_cannot_overwrite_central_device(self):
+
+        with self.get_distributed_server() as d:
+
+            self.register(d)
+
+            sync_results = d.sync()
+
+            results = d.runcode("from securesync.models import Device; d = Device(id='%s', name='Hahaha'); d.save()" % Device.get_own_device().id)
+
+            with self.assertRaises(Exception):
+                sync_results = d.sync()
+
+            self.assertNotEqual(Device.get_own_device().name, "Hahaha", "Eek! Distributed server overwrote central server Device.")
+
+
+    def test_syncing_of_remotely_created_model_modified_locally(self):
+
+        with self.get_distributed_server() as d:
+
+            # Create a facility on central server
+            facility_central = Facility(name="Central Facility", zone_fallback=self.zone)
+            facility_central.save()
+
+            self.register(d)
+
+            sync_results = d.sync()
+
+            d.modifymodel(FACILITY_MODEL,
+                          facility_central.id,
+                          name="Central Facility - Mod")
+
+            sync_results = d.sync()
+
+            self.assertEqual(sync_results["uploaded"], 1, "Wrong number of records uploaded")
+
+            self.assertEqual(Facility.objects.get(id=facility_central.id).name, "Central Facility - Mod", "Updated Facility name not synced back to central server")
