@@ -23,7 +23,7 @@ from django.views.i18n import javascript_catalog
 ###   we CANNOT import main.models in here.  ###
 ###                                          ###
 ################################################
-from kalite.version import VERSION
+from kalite.version import SHORTVERSION
 from fle_utils.general import ensure_dir, softload_json
 from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_langcode_map, get_code2lang_map
 
@@ -47,12 +47,14 @@ LOCALE_ROOT = settings.LOCALE_PATHS[0]
 
 POT_DIRPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
 
+CROWDIN_API_URL = "https://api.crowdin.com/api/project"
+
 
 def get_lang_map_filepath(lang_code):
     return os.path.join(SUBTITLES_DATA_ROOT, "languages", lang_code + LANGUAGE_SRT_SUFFIX)
 
 
-def get_language_pack_availability_filepath(version=VERSION):
+def get_language_pack_availability_filepath(version=SHORTVERSION):
     return os.path.join(LANGUAGE_PACK_ROOT, version, "language_pack_availability.json")
 
 
@@ -81,7 +83,7 @@ def get_lp_build_dir(lang_code=None, version=None):
     return build_dir
 
 
-def get_language_pack_filepath(lang_code, version=VERSION):
+def get_language_pack_filepath(lang_code, version=SHORTVERSION):
     """Returns location on disk of a language pack.
 
     Args:
@@ -94,7 +96,7 @@ def get_language_pack_filepath(lang_code, version=VERSION):
     return os.path.join(LANGUAGE_PACK_ROOT, version, "%s.zip" % lcode_to_ietf(lang_code))
 
 
-def get_language_pack_metadata_filepath(lang_code, version=VERSION):
+def get_language_pack_metadata_filepath(lang_code, version=SHORTVERSION):
     """Returns the location on disk of the metadata associated with a to-be-built language pack.
 
     Args:

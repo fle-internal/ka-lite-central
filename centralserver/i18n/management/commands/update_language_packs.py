@@ -40,16 +40,20 @@ from django.core.management import call_command
 
 from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
-from kalite.version import VERSION
+from kalite.version import SHORTVERSION
 from fle_utils.general import datediff, ensure_dir, softload_json, version_diff
 from kalite.updates import get_all_remote_video_sizes
 
+COMMAND_MIN_VERSION = "0.10.3"
 
 # Attributes whose value, if changed, should change the version of the language pack.
-VERSION_CHANGING_ATTRIBUTES = ["approved_translations", "phrases", "subtitle_count", "num_dubbed_videos", "num_exercises"]
+VERSION_CHANGING_ATTRIBUTES = ["approved_translations", "phrases", "subtitle_count", "num_dubbed_videos",
+                               "num_exercises"]
+
 
 class SkipTranslations(Exception):
     pass
+
 
 class Command(BaseCommand):
     help = 'Updates all requested language packs'
@@ -60,7 +64,8 @@ class Command(BaseCommand):
                     dest='days',
                     default=1 if not settings.DEBUG else 365,
                     metavar="NUM_DAYS",
-                    help="Update any and all subtitles that haven't been refreshed in the numebr of days given. Defaults to 0 days."),
+                    help="Update any and all subtitles that haven't been refreshed in the numebr of days given. "
+                         "Defaults to 0 days."),
         make_option('-l', '--lang_codes',
                     action='store',
                     dest='lang_codes',
@@ -126,8 +131,8 @@ class Command(BaseCommand):
         make_option('-e', '--ver',
                     action='store',
                     dest='version',
-                    default=VERSION,
-                    metavar="VERSION",
+                    default=SHORTVERSION,
+                    metavar="SHORTVERSION",
                     help="Output version"),
     )
 
@@ -152,8 +157,8 @@ class Command(BaseCommand):
             if key.startswith("update_"):
                 options[key] = options[key] and not options["no_update"]
 
-        if version_diff(options["version"], "0.10.3") < 0:
-            raise CommandError("This command cannot be used for versions before 0.10.3")
+        if version_diff(options["version"], COMMAND_MIN_VERSION) < 0:
+            raise CommandError("This command cannot be used for versions before %s" % COMMAND_MIN_VERSION)
 
         if options['low_mem']:
             logging.info('Making the GC more aggressive...')
@@ -191,17 +196,17 @@ def update_language_packs(lang_codes, options):
 
         # Step 2: Update the dubbed video mappings. No version needed, we want to share latest always.
         dv_map = get_dubbed_video_map(lang_code_map["dubbed_videos"])
-        lang_metadata["num_dubbed_videos"] = len(dv_map) if dv_map and version_diff(options["version"], "0.10.3") > 0 else 0
+        lang_metadata["num_dubbed_videos"] = len(dv_map) if dv_map and version_diff(options["version"], COMMAND_MIN_VERSION) > 0 else 0
 
         # Step 3: Update the exercises.  No version needed, we want to share latest always.
         #  TODO(bcipolli): make sure that each language pack only grabs exercises that are included in its topic tree.
-        if options['update_exercises'] and version_diff(options["version"], "0.10.3") > 0:
+        if options['update_exercises'] and version_diff(options["version"], COMMAND_MIN_VERSION) > 0:
             call_command("scrape_exercises", lang_code=lang_code_map["exercises"])
-        lang_metadata["num_exercises"] = get_localized_exercise_count(lang_code_map["exercises"]) if version_diff(options["version"], "0.10.3") > 0 else 0
+        lang_metadata["num_exercises"] = get_localized_exercise_count(lang_code_map["exercises"]) if version_diff(options["version"], COMMAND_MIN_VERSION) > 0 else 0
 
         # Step 4: Update the crowdin translations.  Version needed!
         #   TODO(bcipolli): skip this when we're going backwards in version.
-        if options["no_update"] or version_diff(options["version"], "0.10.3") == 0:
+        if options["no_update"] or version_diff(options["version"], COMMAND_MIN_VERSION) == 0:
             trans_metadata = {lang_code: get_po_metadata(get_po_build_path(lang_code))}
         else:
             try:
@@ -252,9 +257,9 @@ def update_srts(since_date, lang_codes):
         call_command("cache_subtitles", date_since_attempt=date_as_str)
 
 
-def get_po_build_path(lang_code, po_file="django.po", dest_path=None, version=VERSION):
+def get_po_build_path(lang_code, po_file="django.po", dest_path=None, version=SHORTVERSION):
     dest_path = dest_path or get_lp_build_dir(lang_code, version=version)
-    return  os.path.join(dest_path, po_file)
+    return os.path.join(dest_path, po_file)
 
 def update_translations(lang_codes=None,
                         download_kalite_translations=True,
@@ -262,7 +267,7 @@ def update_translations(lang_codes=None,
                         zip_file=None,
                         ka_zip_file=None,
                         use_local=False,
-                        version=VERSION):
+                        version=SHORTVERSION):
     """
     Download translations (if necessary), repurpose them into needed files,
     then move the resulting files to the versioned storage directory.
@@ -406,7 +411,7 @@ def download_latest_translations(project_id=None,
         if rebuild:
             build_translations()
 
-        request_url = "http://api.crowdin.net/api/project/%s/download/%s.zip?key=%s" % (project_id, lang_code, project_key)
+        request_url = "%s/%s/download/%s.zip?key=%s" % (CROWDIN_API_URL, project_id, lang_code, project_key)
         try:
             resp = requests.get(request_url)
             resp.raise_for_status()
@@ -430,6 +435,10 @@ def download_latest_translations(project_id=None,
 
         try:
             if zip_file:
+                # Make sure that the crowdin cache directory exists as specified
+                # in the `centralserver.i18n.CROWDIN_CACHE_DIR`
+                if isinstance(zip_file, basestring) and CROWDIN_CACHE_DIR in zip_file:
+                    ensure_dir(CROWDIN_CACHE_DIR)
                 with open(zip_file, "wb") as fp:  # save the zip file
                     fp.write(resp.content)
         except Exception as e:
@@ -443,7 +452,7 @@ def download_latest_translations(project_id=None,
     po_file = build_new_po(
         lang_code=lang_code,
         src_path=tmp_dir_path,
-        dest_path=get_lp_build_dir(lang_code, version=VERSION),  # put latest translations into newest version.
+        dest_path=get_lp_build_dir(lang_code, version=SHORTVERSION),  # put latest translations into newest version.
         combine_with_po_file=combine_with_po_file,
         filter_type=download_type,
     )
@@ -464,7 +473,7 @@ def build_translations(project_id=None, project_key=None):
         project_key = settings.CROWDIN_PROJECT_KEY
 
     logging.info("Requesting that CrowdIn build a fresh zip of our translations")
-    request_url = "http://api.crowdin.net/api/project/%s/export?key=%s" % (project_id, project_key)
+    request_url = "%s/%s/export?key=%s" % (CROWDIN_API_URL, project_id, project_key)
     try:
         resp = requests.get(request_url)
         resp.raise_for_status()
@@ -472,7 +481,7 @@ def build_translations(project_id=None, project_key=None):
         logging.error(e)
 
 
-def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None, filter_type=None, version=VERSION):
+def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None, filter_type=None, version=SHORTVERSION):
     """Move newly downloaded po files to correct location in locale
     direction. Returns the location of the po file if a single
     language is given, or a list of locations if language is
@@ -545,9 +554,16 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
                 js_po_file.save(os.path.join(dest_path, 'djangojs.po'))
                 js_po_file.save_as_mofile(js_mo_file)
             else:
-                logging.debug('Concatenating %s with %s...' % (src_file, build_file))
-                src_po = polib.pofile(src_file)
-                build_po.merge(src_po)
+                # Make sure we only concatenate .po files of the same version that we need.
+                versioned_po_filename = os.path.join("versioned", "%s-django") % (version,)
+                kalite_po_filename = os.path.join("KA Lite UI", "kalite-%s.po") % (lang_code,)
+                if versioned_po_filename in src_file or kalite_po_filename in src_file:
+                    logging.debug('Concatenating %s with %s...' % (src_file, build_file))
+                    src_po = polib.pofile(src_file)
+                    build_po.merge(src_po)
+                else:
+                    logging.debug("Ignoring %s because it's NOT for version %s." %
+                                  (src_file, version,))
 
         # de-obsolete messages
         for poentry in build_po:
@@ -615,7 +631,7 @@ def all_po_files(dir):
                 yield os.path.join(current_dir, po_file)
 
 
-def generate_metadata(package_metadata=None, version=VERSION, force_version_update=False):
+def generate_metadata(package_metadata=None, version=SHORTVERSION, force_version_update=False):
     """Loop through locale folder, create or update language specific meta
     and create or update master file, skipping broken languages
     """
@@ -681,7 +697,7 @@ def generate_metadata(package_metadata=None, version=VERSION, force_version_upda
     logging.info("Local record of translations updated")
 
 
-def update_metadata(package_metadata, version=VERSION):
+def update_metadata(package_metadata, version=SHORTVERSION):
     """
     We've zipped the packages, and now have unzipped & zipped sizes.
     Update this info in the local metadata (but not inside the zip)
@@ -720,7 +736,7 @@ def download_crowdin_metadata(project_id=None, project_key=None):
     if not project_key:
         project_key = settings.CROWDIN_PROJECT_KEY
 
-    request_url = "http://api.crowdin.net/api/project/%s/status?key=%s&json=True" % (project_id, project_key)
+    request_url = "%s/%s/status?key=%s&json=True" % (CROWDIN_API_URL, project_id, project_key)
     try:
         resp = requests.get(request_url)
         resp.raise_for_status()
@@ -769,7 +785,7 @@ def download_icu_js(lang_code):
     return requests.content
 
 
-def zip_language_packs(lang_codes=None, version=VERSION):
+def zip_language_packs(lang_codes=None, version=SHORTVERSION):
     """Zip up and expose all language packs
 
     converts all into ietf
@@ -823,7 +839,7 @@ def zip_language_packs(lang_codes=None, version=VERSION):
             z.write(srt_file, arcname=os.path.join("subtitles", os.path.basename(srt_file)))
             sizes[lang_code_ietf]["package_size"] += os.path.getsize(srt_file)
 
-        if version_diff(version, "0.10.3") > 0:  # since these are globally available, need to check version.
+        if version_diff(version, COMMAND_MIN_VERSION) > 0:  # since these are globally available, need to check version.
             exercises_dirpath = get_localized_exercise_dirpath(lang_code_map["exercises"])
             for exercise_file in glob.glob(os.path.join(exercises_dirpath, "*.html")):
                 # Get every single compiled language file

@@ -11,6 +11,7 @@ from selenium.webdriver.common.keys import Keys
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
 from ..models import Organization
@@ -351,6 +352,28 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.test_delete_zone_from_org_admin()
 
 
+class CentralFacilityUserFormTestCase(OrganizationManagementTestCase):
+    
+    def setUp(self):
+        super(CentralFacilityUserFormTestCase, self).setUp()
+        self.zone = Zone(name=self.ZONE_NAME)
+        self.zone.save()
+        self.org.add_zone(self.zone)
+        self.org.save()
+        self.facility = Facility(name=self.FACILITY_NAME, zone_fallback=self.zone)
+        self.facility.save()
+        self.user.facility = self.facility
+        self.user.save()
+
+    def test_add_student(self):
+        self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
+        self.browse_to('%s?facility=%s' % (self.reverse('add_facility_student'), self.facility.id))
+        self.browser.find_element_by_id('id_username').send_keys('s')
+        self.browser.find_element_by_id('id_password_first').send_keys('password')
+        self.browser.find_element_by_id('id_password_recheck').send_keys('password')
+        self.browser.find_elements_by_class_name('submit')[0].click()
+        self.browser_check_django_message(message_type="success", contains="successfully created")
+
 class RegressionTests(KALiteCentralBrowserTestCase):
 
     def test_issue_300(self):
@@ -363,7 +386,7 @@ class RegressionTests(KALiteCentralBrowserTestCase):
         # Register & activate two users with different usernames / emails
         self.browser_register_user(username=user1_uname, password=user1_password)
         self.browser_activate_user(username=user1_uname)
-        self.browser_login_user(   username=user1_uname, password=user1_password)
+        self.browser_login_user(username=user1_uname, password=user1_password)
 
         # Verify that we can go to the page with the correct user
         user1_zone_link = self.browser.find_element_by_css_selector(".zone-manage-link").get_attribute("href")
@@ -374,9 +397,10 @@ class RegressionTests(KALiteCentralBrowserTestCase):
         self.browser_logout_user()
         self.browser_register_user(username=user2_uname, password=user2_password)
         self.browser_activate_user(username=user2_uname)
-        self.browser_login_user(   username=user2_uname, password=user2_password)
+        self.browser_login_user(username=user2_uname, password=user2_password)
 
         # Now try
         self.browse_to(user1_zone_link)
         self.assertIn(self.reverse("auth_login"), self.browser.current_url)
         self.browser_check_django_message(message_type="error", contains="You must be logged in with an account authorized to view this page.", num_messages=1)
+

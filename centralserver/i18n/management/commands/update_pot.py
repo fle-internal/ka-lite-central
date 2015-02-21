@@ -24,7 +24,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
-from ... import POT_DIRPATH
+from ... import POT_DIRPATH, CROWDIN_API_URL
 from fle_utils.general import ensure_dir
 from kalite.i18n.management.commands import test_wrappings
 from kalite import version
@@ -128,13 +128,14 @@ def upload_to_crowdin(project_key, project_id="ka-lite", update_files_only=False
     logging.info("Uploading to CrowdIn.")
 
     # url template for our API calls
-    url_template = "https://api.crowdin.com/api/project/{project_id}/{api_call}"
+    url_template = "{crowdin_api_url}/project/{project_id}/{api_call}"
     get_params = {"key": project_key}
 
     # first we have to ensure that the directory that we're gonna put
     # our po files in crowdin is present. We also don't care that it fails.
     api_call = "add-directory"
     url = url_template.format(project_id=project_id,
+                              crowdin_api_url=CROWDIN_API_URL,
                               api_call=api_call)
     data = {"name": "/versioned/"}
     requests.post(url, params=get_params, data=data)

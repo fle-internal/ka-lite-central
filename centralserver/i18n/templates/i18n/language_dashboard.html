@@ -67,7 +67,11 @@
                             {{ pack.name }}
                         </td>
                         <td>
-                            {{ pack.code }}
+                            {% if pack.download_language_url %}
+                                <a href="{{ pack.download_language_url }}" title="Download the language pack.">{{ pack.code }}</a>
+                            {% else %}
+                                {{ pack.code }}
+                            {% endif %}
                         </td>
                         {% if pack.beta %}
                             <td>
@@ -90,10 +94,20 @@
                             {{ pack.subtitle_count }}
                         </td>
                         <td>
-                            <a href="{{ crowdin_base_url }}{{ pack.code }}" title="Translate now!">{{ pack.kalite_ntranslations|compute_percent:pack.kalite_nphrases }}</a>
+                            <a href="{{ crowdin_base_url }}{{ pack.code }}" title="Translate now!">
+                            {% if pack.kalite_nphrases %}
+                                {{ pack.kalite_ntranslations|compute_percent:pack.kalite_nphrases }}
+                            {% else %}
+                                {{ pack.kalite_ntranslations }}
+                            {% endif %}
+                            </a>
                         </td>
                         <td>
-                            {{ pack.ka_ntranslations|compute_percent:pack.ka_nphrases }}
+                            {% if pack.kalite_nphrases %}
+                                {{ pack.ka_ntranslations|compute_percent:pack.ka_nphrases }}
+                            {% else %}
+                                {{ pack.ka_ntranslations }}
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

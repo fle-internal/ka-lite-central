@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     "kalite.testing",  # browser testing
     "kalite.updates",
     "kalite.student_testing",
+    "kalite.store",
     # central-only apps
     "centralserver.contact",
     "centralserver.deployment",
