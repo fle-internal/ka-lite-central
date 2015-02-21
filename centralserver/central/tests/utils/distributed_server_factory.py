@@ -15,8 +15,8 @@ from fle_utils.importing import resolve_model
 class DistributedServer(object):
 
     def __init__(self, *args, **kwargs):
-        self.distributed_dir = (pathlib.Path(settings.PROJECT_PATH).parent
-                                / 'ka-lite-submodule' / 'kalite')
+        self.kalite_submodule_dir = pathlib.Path(settings.PROJECT_PATH).parent / 'ka-lite-submodule'
+        self.distributed_dir = (self.kalite_submodule_dir / 'kalite')
         self.manage_py_path = self.distributed_dir / 'manage.py'
 
         uniq_name = 'settings_' + ''.join(choice(string.ascii_lowercase) for _ in range(10))
@@ -97,12 +97,14 @@ OWN_DEVICE_PRIVATE_KEY = %r
         if self.running_process:
             raise Exception('Command {} already started.'.format(commandname))
 
+        kwargs['traceback'] = True
+
         _, _err, _ret, self.running_process = call_outside_command_with_output(
             commandname,
             output_to_stdout=output_to_stdout,
             output_to_stderr=output_to_stderr,
             settings=self.settings_name,
-            manage_py_dir=self.distributed_dir.as_posix(),
+            kalite_dir=self.kalite_submodule_dir.as_posix(),
             wait=False,
             *args,
             **kwargs
@@ -129,7 +131,6 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         if noerr or returncode != 0:
             errmsgtemplate = "command returned non-zero errcode: stderr is %s"
-            print stderr
             raise subprocess.CalledProcessError(returncode,
                                                 'command',
                                                 output=errmsgtemplate % stderr)
@@ -146,13 +147,14 @@ OWN_DEVICE_PRIVATE_KEY = %r
                           output_to_stdout=False,
                           output_to_stderr=False)
 
-        results = self.wait()[0]
+        results, _, retcode = self.wait()
 
         return {
             "uploaded": int(re.search("Total uploaded: (\d+)", results).group(1)),
             "downloaded": int(re.search("Total downloaded: (\d+)", results).group(1)),
             "errors": int(re.search("Total errors: (\d+)", results).group(1)),
             "results": results,
+            "retcode": retcode,
         }
 
     def addmodel(self, modelname, count=1, **attrs):

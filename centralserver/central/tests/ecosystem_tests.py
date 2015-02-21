@@ -323,7 +323,7 @@ class SameVersionTests(CreateAdminMixin,
 
             results = d.runcode("from securesync.models import Device; d = Device(id='%s', name='Hahaha'); d.save()" % Device.get_own_device().id)
 
-            with self.assertRaises(Exception):
+            with self.assertRaises(subprocess.CalledProcessError):
                 sync_results = d.sync()
 
             self.assertNotEqual(Device.get_own_device().name, "Hahaha", "Eek! Distributed server overwrote central server Device.")

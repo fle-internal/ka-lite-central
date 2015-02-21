@@ -11,7 +11,6 @@ except ImportError:
 ########################
 
 INSTALLED_APPS = (
-    "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
     "kalite.topic_tools",  # lots of access to topic_tools
 )
 

@@ -1,3 +1,9 @@
+argparse==1.2.1
+mock==1.0.1
 pathlib==1.0
-wsgiref==0.1.2
+pygeoip==0.3.2
+requests==2.5.1
+responses==0.3.0
 simplekml==1.2.3
+six==1.9.0
+wsgiref==0.1.2

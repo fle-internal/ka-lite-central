@@ -281,23 +281,22 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
         """Delete an empty org"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon appears.")
-        self.browser.find_element_by_css_selector(".icon-trash").click()
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
+        self.browser.find_element_by_css_selector(".org-delete-link").click()
         self.browser.switch_to_alert().accept()
-        self.browser_wait_for_no_element(".icon-trash")
+        self.browser_wait_for_no_element(".org-delete-link")
         self.browser_check_django_message(message_type="success", contains="successfully deleted")
         with self.assertRaises(NoSuchElementException):
-            self.assertEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon is gone.")
+            self.assertEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon is gone.")
 
     def test_cancel_delete_org(self):
         """Click to delete an empty org, then choose CANCEL"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon appears.")
-        self.browser.find_element_by_css_selector(".icon-trash").click()
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
+        self.browser.find_element_by_css_selector(".org-delete-link").click()
         self.browser.switch_to_alert().dismiss()
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon appears.")
-        self.browser_check_django_message(num_messages=0)
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
 
     def test_can_delete_full_org(self):
         """Confirm no option to delete an org with data"""
@@ -309,7 +308,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
 
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-trash"), None, "Make sure 'delete' icon appears.")
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
 
 
     def test_issue_697_part2(self):

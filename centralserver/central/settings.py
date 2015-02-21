@@ -25,6 +25,7 @@ INSTALLED_APPS = (
     "announcements",  # display announcements in the header
     "south",
     "fle_utils.django_utils",  # custom template tags
+    "fle_utils.backbone",
     "securesync",
     "kalite.facility",
     "kalite.coachreports",  # in both apps; reachable on central via control_panel

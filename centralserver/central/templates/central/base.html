@@ -13,6 +13,9 @@
           <title>{% block title %}{{ title }} |{% endblock title %} {% block title_tagline %}KA Lite: An Offline, Installable Version of Khan Academy{% endblock title_tagline %}</title>
           {% endblock %}
 
+          <!-- TODO(jamalex): Without including this, a lot of Bootstrap classes used on distributed server, such as row/columns, wasn't properly styled -->
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}"></link>
+
           {% if debug  %}
           <link rel="stylesheet/less" type="text/css" href="{% static 'less/bootstrap/bootstrap.less' %}"></link>
           <link rel="stylesheet/less" type="text/css" href="{% static 'less/bootstrap/responsive.less' %}"></link>
@@ -41,7 +44,7 @@
           <script type="text/javascript" src="{% static 'js/purl.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/backbone-min.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/backbone-tastypie.js' %}"></script>
+          <script type="text/javascript" src="{% static 'js/backbone/backbone-tastypie.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
           <script type="text/javascript" src='{% static "js/bootstrap-timepicker.min.js" %}'></script>
           <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
@@ -89,7 +92,7 @@
           <script src="{% static "js/handlebars/handlebars-v1.3.0.js" %}"></script>
           <script src="{% static "js/handlebars/handlebars-helpers.js" %}"></script>
           <script src="{% static "js/handlebars/handlebars-wrapper.js" %}"></script>
-          
+
           {% block headjs %}{% endblock headjs %}
           {% block analytics %}{% include 'central/web_analytics.html' %}{% endblock analytics %}
       </head>

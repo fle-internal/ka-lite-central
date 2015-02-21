@@ -27,19 +27,16 @@ import polib
 import re
 import requests
 import shutil
-import subprocess
-import sys
 import tempfile
 import zipfile
 import StringIO
-from collections_local_copy import Iterable, defaultdict
+from collections_local_copy import defaultdict
 from itertools import chain, ifilter
 from optparse import make_option
 
 from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
-from django.core.mail import mail_admins
 
 from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
@@ -757,6 +754,19 @@ def increment_language_pack_version(stored_meta, updated_meta):
             break
 
     return language_pack_version
+
+
+def download_icu_js(lang_code):
+    download_url = "http://www.localeplanet.com/api/%s/icu.js" % lang_code
+    resp = requests.get(download_url)
+
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        logging.warning("Can't download icu.js for lang_code %s", % lang_code)
+        return ""
+
+    return requests.content
 
 
 def zip_language_packs(lang_codes=None, version=VERSION):

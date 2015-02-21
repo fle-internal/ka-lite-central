@@ -43,6 +43,7 @@ SERVER_EMAIL = 'kalite@learningequality.org'
 # Not really a Django setting, but we treat it like one--it's eeeeverywhere.
 PROJECT_PATH = os.path.realpath(getattr(local_settings, "PROJECT_PATH", os.path.dirname(os.path.realpath(__file__)))) + "/"
 ROOT_DATA_PATH = os.path.realpath(getattr(local_settings, "ROOT_DATA_PATH", os.path.join(PROJECT_PATH, "..", "data"))) + "/"
+STATS_PATH = ROOT_DATA_PATH
 KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
 
 LOCALE_PATHS   = getattr(local_settings, "LOCALE_PATHS", (PROJECT_PATH + "/../locale",))
@@ -100,15 +101,18 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.sessions",
     "django_extensions", # needed for clean_pyc (testing)
-    "debug_toolbar",
+    "securesync.devices",
     "centralserver.central",
     "centralserver.testing",
     "fle_utils.handlebars",
+    "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
+    "kalite.topic_tools",
+    "kalite.store",
+    "centralserver.i18n",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
     "centralserver.middleware.DummySessionForAPIUrls",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
 
@@ -189,3 +193,5 @@ AUTH_PROFILE_MODULE = "central.UserProfile"
 # Tastypie stuff
 TASTYPIE_DEFAULT_FORMATS = ['json']
 API_LIMIT_PER_PAGE = 0
+
+POSTMARK_API_KEY = ""
