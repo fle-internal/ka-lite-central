@@ -9,7 +9,7 @@ from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
 from kalite.facility.models import Facility, FacilityGroup, FacilityUser
-from securesync.models import Device
+from securesync.models import Device, DeviceZone
 
 FACILITY_MODEL = 'kalite.facility.models.Facility'
 GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
@@ -45,11 +45,12 @@ class SameVersionTests(CreateAdminMixin,
 
         return DistributedServer(**config)
 
-    def register(self, dist_server, zone_id=None):
+    def register(self, dist_server, zone_id=None, noerr=False):
         return dist_server.register(
             username=self.user.username,
             password=self.user.real_password,
             zone_id=zone_id or self.zone.id,
+            noerr=noerr
         )
 
     def test_can_run_on_distributed_server(self):
@@ -350,3 +351,26 @@ class SameVersionTests(CreateAdminMixin,
             self.assertEqual(sync_results["uploaded"], 1, "Wrong number of records uploaded")
 
             self.assertEqual(Facility.objects.get(id=facility_central.id).name, "Central Facility - Mod", "Updated Facility name not synced back to central server")
+
+    @override_settings(DEBUG_ALLOW_DELETIONS=True)
+    def test_bad_registration_handled_gracefully(self):
+        """
+        Testing issue 2872. Redirect loop can happen when there is:
+        * An entry in `securesync_device` but not `securesync_devicezone` corresponding to the client_device (on central)
+        * But no `securesync_zone` or `securesync_devicezone` in client database
+        """
+        # Set up a normal registration, then delete rows judiciously to get to right "bad" state.
+        config = {"DEBUG_ALLOW_DELETIONS":True}
+        with self.get_distributed_server(**config) as d:
+            self.register(d)
+            sync_results = d.sync()
+
+            d.runcode("from securesync.models import Zone, DeviceZone; Zone.objects.all().delete(); DeviceZone.objects.all().delete()", noerr=True)
+            distributed_device_id = d.runcode("from securesync.models import Device; id = Device.get_own_device().id", noerr=True)['id']
+           
+            DeviceZone.objects.filter(device_id=distributed_device_id).delete()
+
+            # We'll expect a nonzero return value here
+            result = self.register(d, noerr=True)
+            self.assertFalse("device_already_registered" in result[1] or "AssertionError" in result[1],
+                            "If corresponding RegisteredDevicePublicKey exists on server, then gracefully repair the db.")

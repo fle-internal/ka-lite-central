@@ -129,7 +129,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
         returncode = self.running_process.returncode
         self.running_process = None  # so we can run other commands
 
-        if noerr or returncode != 0:
+        if not noerr and returncode != 0:
             errmsgtemplate = "command returned non-zero errcode: stderr is %s"
             raise subprocess.CalledProcessError(returncode,
                                                 'command',
@@ -211,7 +211,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         return self.runcode(code)["count"]
 
-    def register(self, username, password, zone_id):
+    def register(self, username, password, zone_id, noerr=False):
         '''
         Registers the distributed server to the zone id, which the user
         given by the username and password is a part of. Returns the
@@ -224,7 +224,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             zone=zone_id,
             output_to_stdout=False,
             output_to_stderr=False,
-        ).wait()
+        ).wait(noerr)
 
         return result
 
@@ -245,7 +245,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         return json.loads(stdout)
 
-    def runcode(self, code):
+    def runcode(self, code, noerr=False):
         '''
         Runs a block of code and returns a dictionary with the serializable
         portions of the resulting local namespace.
@@ -259,8 +259,11 @@ OWN_DEVICE_PRIVATE_KEY = %r
             code,
             output_to_stdout=False,
             output_to_stderr=False,
-        ).wait()
+        ).wait(noerr)
 
+        # json.loads will return an error when given an empty string, so send it an empty JSON object string
+        if not stdout:
+            stdout = "{}"
         return json.loads(stdout)
 
     def validate(self):
