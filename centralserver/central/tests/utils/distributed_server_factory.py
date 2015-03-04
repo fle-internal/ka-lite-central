@@ -93,6 +93,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         output_to_stdout = kwargs.pop('output_to_stdout', True)
         output_to_stderr = kwargs.pop('output_to_stderr', True)
+        self.commandname = commandname
 
         if self.running_process:
             raise Exception('Command {} already started.'.format(commandname))
@@ -132,7 +133,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
         if not noerr and returncode != 0:
             errmsgtemplate = "command returned non-zero errcode: stderr is %s"
             raise subprocess.CalledProcessError(returncode,
-                                                'command',
+                                                self.commandname,
                                                 output=errmsgtemplate % stderr)
 
         return (stdout, stderr, returncode)
