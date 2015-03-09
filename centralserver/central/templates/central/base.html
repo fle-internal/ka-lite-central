@@ -13,14 +13,13 @@
           <title>{% block title %}{{ title }} |{% endblock title %} {% block title_tagline %}KA Lite: An Offline, Installable Version of Khan Academy{% endblock title_tagline %}</title>
           {% endblock %}
 
-          <!-- TODO(jamalex): Without including this, a lot of Bootstrap classes used on distributed server, such as row/columns, wasn't properly styled -->
           <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}"></link>
+          <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap-timepicker.min.css" %}' />
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-alerts.css' %}"></link>
 
           {% if debug  %}
-          <link rel="stylesheet/less" type="text/css" href="{% static 'less/bootstrap/bootstrap.less' %}"></link>
-          <link rel="stylesheet/less" type="text/css" href="{% static 'less/bootstrap/responsive.less' %}"></link>
+
           <link rel="stylesheet/less" type="text/css" href="{% static 'less/style.less' %}"></link>
-          <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap-timepicker.min.css" %}' />
           <script type="text/javascript">
               less = {
                   env: "development", // or "production"
@@ -30,13 +29,13 @@
           <script type="text/javascript" src="{% static 'js/less.js' %}"></script>
 
           {% else %}
-          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap/bootstrap.css' %}"></link>
-          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap/responsive.css' %}"></link>
+
           <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"></link>
+
           {% endif %}
-          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-alerts.css' %}"></link>
 
           {% block headcss %}{% endblock headcss %}
+
           <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
 
           <script type="text/javascript" src="{% static 'js/jquery-1.9.1.min.js' %}"></script>
