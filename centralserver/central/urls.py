@@ -16,6 +16,7 @@ import centralserver.stats.urls
 import fle_utils.feeds.urls
 import kalite.coachreports.urls
 import kalite.control_panel.urls
+import kalite.dynamic_assets.urls
 import kalite.facility.urls
 import securesync.urls
 from . import api_urls
@@ -41,6 +42,11 @@ urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^securesync/', include(securesync.urls)),
     url(r'^securesync/', include(kalite.facility.urls)),
+)
+
+# Dynamic assets
+urlpatterns += patterns('',
+    url(r'^_generated/', include(kalite.dynamic_assets.urls)),
 )
 
 urlpatterns += patterns('',

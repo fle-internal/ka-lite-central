@@ -36,7 +36,11 @@
 
           {% block headcss %}{% endblock headcss %}
 
+          <link rel="stylesheet" type="text/css" href="{% url 'dynamic_css' %}">
+
           <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+
+          <script type="text/javascript" src="{% url 'dynamic_js' %}"></script>
 
           <script type="text/javascript" src="{% static 'js/jquery-1.9.1.min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/jquery-ui/jquery-ui.min.js' %}"></script>
