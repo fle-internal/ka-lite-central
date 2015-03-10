@@ -756,7 +756,7 @@ def download_icu_js(lang_code):
     try:
         resp.raise_for_status()
     except requests.exceptions.HTTPError:
-        logging.warning("Can't download icu.js for lang_code %s", % lang_code)
+        logging.warning("Can't download icu.js for lang_code %s" % lang_code)
         return ""
 
     return requests.content
