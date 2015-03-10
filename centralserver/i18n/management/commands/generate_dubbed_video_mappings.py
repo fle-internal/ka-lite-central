@@ -130,7 +130,7 @@ def generate_dubbed_video_mappings_from_csv(csv_data=None):
                     video_map[lang][english_video_id] = row[idx]  # add the corresponding video id for the video, in this language.
 
     # Now, validate the mappings with our topic data
-    known_videos = get_node_cache("Video").keys()
+    known_videos = get_node_cache("Content").keys()
     missing_videos = set(known_videos) - set(video_map["english"].keys())
     extra_videos = set(video_map["english"].keys()) - set(known_videos)
     if missing_videos:
