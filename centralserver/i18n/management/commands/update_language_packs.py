@@ -38,6 +38,7 @@ from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 
+from kalite.contentload.management.commands.generate_assessment_zips import convert_urls
 from kalite.i18n import *   # put this first so ... can override some names.  bad bad bad (bcipolli)
 from ... import *
 from kalite.version import SHORTVERSION
@@ -548,6 +549,7 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
             # a list comprehension over it won't work. So we unobsolete entries so that
             # they can be detected and turned into a mo file
             poentry.obsolete = False
+            poentry = convert_aws_urls_to_localhost_urls(poentry)
         build_po.save()
         build_po.save_as_mofile(dest_mo_file)
         shutil.move(build_file, dest_file)
@@ -557,6 +559,20 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
     dest_file = produce_outputs(src_po_files, dest_path, lang_code)
 
     return dest_file
+
+
+def convert_aws_urls_to_localhost_urls(poentry):
+    """ Strings grabbed from KA may contain urls pointing to files hosted on aws.
+    We rehost those files locally, but the strings need to be updated. This function
+    just converts aws urls to localholst urls in both the original string and the translated string.
+    
+    :param: poentry - A polib.POEntry instance
+    """
+    poentry.msgid = convert_urls(poentry.msgid)
+    poentry.msgstr = convert_urls(poentry.msgstr)
+    poentry.msgid_plural = convert_urls(poentry.msgid_plural)
+    poentry.msgstr_plural = convert_urls(poentry.msgstr_plural)
+    return poentry
 
 
 def get_po_metadata(pofilename):
