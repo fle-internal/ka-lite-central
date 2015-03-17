@@ -28,21 +28,25 @@
             margin-left: -5px;
             margin-right: -5px;
         }
+        span.glyphicon {
+            font-size: 1.4em;
+            top: 4px;
+        }
     </style>
 {% endblock headcss %}
 
 {% block content %}
     <div class="row-fluid">
+        <div class="span3">
+            <form method="link" action="/organization/new/" class="neworg-button">
+                <input type="submit" class="button--large" value="Create a new organization">
+            </form>
+        </div>
         <div class="span9">
             <div class="tooltip-container">
                 <h1>{% trans "My Organization" %}{{ organizations|pluralize }}</h1>
                 <div id="button-popover-org" class="button-popover" data-toggle="popover" data-placement="right" data-content="{% trans 'An Organization is a group of people responsible for administering a set of Sharing Networks.' %}" title="" data-original-title="Organization">?</div>
             </div>
-        </div>
-        <div class="span3">
-            <form method="link" action="/organization/new/" class="neworg-button">
-                <input type="submit" class="button--large" value="Create a new organization">
-            </form>
         </div>
     </div>
 
@@ -77,19 +81,19 @@
                         {% if org.name != HEADLESS_ORG_NAME %}
                             <li>
                                 <a href="{% url 'organization_form' org_id=org.id %}">
-                                    <span class="icon-pencil icon-large" title="Edit this organization's information."></span>
+                                    <span class="glyphicon glyphicon-pencil" title="Edit this organization's information."></span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{% url 'data_export' %}?org_id={{ org.id }}">
-                                    <span class="icon-circle-arrow-down icon-large" title="Download organization data"></span>
+                                    <span class="glyphicon glyphicon-circle-arrow-down" title="Download organization data"></span>
                                 </a>
                             </li>
                         {% endif %}
                         {% if org.owner == request.user %}
                             <li>
                                 <a class="org-delete-link" href="#" value="{% url 'delete_organization' org_id=org.id %}">
-                                    <span class="icon-trash icon-large" value="{% url 'delete_organization' org_id=org.id %}" title="Delete this organization."></span>
+                                    <span class="glyphicon glyphicon-trash" value="{% url 'delete_organization' org_id=org.id %}" title="Delete this organization."></span>
                                 </a>
                             </li>
                         {% endif %}
@@ -98,8 +102,8 @@
             </div>
         </div>
 
-            <div class="row-fluid organization-container">
-                <div class="span6">
+            <div class="row organization-container">
+                <div class="col-md-6">
                     {# We only say "Affiliated networks" if there is an org #}
                     <div class="tooltip-container">
                     {% if org.name != HEADLESS_ORG_NAME %}
@@ -131,7 +135,7 @@
                     {% endif %}
                 </div>
 
-            <div class="span6">
+            <div class="col-md-6">
                 {% if org.name != HEADLESS_ORG_NAME %}
                     <div class="tooltip-container">
                         <h3>Organization Admins</h3>
@@ -188,9 +192,8 @@
                             {{ org.form.invited_by }}
 
                             <h4>Add Admin</h4>
-                            <input type="text" placeholder="example@email.com" name="email_to_invite">
+                            <input type="text" class="form-control" placeholder="example@email.com" name="email_to_invite">
                             <input type="submit" class="button--small" value="Send invite!">
-
 
                             {% for error in org.form.non_field_errors %}
                             <div class="errors">{{ error }}</div>
