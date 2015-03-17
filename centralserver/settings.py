@@ -109,6 +109,8 @@ INSTALLED_APPS = (
     "kalite.topic_tools",
     "kalite.store",
     "centralserver.i18n",
+    "kalite.dynamic_assets",
+    "centralserver.ab_testing",
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
