@@ -76,7 +76,7 @@ class Command(BaseCommand):
             # Get list of exercises
             exercise_ids = options["exercise_ids"].split(",") if options["exercise_ids"] else None
             exercise_ids = exercise_ids or ([ex["id"] for ex in get_topic_exercises(topic_id=options["topic_id"])] if options["topic_id"] else None)
-            exercise_ids = exercise_ids or get_node_cache("Exercise").keys()
+            exercise_ids = exercise_ids or [k for (k, e) in get_node_cache("Exercise").iteritems() if not e.get('uses_assessment_items', False)]
 
             # Download the exercises
             pool = ThreadPool(processes=5)
