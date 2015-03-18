@@ -565,13 +565,14 @@ def convert_aws_urls_to_localhost_urls(poentry):
     """ Strings grabbed from KA may contain urls pointing to files hosted on aws.
     We rehost those files locally, but the strings need to be updated. This function
     just converts aws urls to localholst urls in both the original string and the translated string.
-    
+
     :param: poentry - A polib.POEntry instance
     """
     poentry.msgid = convert_urls(poentry.msgid)
     poentry.msgstr = convert_urls(poentry.msgstr)
     poentry.msgid_plural = convert_urls(poentry.msgid_plural)
-    poentry.msgstr_plural = convert_urls(poentry.msgstr_plural)
+    # so poentry.msgstr_plural can be a dict, so we loop over the values and convert those
+    poentry.msgstr_plural = {k: convert_urls(v) for (k, v) in poentry.msgstr_plural.iteritems()}
     return poentry
 
 
