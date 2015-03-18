@@ -88,6 +88,10 @@
                         }
                     }
                 });
+
+                $(".help-tooltip").tooltip({
+                    placement : 'right'
+                });
             });
           </script>
 
@@ -178,6 +182,7 @@
             <div class="row-fluid"> <!-- copyright footer -->
                 <div class="span12 float-right">
                 {% block attribution %}
+                    <p></p>
                     <p>
                         &copy; 2014 <a href="//learningequality.org/about/">Foundation for Learning Equality, Inc</a>
                     </p>

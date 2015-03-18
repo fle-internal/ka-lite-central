@@ -162,11 +162,15 @@ h4{font-size: 118%;}
 .button--large{
   .button;
   .round-button(232px,5px, 18px, 18px, 19px);
+  width: auto;
 }
 
 .button--small{
   .button;
-  .round-button(100px,3px, 13px, 5px, 20px);
+  .round-button(100px,3px, 13px, 7px, 20px);
+  font-size: 15px;
+  width: auto;
+  vertical-align:middle;
 }
 
 .button-popover{
@@ -352,13 +356,34 @@ h4{font-size: 118%;}
 // Contact Form
 // --------------------------------------------------
 textarea{
-  width: 500px;
+  display: block;
+  border:1px solid #cccccc;
+  border-radius: 5px;
+  min-width: 600px;
+  min-height: 240px;
 }
 
 .required label:before{
   content:"*";
   color: red;
   font-size: 15px;
+}
+
+label{
+  display: block;
+  font-weight: normal;
+  margin-top: 10px;
+}
+
+input{
+  border:1px solid #cccccc;
+  border-radius: 5px;
+  min-height:30px;
+  font-size:14pt;
+}
+
+input[type=checkbox]{
+  margin-top:-8px;
 }
 
 .helptext {
