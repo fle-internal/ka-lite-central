@@ -12,6 +12,7 @@ import glob
 import os
 import requests
 import shutil
+from multiprocessing.dummy import Pool as ThreadPool
 from optparse import make_option
 
 from django.conf import settings; logging = settings.LOG
@@ -78,8 +79,9 @@ class Command(BaseCommand):
             exercise_ids = exercise_ids or get_node_cache("Exercise").keys()
 
             # Download the exercises
-            for exercise_id in exercise_ids:
-                scrape_exercise(exercise_id=exercise_id, lang_code=lang_code, force=options["force"])
+            pool = ThreadPool(processes=5)
+            f = lambda ex_id: scrape_exercise(exercise_id=ex_id, lang_code=lang_code, force=options["force"])
+            pool.map(f, exercise_ids)
 
         logging.info("Process complete.")
 
