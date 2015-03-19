@@ -21,16 +21,14 @@ class UrlConversionTestCase(TestCase):
     def test_poentry_urls_converted(self):
         """ poentry urls should be converted from aws urls to localhost urls """
         poentry = MagicMock(autospec=polib.POEntry)
-        poentry.msgid = poentry.msgid_plural = "I love https://something.aws.org/cat_picture.jpg"
-        poentry.msgstr = poentry.msgstr_plural = "Ich liebe https://something.aws.org/cat_picture.jpg"
-        
+        poentry.msgid = "I love https://something.aws.org/cat_picture.jpg"
+        poentry.msgstr = "Ich liebe https://something.aws.org/cat_picture.jpg"
+
         poentry = convert_aws_urls_to_localhost_urls(poentry)
 
         converted_url = "/content/khan/cat_picture.jpg"
         self.assertIn(converted_url, poentry.msgid)
-        self.assertIn(converted_url, poentry.msgid_plural)
         self.assertIn(converted_url, poentry.msgstr)
-        self.assertIn(converted_url, poentry.msgstr_plural)
 
 class TranslationCommentTestCase(LiveServerTestCase):
     """
