@@ -196,7 +196,7 @@ AUTH_PROFILE_MODULE = "central.UserProfile"
 TASTYPIE_DEFAULT_FORMATS = ['json']
 API_LIMIT_PER_PAGE = 0
 
-POSTMARK_API_KEY = ""
+POSTMARK_API_KEY = getattr(local_settings, "POSTMARK_API_KEY", "")
 
 # Whether this was built by a build server; it's not.
 BUILT = getattr(local_settings, "BUILT", False)
