@@ -17,6 +17,13 @@ This is the code for the KA Lite Central Server: [https://kalite.learningequalit
 10. Set up a custom `centralserver/local_settings.py` file (see below)
 11. Run the server: `python manage.py runserver`
 
+### Environment set up with vagrant
+
+Hopefully we can standardize our dev environment and get up and running much more quickerer.
+1. Get the latest version of vagrant. Warning: On Debian (even on testing) the version is far behind. Get it from the vagrant website.
+2. Run `vagrant box add hashicorp/trusty64` to grab the base virtual machine.
+3. Run `vagrant up` to start the machine and provision it.
+
 ### Pointing distributed ka-lite servers to local central server
 
 After cloning the distrbuted server codebase from https://github.com/learningequality/ka-lite, add the following to its `kalite/local_settings.py` prior to running `install.sh` or `install.bat`:

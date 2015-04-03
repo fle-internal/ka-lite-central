@@ -7,3 +7,4 @@ responses==0.3.0
 simplekml==1.2.3
 six==1.9.0
 wsgiref==0.1.2
+MySQL-python==1.2.5
