@@ -19,6 +19,7 @@ import os
 import requests
 import shutil
 from optparse import make_option
+from subprocess import Popen
 
 from django.conf import settings
 from django.core.management import call_command
@@ -26,7 +27,6 @@ from django.core.management.base import BaseCommand, CommandError
 
 from ... import POT_DIRPATH, CROWDIN_API_URL
 from fle_utils.general import ensure_dir
-from kalite.i18n.management.commands import test_wrappings
 from kalite import version
 
 logging = settings.LOG
@@ -36,7 +36,7 @@ TRANSLATOR_VARIABLE_COMMENT = "Translators: do not change variable names (anythi
 CROWDIN_API_URL = "https://api.crowdin.com/api/project"
 
 
-class Command(test_wrappings.Command):
+class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option(
             '--upload',
@@ -91,10 +91,23 @@ def run_makemessages(verbosity=0):
     ignore_patterns = ["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js",
                        "*/i18n/build/*", "*/media/language_packs/*"]
     with inside_kalite():
+        # First make messages for the application
         ensure_dir("locale")
         call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="django")
         call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="djangojs")
-        return glob.glob(os.path.join(''.join(settings.LOCALE_PATHS), "en", "LC_MESSAGES", "*.po"))
+        pofiles = glob.glob(os.path.join(''.join(settings.LOCALE_PATHS), "en", "LC_MESSAGES", "*.po"))
+        # Then for the docs
+        os.chdir(os.path.join("ka-lite-submodule", "sphinx-docs"))
+        p = Popen(["make", "gettext"])
+        p.wait()
+        p = Popen(["sphinx-intl", "update", "-p", "_build/locale", "-l", "en"])
+        p.wait()
+        docs_pofiles = set()
+        for root, _, _ in os.walk(os.getcwd()):
+            os.chdir(root)
+            docs_pofiles.update(glob.glob(os.path.join(os.getcwd(), "*.po")))
+        pofiles += list(docs_pofiles)
+        return pofiles
 
 
 def insert_translator_comments(po_filepaths):
