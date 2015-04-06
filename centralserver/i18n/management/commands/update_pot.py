@@ -18,8 +18,8 @@ import polib
 import os
 import requests
 import shutil
+import subprocess
 from optparse import make_option
-from subprocess import Popen
 
 from django.conf import settings
 from django.core.management import call_command
@@ -98,10 +98,8 @@ def run_makemessages(verbosity=0):
         pofiles = glob.glob(os.path.join(''.join(settings.LOCALE_PATHS), "en", "LC_MESSAGES", "*.po"))
         # Then for the docs
         os.chdir(os.path.join("ka-lite-submodule", "sphinx-docs"))
-        p = Popen(["make", "gettext"])
-        p.wait()
-        p = Popen(["sphinx-intl", "update", "-p", "_build/locale", "-l", "en"])
-        p.wait()
+        subprocess.call(["make", "gettext"])
+        subprocess.call(["sphinx-intl", "update", "-p", "_build/locale", "-l", "en"])
         docs_pofiles = set()
         for root, _, _ in os.walk(os.getcwd()):
             os.chdir(root)
