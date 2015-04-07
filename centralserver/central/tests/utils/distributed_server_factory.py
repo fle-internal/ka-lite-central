@@ -64,9 +64,10 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         # we have to remove the protocol (http or https) from the url
         # that the user gives to us
-        if 'CENTRAL_SERVER_HOST' in kwargs:
-            parse_result = urlparse(kwargs['CENTRAL_SERVER_HOST'])
+        if 'CENTRAL_SERVER_URL' in kwargs:
+            parse_result = urlparse(kwargs['CENTRAL_SERVER_URL'])
             kwargs['CENTRAL_SERVER_HOST'] = parse_result.netloc
+            kwargs['SECURESYNC_PROTOCOL'] = parse_result.scheme
 
         other_settings = ['%s = %r' % (k, v) for k, v in kwargs.iteritems()]
         new_settings = '\n'.join([new_settings] + other_settings)
