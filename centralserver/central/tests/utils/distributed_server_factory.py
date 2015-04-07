@@ -277,7 +277,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             f.write(self.settings_contents)
 
         # prepare the DB
-        self.call_command('syncdb', noinput=True, output_to_stdout=False, migrate=True)
+        self.call_command('syncdb', noinput=True, output_to_stdout=False)
         self.wait()
 
         return self
