@@ -1,19 +1,25 @@
 #!/bin/sh
-curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
-sudo apt-get update
-sudo apt-get install -yqq nodejs mysql-server git-core python-mysqldb python python-dev libmysqlclient-dev
-sudo apt-get upgrade -y
+curl -sL https://deb.nodesource.com/setup_0.12 | bash -
+echo 'mysql-server mysql-server/root_password password root' | debconf-set-selections
+echo 'mysql-server mysql-server/root_password_again password root' | debconf-set-selections
+apt-get update
+apt-get install -yqq nodejs mysql-server-5.5 git-core python-mysqldb python python-pip python-dev libmysqlclient-dev
+apt-get upgrade -y
+
+# get npm
+curl -sL https://npmjs.org/install.sh | bash
 
 # Set up mysql user. Highly insecure.
-sudo mysql -e "CREATE USER 'dbuser'@'localhost' IDENTIFIED BY 'pass';"
-sudo mysql -e "GRANT ALL PRIVILEGES ON * . * TO 'dbuser'@'localhost'; FLUSH PRIVILEGES;"
-sudo mysql -udbuser -ppass -e "CREATE DATABASE 'kalite_central_server';"
+mysql -uroot -proot -e "CREATE USER 'dbuser'@'localhost' IDENTIFIED BY 'pass';"
+mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON * . * TO 'dbuser'@'localhost'; FLUSH PRIVILEGES;"
+mysql -udbuser -ppass -e "CREATE DATABASE kalite_central_server;"
 
-sudo npm install
-sudo npm install -g grunt-cli
+cd /vagrant/
+
+npm install
+npm install -g grunt-cli
 
 pip install -r requirements.txt
 
 echo 'yes\n' | python centralserver/manage.py setup --noinput -u 'admin' -p 'admin' -o 'Dev Central Server' -d 'A central server instance for development.'
-python centralserver/manage.py setup
 grunt
