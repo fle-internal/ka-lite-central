@@ -6,9 +6,6 @@ apt-get update
 apt-get install -yqq nodejs mysql-server-5.5 git-core python-mysqldb python python-pip python-dev libmysqlclient-dev
 apt-get upgrade -y
 
-# get npm
-curl -sL https://npmjs.org/install.sh | bash
-
 # Set up mysql user. Highly insecure.
 mysql -uroot -proot -e "CREATE USER 'dbuser'@'localhost' IDENTIFIED BY 'pass';"
 mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON * . * TO 'dbuser'@'localhost'; FLUSH PRIVILEGES;"
@@ -21,5 +18,4 @@ npm install -g grunt-cli
 
 pip install -r requirements.txt
 
-echo 'yes\n' | python centralserver/manage.py setup --noinput -u 'admin' -p 'admin' -o 'Dev Central Server' -d 'A central server instance for development.'
-grunt
+echo "DEBUG=True" >> centralserver/local_settings.py
