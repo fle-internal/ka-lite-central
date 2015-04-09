@@ -32,8 +32,7 @@ class SameVersionTests(CreateAdminMixin,
         self._key_factory = KeyFactory()
 
         self.settings = {
-            'CENTRAL_SERVER_HOST': self.live_server_url,
-            'SECURESYNC_PROTOCOL': 'http',
+            'CENTRAL_SERVER_URL': self.live_server_url,
             'SYNCING_MAX_RECORDS_PER_REQUEST': settings.SYNCING_MAX_RECORDS_PER_REQUEST,
         }
 
@@ -367,7 +366,7 @@ class SameVersionTests(CreateAdminMixin,
 
             d.runcode("from securesync.models import Zone, DeviceZone; Zone.objects.all().delete(); DeviceZone.objects.all().delete()", noerr=True)
             distributed_device_id = d.runcode("from securesync.models import Device; id = Device.get_own_device().id", noerr=True)['id']
-           
+
             DeviceZone.objects.filter(device_id=distributed_device_id).delete()
 
             # We'll expect a nonzero return value here
