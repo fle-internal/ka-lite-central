@@ -5,6 +5,7 @@ echo 'mysql-server mysql-server/root_password_again password root' | debconf-set
 apt-get update
 apt-get install -yqq nodejs mysql-server-5.5 git-core python-mysqldb python python-pip python-dev libmysqlclient-dev
 apt-get upgrade -y
+easy_install -U pip
 
 # Set up mysql user. Highly insecure.
 mysql -uroot -proot -e "CREATE USER 'dbuser'@'localhost' IDENTIFIED BY 'pass';"
