@@ -15,7 +15,7 @@ This is the code for the KA Lite Central Server: [https://kalite.learningequalit
 8. Run grunt in the root directory: `grunt`
 9. Return to the code directory: `cd centralserver`
 10. Set up a custom `centralserver/local_settings.py` file (see below)
-11. Run the server: `python manage.py runserver`
+11. Run the server: `python manage.py runserver 0.0.0.0:8000`
 
 ### Environment set up with vagrant
 
