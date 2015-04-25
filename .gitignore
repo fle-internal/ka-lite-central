@@ -37,3 +37,4 @@ writeup/
 /data/i18n
 /data/logs
 /data/subtitles
+.vagrant/
