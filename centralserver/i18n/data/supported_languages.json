@@ -16,7 +16,13 @@
     "pt-BR": {
         "dubbed_videos": "pt"
     },
+    "sw": {
+        "beta": true
+    },
     "xh": {
+        "beta": true
+    },
+    "zu": {
         "beta": true
     }
 }
