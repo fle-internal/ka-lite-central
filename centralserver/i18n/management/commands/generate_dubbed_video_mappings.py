@@ -85,7 +85,7 @@ def generate_dubbed_video_mappings_from_csv(csv_data=None):
     for row in reader:
 
         # skip over the header rows
-        if row[0].strip() in ["", "LAST UPDATED"]:
+        if row[0].strip() in ["", "UPDATED"]:
             continue
 
         elif row[0] == "SERIAL":
