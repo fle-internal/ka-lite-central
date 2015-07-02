@@ -50,6 +50,8 @@ def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
         else:
             download_url = download_url.replace("/edit", "/export?format=csv")
 
+    download_url = "https://docs.google.com/spreadsheets/d/1k5xh2UXV3EchRHnYzeP6-YGKrmba22vsltGSuU9bL88/edit#gid=0"
+    download_url = download_url.replace("/edit", "/export?format=csv")
     logging.info("Downloading dubbed video data from %s" % download_url)
     response = requests.get(download_url)
     if response.status_code != 200:
