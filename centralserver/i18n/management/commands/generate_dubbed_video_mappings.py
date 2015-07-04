@@ -41,7 +41,7 @@ def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
         conn = httplib.HTTPConnection("www.khanacademy.org")
         conn.request("GET", "/r/translationmapping")
         r1 = conn.getresponse()
-        if not r1.status == 302:
+        if r1.status not in [301, 302]:
             # TODO: have django email admins when we hit this exception
             raise Exception("Expected redirect response from Khan Academy redirect url.")
         download_url = r1.getheader('Location')
@@ -50,6 +50,8 @@ def download_ka_dubbed_video_csv(download_url=None, cache_filepath=None):
         else:
             download_url = download_url.replace("/edit", "/export?format=csv")
 
+    download_url = "https://docs.google.com/spreadsheets/d/1k5xh2UXV3EchRHnYzeP6-YGKrmba22vsltGSuU9bL88/edit#gid=0"
+    download_url = download_url.replace("/edit", "/export?format=csv")
     logging.info("Downloading dubbed video data from %s" % download_url)
     response = requests.get(download_url)
     if response.status_code != 200:
@@ -83,7 +85,7 @@ def generate_dubbed_video_mappings_from_csv(csv_data=None):
     for row in reader:
 
         # skip over the header rows
-        if row[0].strip() in ["", "LAST UPDATED"]:
+        if row[0].strip() in ["", "UPDATED"]:
             continue
 
         elif row[0] == "SERIAL":
