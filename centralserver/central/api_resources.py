@@ -3,7 +3,7 @@ from tastypie.exceptions import NotFound
 from tastypie.resources import ModelResource
 
 from central.models import Organization
-from kalite.shared.api_auth import ObjectAdminAuthorization, UserObjectsOnlyAuthorization
+from kalite.shared.api_auth.auth import ObjectAdminAuthorization, UserObjectsOnlyAuthorization
 from securesync.models import Zone
 
 class ZoneResource(ModelResource):

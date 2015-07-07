@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 from centralserver.central.models import Organization
 from fle_utils.django_utils.paginate import paginate_data
 from kalite.facility.models import Facility
-from kalite.shared.decorators import require_authorized_admin
+from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.models import DeviceZone
 
 

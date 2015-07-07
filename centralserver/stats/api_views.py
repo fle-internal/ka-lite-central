@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 
 from . import stats_logger
 from centralserver.i18n import get_language_pack_filepath, get_srt_path
-from fle_utils.django_utils import get_request_ip
+from fle_utils.django_utils.functions import get_request_ip
 from fle_utils.videos import OUTSIDE_DOWNLOAD_BASE_URL  # for video download redirects
 from kalite.version import VERSION as KALITE_VERSION
 

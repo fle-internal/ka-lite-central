@@ -25,9 +25,9 @@ import kalite.version  # for software version
 from .forms import OrganizationForm, OrganizationInvitationForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
-from fle_utils.internet import set_query_params
+from fle_utils.internet.functions import set_query_params
 from kalite.control_panel import views as kalite_control_panel_views
-from kalite.shared.decorators import require_authorized_admin
+from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.engine.api_client import SyncClient
 from securesync.models import Zone
 

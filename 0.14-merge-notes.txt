@@ -1,0 +1,282 @@
+- How to integrate ka-lite-submodule/kalite/project/settings/central_server.py?
+- Get tests working
+- Confirm that everything that should be overridable by local_settings.py actually is
+
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
+    'kalite.facility.custom_context_processors.custom',
+    'django.core.context_processors.i18n',
+    'kalite.i18n.custom_context_processors.languages',
+    'django.contrib.messages.context_processors.messages',
+    'centralserver.central.custom_context_processors.custom'
+)
+
+INSTALLED_APPS = (
+    'kalite.topic_tools',
+    'django.contrib.auth',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django_extensions',
+    'fle_utils.config',
+    'fle_utils.chronograph',
+    'fle_utils.django_utils',
+    'django.contrib.staticfiles',
+    'south',
+    'kalite.facility',
+    'kalite.i18n',
+    'kalite.testing',
+    'securesync',
+    'kalite.main',
+    'django.contrib.admin',
+    'kalite.testing.loadtesting',
+    'kalite.contentload',
+    'kalite.control_panel',
+    'centralserver.central',
+    'kalite.coachreports',
+    'django.contrib.humanize',
+    'centralserver.contact',
+    'kalite.updates',
+    'kalite.caching',
+    'centralserver.i18n',
+    'tastypie',
+    'announcements',
+    'fle_utils.backbone',
+    'kalite.playlist',
+    'kalite.student_testing',
+    'kalite.store',
+    'centralserver.deployment',
+    'centralserver.faq',
+    'centralserver.khanload',
+    'centralserver.registration',
+    'centralserver.stats',
+    'centralserver.testing',
+    'django_snippets',
+    'django.contrib.contenttypes',
+    'securesync.devices',
+    'fle_utils.handlebars',
+    'kalite.dynamic_assets',
+    'centralserver.ab_testing'
+)
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'securesync.middleware.RegisteredCheck',
+    'securesync.middleware.DBCheck',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'fle_utils.django_utils.middleware.GetNextParam',
+    'kalite.facility.middleware.AuthFlags',
+    'kalite.facility.middleware.FacilityCheck',
+    'django_snippets.profiling_middleware.ProfileMiddleware',
+    'kalite.i18n.middleware.SessionLanguage',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'centralserver.middleware.DummySessionForAPIUrls'
+)
+
+ABSOLUTE_URL_OVERRIDES = {}
+ACCOUNT_ACTIVATION_DAYS = 7
+ADMINS = (('FLE Errors', 'errors@learningequality.org'),)
+ADMIN_FOR = ()
+ALLOWED_HOSTS = ['*']
+ALLOWED_INCLUDE_ROOTS = ()
+AMARA_API_KEY = None
+AMARA_USERNAME = None
+API_LIMIT_PER_PAGE = 0
+APPEND_SLASH = True
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+AUTH_PROFILE_MODULE = 'central.UserProfile'
+AUTH_USER_MODEL = 'auth.User'
+AUTO_LOAD_TEST = False
+BACKUP_THUMBNAIL_SOURCE = None
+BACKUP_VIDEO_SOURCE = None
+BUILT = False
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_KEY_PREFIX = ''
+CACHE_MIDDLEWARE_SECONDS = 600
+CACHE_NAME = None
+CACHE_TIME = 0
+CENTRALSERVER_TEST_RUNNER = 'centralserver.testing.testrunner.CentralTestRunner'
+CENTRAL_ADMIN_EMAIL = 'errors@learningequality.org'
+CENTRAL_CONTACT_EMAIL = 'info@learningequality.org'
+CENTRAL_DEPLOYMENT_EMAIL = 'implementations@learningequality.org'
+CENTRAL_DEV_EMAIL = 'dev@learningequality.org'
+CENTRAL_FROM_EMAIL = 'kalite@learningequality.org'
+CENTRAL_INFO_EMAIL = 'info@learningequality.org'
+CENTRAL_SERVER = True
+CENTRAL_SERVER_DOMAIN = 'learningequality.org'
+CENTRAL_SERVER_HOST = ''
+CENTRAL_SUBSCRIBE_URL = 'http://adhocsync.us6.list-manage.com/subscribe/post?u=023b9af05922dfc7f47a4fffb&amp;id=97a379de16'
+CENTRAL_SUPPORT_EMAIL = 'support@learningequality.org'
+CENTRAL_WIKI_URL = 'http://kalitewiki.learningequality.org/'
+CHANNEL = 'khan'
+CHANNEL_DATA = {u'channel_license': u'CC-BY-NC-SA', u'head_line': u'A free world-class education for anyone anywhere.', u'channel_name': u'KA Lite', u'footer_text': u'Videos \xa9 2015 Khan Academy (Creative Commons) // Exercises \xa9 2015 Khan Academy', u'tag_line': u'KA Lite is a light-weight web server for viewing and interacting with core Khan Academy content (videos and exercises) without needing an Internet connection.'}
+CHANNEL_DATA_PATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/main/../../data/khan'
+COMMENTS_ALLOW_PROFANITIES = False
+CONFIG_PACKAGE = []
+CONTENT_DATA_PATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/main/../../data'
+CONTENT_DATA_URL = '/data/'
+CONTENT_ROOT = '/media/2tb/fle/ka-lite-central/content/'
+CONTENT_URL = '/content/'
+CRONSERVER_FREQUENCY = 600
+CROWDIN_PROJECT_ID = None
+CROWDIN_PROJECT_KEY = None
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_NAME = 'csrftoken_central'
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SECURE = False
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+DATABASES = {'default': {'ENGINE': 'django.db.backends.mysql', 'TEST_MIRROR': None, 'NAME': 'kalite_central_server', 'TEST_CHARSET': None, 'TIME_ZONE': None, 'TEST_COLLATION': None, 'PORT': '', 'HOST': '', 'USER': 'dbuser', 'TEST_NAME': None, 'PASSWORD': 'pass', 'OPTIONS': {}}}
+DATABASE_ROUTERS = []
+DATETIME_FORMAT = 'N j, Y, P'
+DATETIME_INPUT_FORMATS = ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%m/%d/%Y %H:%M:%S', '%m/%d/%Y %H:%M:%S.%f', '%m/%d/%Y %H:%M', '%m/%d/%Y', '%m/%d/%y %H:%M:%S', '%m/%d/%y %H:%M:%S.%f', '%m/%d/%y %H:%M', '%m/%d/%y')
+DATE_FORMAT = 'N j, Y'
+DATE_INPUT_FORMATS = ('%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y', '%b %d %Y', '%b %d, %Y', '%d %b %Y', '%d %b, %Y', '%B %d %Y', '%B %d, %Y', '%d %B %Y', '%d %B, %Y')
+DEBUG = True
+DEBUG_ALLOW_DELETIONS = False
+DEBUG_PROPAGATE_EXCEPTIONS = False
+DECIMAL_SEPARATOR = '.'
+DEFAULT_CHARSET = 'utf-8'
+DEFAULT_CONTENT_TYPE = 'text/html'
+DEFAULT_ENCODING = 'utf-8'
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'django.views.debug.SafeExceptionReporterFilter'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DEFAULT_FROM_EMAIL = 'kalite@learningequality.org'
+DEFAULT_INDEX_TABLESPACE = ''
+DEFAULT_TABLESPACE = ''
+DISABLE_SELF_ADMIN = False
+DISALLOWED_USER_AGENTS = ()
+DO_NOT_RELOAD_CONTENT_CACHE_AT_STARTUP = False
+DUBBED_LANGUAGES_FETCHED_IN_API = []
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = ''
+EMAIL_PORT = 25
+EMAIL_SUBJECT_PREFIX = '[Django] '
+EMAIL_USE_TLS = False
+FILE_CHARSET = 'utf-8'
+FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler', 'django.core.files.uploadhandler.TemporaryFileUploadHandler')
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440
+FILE_UPLOAD_PERMISSIONS = None
+FILE_UPLOAD_TEMP_DIR = None
+FIRST_DAY_OF_WEEK = 0
+FIXTURE_DIRS = ()
+FORCE_SCRIPT_NAME = None
+FORMAT_MODULE_PATH = None
+GIT_UPDATE_BRANCH = 'master'
+GIT_UPDATE_REMOTE_NAME = 'updates'
+GIT_UPDATE_REPO_URL = 'https://github.com/learningequality/ka-lite.git'
+I18N_CENTRAL_DATA_PATH = '/media/2tb/fle/ka-lite-central/centralserver/i18n/data'
+I18N_DATA_PATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/i18n/data'
+IGNORABLE_404_URLS = ()
+INSTALLER_BASE_URL = 'https://www.dropbox.com/s/mich3t4rsw2q6hc/'
+INSTALL_FACILITY_NAME = None
+INTERCEPT_REDIRECTS = False
+INTERNAL_IPS = ('127.0.0.1',)
+IN_CONTEXT_LOCALIZED = False
+KALITE_PATH = '/media/2tb/fle/ka-lite-central/centralserver/../ka-lite-submodule/'
+KALITE_TEST_RUNNER = 'kalite.testing.testrunner.KALiteTestRunner'
+KA_CROWDIN_PROJECT_ID = None
+KA_CROWDIN_PROJECT_KEY = None
+KHAN_EXERCISES_DIRPATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/topic_tools/../static/perseus/ke'
+KHAN_EXERCISES_RELPATH = 'static/perseus/ke'
+LANGUAGES = set([(u'que', u'Quechua'), (u'sq', u'Albanian'), (u'et', u'Estonian'), (u'io', u'Ido'), (u'ts', u'Tsonga'), (u'ru', u'Russian'), (u'ay', u'Aymara'), (u'nv', u'Navajo, Navaho'), (u'hu', u'Hungarian'), (u'ful', u'Fula'), (u'ku', u'Kurdish'), (u'is', u'Icelandic'), (u'ml', u'Malayalam'), (u'rw', u'Kinyarwanda'), (u'cs', u'Czech'), (u'ti', u'Tigrinya'), (u'ff', u'Fula; Fulah; Pulaar; Pular'), (u'swa', u'Swahili'), (u'yor', u'Yoruba'), (u'en_pt', u'English, Pirate'), (u'or', u'Oriya'), (u'pnb', u'Punjabi'), (u'tk', u'Turkmen'), (u'id', u'Indonesian'), (u'gu', u'Gujarati'), (u'sr_latn', u'Serbian, Latin'), (u'gn', u'Guaran\xed'), (u'mr', u'Marathi (Mar\u0101\u1e6dh\u012b)'), (u'ky', u'Kirghiz, Kyrgyz'), (u'kv', u'Komi'), (u'ceb', u'Cebuano'), (u'la', u'Latin'), (u'rn', u'Kirundi'), (u'sw', u'Swahili'), (u'be', u'Belarusian'), (u'co', u'Corsican'), (u'na', u'Nauru'), (u'rm', u'Romansh'), (u'wo', u'Wolof'), (u'vo', u'Volap\xfck'), (u'jv', u'Javanese'), (u'ha', u'Hausa'), (u'pl', u'Polish'), (u'zul', u'Zulu'), (u'pi', u'P\u0101li'), (u'bg', u'Bulgarian'), (u'es_es', u'Spanish, Spain'), (u'aka', u'Akan'), (u'si', u'Sinhala, Sinhalese'), (u'tsn', u'Tswana'), (u'pt', u'Portuguese'), (u'cu', u'Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic'), (u'hr', u'Croatian'), (u'pa', u'Panjabi, Punjabi'), (u'ks', u'Kashmiri'), (u'am', u'Amharic'), (u'fr', u'French'), (u'bi', u'Bislama'), (u'ar', u'Arabic'), (u'yi', u'Yiddish'), (u'az', u'Azerbaijani'), (u'en', u'English'), (u'th', u'Thai'), (u'pt_br', u'Portuguese, Brazil'), (u'tir', u'Tigrinya'), (u'bm', u'Bambara'), (u'fo', u'Faroese'), (u'sd', u'Sindhi'), (u'uz', u'Uzbek'), (u'he', u'Hebrew (modern)'), (u'tn', u'Tswana'), (u'ta', u'Tamil'), (u'ee', u'Ewe'), (u'ur', u'Urdu'), (u'ms', u'Malay'), (u'ii', u'Nuosu'), (u'fj', u'Fijian'), (u'hy', u'Armenian'), (u'to', u'Tonga (Tonga Islands)'), (u'mi', u'M\u0101ori'), (u'no', u'Norwegian'), (u'oc', u'Occitan'), (u'lt', u'Lithuanian'), (u'pt_pt', u'Portuguese, Portugal'), (u'vi', u'Vietnamese'), (u'oji', u'Ojibwe'), (u'cr', u'Cree'), (u'cho', u'Choctaw'), (u'kl', u'Kalaallisut, Greenlandic'), (u'bo', u'Tibetan Standard, Tibetan, Central'), (u'fy', u'Western Frisian'), (u'ko', u'Korean'), (u'yo', u'Yoruba'), (u'sv_se', u'Swedish'), (u'bs', u'Bosnian'), (u'kr', u'Kanuri'), (u'ty', u'Tahitian'), (u'mn', u'Mongolian'), (u'kw', u'Cornish'), (u'sot', u'Southern Sotho'), (u'ibo', u'Igbo'), (u'tt', u'Tatar'), (u'tl', u'Tagalog'), (u'nya', u'Chichewa'), (u'tr', u'Turkish'), (u'ba', u'Bashkir'), (u'as', u'Assamese'), (u'qu', u'Quechua'), (u'efi', u'Efik'), (u'tg', u'Tajik'), (u'zh_cn', u'Chinese, Simplified'), (u'sn', u'Shona'), (u'ia', u'Interlingua'), (u'bug', u'Buginese'), (u'an', u'Aragonese'), (u'en_gb', u'English, Britain'), (u'ga', u'Irish'), (u'es_ni', u'Spanish, Nicaraguan'), (u'zh', u'Chinese'), (u'de', u'German'), (u'st', u'Southern Sotho'), (u'kn', u'Kannada'), (u'hau', u'Hausa'), (u'oj', u'Ojibwe, Ojibwa'), (u'wa', u'Walloon'), (u'ie', u'Interlingue'), (u've', u'Venda'), (u'es_mx', u'Spanish, Mexico'), (u'za', u'Zhuang, Chuang'), (u'ca', u'Catalan; Valencian'), (u'ne_np', u'Nepali'), (u'kg', u'Kongo'), (u'br', u'Breton'), (u'mk', u'Macedonian'), (u'my', u'Burmese'), (u'fa', u'Persian'), (u'mg', u'Malagasy'), (u'el', u'Greek, Modern'), (u'mt', u'Maltese'), (u'da', u'Danish'), (u'fr_ca', u'French, Canada'), (u'gv', u'Manx'), (u'fy_nl', u'Frisian'), (u'sr_cs', u'Serbian, Cyrillic'), (u'li', u'Limburgish, Limburgan, Limburger'), (u'it', u'Italian'), (u'fil', u'Filipino'), (u'ht', u'Haitian; Haitian Creole'), (u'lb', u'Luxembourgish, Letzeburgesch'), (u'nd', u'North Ndebele'), (u'km', u'Khmer'), (u'ps', u'Pashto, Pushto'), (u'ho', u'Hiri Motu'), (u'dv', u'Divehi; Dhivehi; Maldivian;'), (u'lo', u'Lao'), (u'ur_pk', u'Swedish'), (u'sm', u'Samoan'), (u'tw', u'Twi'), (u'sc', u'Sardinian'), (u'om', u'Oromo'), (u'se', u'Northern Sami'), (u'mh', u'Marshallese'), (u'aa', u'Afar'), (u'lu', u'Luba-Katanga'), (u'mlg', u'Malagasy'), (u'zh_tw', u'Chinese, Traditional'), (u'ik', u'Inupiaq'), (u'nb', u'Norwegian Bokm\xe5l'), (u'ss', u'Swati'), (u'xho', u'Xhosa'), (u'ak', u'Akan'), (u'cy', u'Welsh'), (u'som', u'Somali'), (u'av', u'Avaric'), (u'hi', u'Hindi'), (u'ug', u'Uighur, Uyghur'), (u'fi', u'Finnish'), (u'ig', u'Igbo'), (u'ki', u'Kikuyu, Gikuyu'), (u'os', u'Ossetian, Ossetic'), (u'so', u'Somali'), (u'kj', u'Kwanyama, Kuanyama'), (u'sr', u'Serbian'), (u'sg', u'Sango'), (u'lv', u'Latvian'), (u'cv', u'Chuvash'), (u'kon', u'Kongo'), (u'sl', u'Slovene'), (u'ny', u'Chichewa; Chewa; Nyanja'), (u'es_ar', u'Spanish, Argentina'), (u'iu', u'Inuktitut'), (u'ae', u'Avestan'), (u'af', u'Afrikaans'), (u'bh', u'Bihari'), (u'nr', u'South Ndebele'), (u'bn', u'Bengali'), (u'te', u'Telugu'), (u'ng', u'Ndonga'), (u'sk', u'Slovak'), (u'su', u'Sundanese'), (u'lg', u'Luganda'), (u'eo', u'Esperanto'), (u'ro', u'Romanian, Moldavian, Moldovan'), (u'wol', u'Wolof'), (u'xh', u'Xhosa'), (u'sna', u'Shona'), (u'ka', u'Georgian'), (u'kik', u'Kikuyu'), (u'sa', u'Sanskrit (Sa\u1e41sk\u1e5bta)'), (u'ln', u'Lingala'), (u'ne', u'Nepali'), (u'gl', u'Galician'), (u'nl', u'Dutch'), (u'es', u'Spanish; Castilian'), (u'eu', u'Basque'), (u'kk', u'Kazakh'), (u'sv', u'Swedish'), (u'lin', u'Lingala'), (u'ab', u'Abkhaz'), (u'nn', u'Norwegian Nynorsk'), (u'hz', u'Herero'), (u'gd', u'Scottish Gaelic; Gaelic'), (u'ch', u'Chamorro'), (u'uk', u'Ukrainian'), (u'ja', u'Japanese'), (u'ce', u'Chechen')])
+LANGUAGES_BIDI = ('he', 'ar', 'fa')
+LANGUAGE_CODE = 'en'
+LANGUAGE_COOKIE_NAME = 'django_language_central'
+LANG_LOOKUP_FILEPATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/i18n/data/languagelookup.json'
+LOAD_KHAN_RESOURCES = True
+LOCALE_PATHS = ('/media/2tb/fle/ka-lite-central/locale/',)
+LOG = <logging.Logger object at 0x7f61035eee10>
+LOGGING = {}
+LOGGING_CONFIG = 'django.utils.log.dictConfig'
+LOGGING_LEVEL = 10
+LOGIN_REDIRECT_URL = '/organization/'
+LOGIN_URL = '/accounts/login/'
+LOGOUT_URL = '/accounts/logout/'
+MANAGERS = ()
+MEDIA_ROOT = '/media/2tb/fle/ka-lite-central/centralserver/media/'
+MEDIA_URL = '/media/'
+MESSAGE_STORAGE = 'fle_utils.django_utils.NoDuplicateMessagesSessionStorage'
+MONTH_DAY_FORMAT = 'F j'
+NUMBER_GROUPING = 0
+PASSWORD_CONSTRAINTS = {'min_length': 6}
+PASSWORD_HASHERS = ('django.contrib.auth.hashers.PBKDF2PasswordHasher', 'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher', 'django.contrib.auth.hashers.BCryptPasswordHasher', 'django.contrib.auth.hashers.SHA1PasswordHasher', 'django.contrib.auth.hashers.MD5PasswordHasher', 'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher', 'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher', 'django.contrib.auth.hashers.CryptPasswordHasher')
+PASSWORD_ITERATIONS_STUDENT = None
+PASSWORD_ITERATIONS_STUDENT_SYNCED = 2500
+PASSWORD_ITERATIONS_TEACHER = None
+PASSWORD_ITERATIONS_TEACHER_SYNCED = 5000
+PASSWORD_RESET_TIMEOUT_DAYS = 3
+POSTMARK_API_KEY = ''
+PREPEND_WWW = False
+PROFANITIES_LIST = ()
+PROJECT_PATH = '/media/2tb/fle/ka-lite-central/centralserver/'
+QUIZ_REPEATS = 3
+REPLACEMENTS = {}
+RESTRICTED_TEACHER_PERMISSIONS = False
+ROOT_DATA_PATH = '/media/2tb/fle/ka-lite-central/data/'
+ROOT_URLCONF = 'centralserver.central.urls'
+ROOT_UUID_NAMESPACE = UUID('a8f052c7-8790-5bed-ab15-fe2d3b1ede41')
+RUNNING_IN_TRAVIS = False
+SECRET_KEY = '8qq-!fa$92i=s1gjjitd&%s@4%ka9lj+=@n7a&fzjpwu%3kd#u'
+SECURESYNC_PROTOCOL = 'http'
+SECURE_PROXY_SSL_HEADER = None
+SEND_BROKEN_LINK_EMAILS = False
+SERVER_EMAIL = 'kalite@learningequality.org'
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_DOMAIN = None
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = 'sessionid_central'
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_SECURE = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_FILE_PATH = None
+SESSION_SAVE_EVERY_REQUEST = False
+SETTINGS_KEY_EXAM_MODE = 'EXAM_MODE_ON'
+SETTINGS_MODULE = 'centralserver.settings'
+SHORT_DATETIME_FORMAT = 'm/d/Y P'
+SHORT_DATE_FORMAT = 'm/d/Y'
+SHOW_DELETED_OBJECTS = False
+SIGNING_BACKEND = 'django.core.signing.TimestampSigner'
+STATICFILES_DIRS = ('/media/2tb/fle/ka-lite-central/centralserver/../static-libraries', '/media/2tb/fle/ka-lite-central/centralserver/../ka-lite-submodule/static-libraries')
+STATICFILES_FINDERS = ('django.contrib.staticfiles.finders.FileSystemFinder', 'django.contrib.staticfiles.finders.AppDirectoriesFinder')
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATIC_ROOT = '/media/2tb/fle/ka-lite-central/centralserver/static/'
+STATIC_URL = '/static/'
+STATS_PATH = '/media/2tb/fle/ka-lite-central/data/'
+STUDENT_TESTING_DATA_PATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/student_testing/data'
+SYNCING_MAX_RECORDS_PER_REQUEST = 100
+SYNCING_THROTTLE_WAIT_TIME = None
+SYNC_SESSIONS_MAX_RECORDS = None
+TASTYPIE_DEFAULT_FORMATS = ['json']
+TEMPLATE_DEBUG = True
+TEMPLATE_DIRS = ('/media/2tb/fle/ka-lite-central/centralserver/registration/templates', '/media/2tb/fle/ka-lite-central/centralserver/central/templates')
+TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
+TEMPLATE_STRING_IF_INVALID = ''
+TESTS_TO_SKIP = ['medium', 'long']
+TEST_RUNNER = 'centralserver.testing.testrunner.CentralTestRunner'
+THOUSAND_SEPARATOR = ','
+TIME_FORMAT = 'P'
+TIME_INPUT_FORMATS = ('%H:%M:%S', '%H:%M')
+TIME_ZONE = None
+TRANSACTIONS_MANAGED = False
+UPDATES_DATA_PATH = '/media/2tb/fle/ka-lite-central/ka-lite-submodule/kalite/updates/data'
+USER_LOG_MAX_RECORDS_PER_USER = 1
+USER_LOG_SUMMARY_FREQUENCY = (1, 'day')
+USE_DEBUG_TOOLBAR = False
+USE_ETAGS = False
+USE_I18N = True
+USE_L10N = False
+USE_THOUSAND_SEPARATOR = False
+USE_TZ = False
+USE_X_FORWARDED_HOST = False
+WSGI_APPLICATION = None
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+YEAR_MONTH_FORMAT = 'F Y'

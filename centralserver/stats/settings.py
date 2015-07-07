@@ -1,26 +1,9 @@
 import os
 
 try:
-    import local_settings
+    from centralserver import local_settings
 except ImportError:
     local_settings = object()
-
-
-
-########################
-# Django dependencies
-########################
-
-INSTALLED_APPS = (
-    "fle_utils.django_utils",  # templatetags
-    "securesync",  # for querying data
-    "kalite.i18n",  # video info
-    "kalite.main",  # timeline of *Log syncing
-    "kalite.control_panel",  # direct links to zone syncing summaries.
-    "kalite.topic_tools",  # for video stats, need to map youtube_id to video_id
-    "centralserver.i18n",  # for redirecting to resource paths
-)
-
 
 #######################
 # Set module settings

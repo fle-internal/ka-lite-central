@@ -32,20 +32,28 @@ AMARA_HEADERS = {
     "X-apikey": getattr(settings, "AMARA_API_KEY", None),
 }
 
+I18N_CENTRAL_DATA_PATH = os.path.join(os.path.dirname(__file__), "data")
+
+# So KA used to have a translated_youtube_id field from the video API.
+# But that seems to be gone now, so we just don't fetch any dubbed
+# video data from their API.
+# TODO(jamalex): the above comment doesn't sound accurate anymore
+DUBBED_LANGUAGES_FETCHED_IN_API = [] # ["es", "fr"]
+
 SUBTITLES_DATA_ROOT = os.path.join(settings.ROOT_DATA_PATH, "subtitles")
 LANGUAGE_PACK_ROOT = os.path.join(settings.MEDIA_ROOT, "language_packs")
 
 LANGUAGE_SRT_SUFFIX = "_download_status.json"
 SRTS_JSON_FILEPATH = os.path.join(SUBTITLES_DATA_ROOT, "srts_remote_availability.json")
-DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "dubbed_video_mappings.json")
+DUBBED_VIDEOS_MAPPING_FILEPATH = os.path.join(I18N_CENTRAL_DATA_PATH, "dubbed_video_mappings.json")
 SUBTITLE_COUNTS_FILEPATH = os.path.join(SUBTITLES_DATA_ROOT, "subtitle_counts.json")
-SUPPORTED_LANGUAGES_FILEPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "supported_languages.json")
+SUPPORTED_LANGUAGES_FILEPATH = os.path.join(I18N_CENTRAL_DATA_PATH, "supported_languages.json")
 CROWDIN_CACHE_DIR = os.path.join(settings.PROJECT_PATH, "..", "_crowdin_cache")
 LANGUAGE_PACK_BUILD_DIR = os.path.join(settings.ROOT_DATA_PATH, "i18n", "build")
 
 LOCALE_ROOT = settings.LOCALE_PATHS[0]
 
-POT_DIRPATH = os.path.join(settings.I18N_CENTRAL_DATA_PATH, "pot")
+POT_DIRPATH = os.path.join(I18N_CENTRAL_DATA_PATH, "pot")
 
 CROWDIN_API_URL = "https://api.crowdin.com/api/project"
 

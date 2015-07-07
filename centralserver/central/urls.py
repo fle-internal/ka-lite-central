@@ -14,6 +14,7 @@ import centralserver.registration.urls
 import centralserver.stats.api_urls
 import centralserver.stats.urls
 import fle_utils.feeds.urls
+import fle_utils.handlebars.urls
 import kalite.coachreports.urls
 import kalite.control_panel.urls
 import kalite.dynamic_assets.urls

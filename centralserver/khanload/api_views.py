@@ -37,10 +37,11 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 
-from fle_utils.internet import JsonResponse, JsonResponseMessageError, set_query_params
+from fle_utils.internet.classes import JsonResponse, JsonResponseMessageError
+from fle_utils.internet.functions import set_query_params
 from kalite.i18n import get_video_id
 from kalite.main.models import ExerciseLog, VideoLog
-from kalite.shared.decorators import require_login
+from kalite.shared.decorators.auth import require_login
 from kalite.topic_tools import get_node_cache
 
 KHAN_SERVER_URL = "http://www.khanacademy.org"
