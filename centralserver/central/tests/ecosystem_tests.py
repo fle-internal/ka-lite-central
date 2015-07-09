@@ -296,11 +296,11 @@ class SameVersionTests(CreateAdminMixin,
         with self.get_distributed_server() as d:
 
             # Create a facility on central server, in correct zone
-            facility_central = Facility(name="Central Facility", zone_fallback=self.zone)
+            facility_central = Facility(name="CentralFacility", zone_fallback=self.zone)
             facility_central.save()
 
             # Create a facility on distributed server
-            facility_distributed_id = d.addmodel(FACILITY_MODEL, name='Distributed Facility')
+            facility_distributed_id = d.addmodel(FACILITY_MODEL, name='DistributedFacility')
 
             self.register(d)
 
@@ -334,7 +334,7 @@ class SameVersionTests(CreateAdminMixin,
         with self.get_distributed_server() as d:
 
             # Create a facility on central server
-            facility_central = Facility(name="Central Facility", zone_fallback=self.zone)
+            facility_central = Facility(name="CentralFacility", zone_fallback=self.zone)
             facility_central.save()
 
             self.register(d)
@@ -343,13 +343,13 @@ class SameVersionTests(CreateAdminMixin,
 
             d.modifymodel(FACILITY_MODEL,
                           facility_central.id,
-                          name="Central Facility - Mod")
+                          name="CentralFacilityMod")
 
             sync_results = d.sync()
 
             self.assertEqual(sync_results["uploaded"], 1, "Wrong number of records uploaded")
 
-            self.assertEqual(Facility.objects.get(id=facility_central.id).name, "Central Facility - Mod", "Updated Facility name not synced back to central server")
+            self.assertEqual(Facility.objects.get(id=facility_central.id).name, "CentralFacilityMod", "Updated Facility name not synced back to central server")
 
     @override_settings(DEBUG_ALLOW_DELETIONS=True)
     def test_bad_registration_handled_gracefully(self):

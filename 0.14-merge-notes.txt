@@ -1,6 +1,7 @@
 - How to integrate ka-lite-submodule/kalite/project/settings/central_server.py?
 - Get tests working
 - Confirm that everything that should be overridable by local_settings.py actually is
+- Be sure to update Ansible to install requirements.txt from ka-lite-submodule
 
 
 TEMPLATE_CONTEXT_PROCESSORS = (

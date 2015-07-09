@@ -1,2 +1,2 @@
-from fle_utils.importing import import_all_child_modules
-import_all_child_modules()
+from browser_tests import *
+from unicode_tests import *

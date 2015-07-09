@@ -3,20 +3,19 @@ import os
 import platform
 import uuid
 
-
 ##############################
 # Basic setup
 ##############################
+
+# import the base settings from kalite up here, since we need things from there but also don't
+# want stuff like INSTALLED_APPS from there to swamp the settings defined in the current file
+from kalite.settings.base import *
 
 try:
     from local_settings import *
     import local_settings
 except ImportError:
     local_settings = object()
-
-# import the base settings from kalite up here, since we need things from there but also don't
-# want stuff like INSTALLED_APPS from there to swamp the settings defined in the current file
-from kalite.settings.base import *
 
 # Used everywhere, so ... set it up top.
 DEBUG          = getattr(local_settings, "DEBUG", False)

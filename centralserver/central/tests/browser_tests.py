@@ -18,7 +18,7 @@ from ..models import Organization
 from centralserver.registration.models import RegistrationProfile
 from kalite.facility.models import Facility
 from kalite.testing.base import KALiteBrowserTestCase
-from kalite.testing.mixins import BrowserActionMixins
+from kalite.testing.mixins.browser_mixins import BrowserActionMixins
 from securesync.models import Zone, Device, DeviceZone
 from .utils.mixins import CreateAdminMixin, CentralServerMixins
 

@@ -1,2 +1,9 @@
-from fle_utils.importing import import_all_child_modules
-import_all_child_modules()
+from .auth_tests import *
+from .browser_tests import *
+from .code_tests import *
+from .ecosystem_tests import *
+from .fixture_tests import *
+from .invitation_tests import *
+from .pot_tests import *
+from .unicode_tests import *
+from .url_tests import *
