@@ -90,7 +90,7 @@
                                 </a>
                             </li>
                         {% endif %}
-                        {% if org.owner == request.user %}
+                        {% if org.owner == request.user and org.zones.count == 0 %}
                             <li>
                                 <a class="org-delete-link" href="#" value="{% url 'delete_organization' org_id=org.id %}">
                                     <span class="glyphicon glyphicon-trash" value="{% url 'delete_organization' org_id=org.id %}" title="Delete this organization."></span>

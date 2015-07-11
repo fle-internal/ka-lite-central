@@ -281,7 +281,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
     def test_delete_org(self):
         """Delete an empty org"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".glyphicon-pencil"), None, "Make sure 'edit' icon appears.")
         self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
         self.browser.find_element_by_css_selector(".org-delete-link").click()
         self.browser.switch_to_alert().accept()
@@ -293,7 +293,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
     def test_cancel_delete_org(self):
         """Click to delete an empty org, then choose CANCEL"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".glyphicon-pencil"), None, "Make sure 'edit' icon appears.")
         self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
         self.browser.find_element_by_css_selector(".org-delete-link").click()
         self.browser.switch_to_alert().dismiss()
@@ -308,8 +308,10 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
         self.org.save()
 
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".icon-pencil"), None, "Make sure 'edit' icon appears.")
-        self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
+        self.assertNotEqual(self.browser.find_element_by_css_selector(".glyphicon-pencil"), None, "Make sure 'edit' icon appears.")
+        with self.assertRaises(NoSuchElementException):
+            self.assertEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon does not appear.")
+
 
 
     def test_issue_697_part2(self):
