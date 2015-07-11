@@ -15,7 +15,7 @@ import kalite.version  # for kalite software version
 from .models import Organization
 from fle_utils.internet.classes import JsonResponse, JsonResponseMessageError, JsonResponseMessageSuccess
 from fle_utils.internet.decorators import allow_jsonp, api_handle_error_with_json, api_response_causes_reload
-from kalite.shared.decorators import require_authorized_admin
+from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.models import Zone
 
 

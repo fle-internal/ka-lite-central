@@ -3,19 +3,21 @@ import sys
 from django.utils import unittest
 
 from ..models import *
-from fle_utils.testing.unicode import UnicodeModelsTest
+from kalite.testing.base import KALiteTestCase
 
 
-class CentralUnicodeModelsTest(UnicodeModelsTest):
+class CentralUnicodeModelsTest(KALiteTestCase):
 
-    @unittest.skipIf(sys.version_info < (2,7), "Test requires python version >= 2.7")
-    def test_unicode_class_coverage(self):
-        # Make sure we're testing all classes
-        self.check_unicode_class_coverage(
-            models_module="central.models",
-            known_classes = [Organization, UserProfile],
-        )
+    # TODO(jamalex): this is broken because test_unicode_class_coverage no longer exists anywhere
+    # @unittest.skipIf(sys.version_info < (2,7), "Test requires python version >= 2.7")
+    # def test_unicode_class_coverage(self):
+    #     # Make sure we're testing all classes
+    #     self.check_unicode_class_coverage(
+    #         models_module="central.models",
+    #         known_classes = [Organization, UserProfile],
+    #     )
 
+    korean_string = unichr(54392)
 
     def test_unicode_string(self):
         #   NOTE: we're not testing UserProfile

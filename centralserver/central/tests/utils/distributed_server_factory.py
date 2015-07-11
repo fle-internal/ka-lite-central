@@ -8,7 +8,7 @@ from urlparse import urlparse
 
 from django.conf import settings
 from fle_utils.crypto import Key
-from fle_utils.django_utils import call_outside_command_with_output
+from fle_utils.django_utils.command import call_outside_command_with_output
 from fle_utils.importing import resolve_model
 
 
@@ -71,7 +71,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         other_settings = ['%s = %r' % (k, v) for k, v in kwargs.iteritems()]
         new_settings = '\n'.join([new_settings] + other_settings)
-        old_settings_path = self.distributed_dir / 'settings.py'
+        old_settings_path = self.distributed_dir / 'project/settings/base.py'
         with open(old_settings_path.as_posix()) as f:
             old_settings = f.read()
 

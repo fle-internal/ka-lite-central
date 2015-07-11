@@ -19,4 +19,5 @@ npm install -g grunt-cli
 
 pip install -r requirements.txt
 
+echo >> centralserver/local_settings.py
 echo "DEBUG=True" >> centralserver/local_settings.py

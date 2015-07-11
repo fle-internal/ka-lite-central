@@ -1,19 +1,21 @@
 import logging
 import os
 import platform
-from fle_utils.settingshelper import import_installed_app_settings
-
+import uuid
 
 ##############################
 # Basic setup
 ##############################
+
+# import the base settings from kalite up here, since we need things from there but also don't
+# want stuff like INSTALLED_APPS from there to swamp the settings defined in the current file
+from kalite.settings.base import *
 
 try:
     from local_settings import *
     import local_settings
 except ImportError:
     local_settings = object()
-
 
 # Used everywhere, so ... set it up top.
 DEBUG          = getattr(local_settings, "DEBUG", False)
@@ -36,6 +38,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)  # shut up requests!
 ADMINS = (('FLE Errors', 'errors@learningequality.org'),)
 SERVER_EMAIL = 'kalite@learningequality.org'
 
+EMAIL_BACKEND = getattr(local_settings, "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend" if DEBUG else "postmark.backends.PostmarkBackend")
+
 ##############################
 # Basic Django settings
 ##############################
@@ -49,17 +53,15 @@ KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
 LOCALE_PATHS   = getattr(local_settings, "LOCALE_PATHS", (PROJECT_PATH + "/../locale",))
 LOCALE_PATHS   = tuple([os.path.realpath(lp) + "/" for lp in LOCALE_PATHS])
 
-# You'll probably want to change this for production.
-DATABASES      = {
+DATABASES = getattr(local_settings, "DATABASES", {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME"  : "kalite_central_server",
-        "USER"  : "dbuser",
-        "PASSWORD"  : "pass",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "data.sqlite",
         "OPTIONS": {
+            "timeout": 60,
         },
     }
-}
+})
 
 ALLOWED_HOSTS = getattr(local_settings, "ALLOWED_HOSTS", ['*'])
 INTERNAL_IPS   = getattr(local_settings, "INTERNAL_IPS", ("127.0.0.1",))
@@ -96,33 +98,85 @@ SESSION_COOKIE_NAME     = "sessionid_central"
 
 ROOT_URLCONF = "centralserver.central.urls"
 
+TEMPLATE_DIRS = (os.path.join(os.path.dirname(__file__), "templates"),)
+
+# List of callables that know how to import templates from various sources.
+TEMPLATE_LOADERS = (
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
+    'django.core.context_processors.i18n',
+    'kalite.i18n.custom_context_processors.languages',
+    'django.contrib.messages.context_processors.messages',
+    'centralserver.central.custom_context_processors.custom'
+) + getattr(local_settings, 'TEMPLATE_CONTEXT_PROCESSORS', tuple())
+
 INSTALLED_APPS = (
-    "django.contrib.admin",  # this and the following are needed to enable django admin.
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.messages",
-    "django.contrib.sessions",
-    "django_extensions", # needed for clean_pyc (testing)
-    "securesync.devices",
-    "centralserver.central",
-    "centralserver.testing",
-    "fle_utils.handlebars",
-    "kalite.i18n",  # middleware for setting user's default language.  TODO: move this code to facility, break the dependency.
-    "kalite.topic_tools",
-    "kalite.store",
-    "centralserver.i18n",
-    "kalite.dynamic_assets",
-    "centralserver.ab_testing",
+    'kalite.topic_tools',
+    'django.contrib.auth',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'fle_utils.config',
+    'fle_utils.chronograph',
+    'fle_utils.django_utils',
+    'django.contrib.staticfiles',
+    'south',
+    'kalite.facility',
+    'kalite.i18n',
+    'kalite.testing',
+    'securesync',
+    'kalite.main',
+    'django.contrib.admin',
+    'kalite.testing.loadtesting',
+    'kalite.contentload',
+    'kalite.control_panel',
+    'centralserver.central',
+    'kalite.coachreports',
+    'django.contrib.humanize',
+    'centralserver.contact',
+    'kalite.updates',
+    'kalite.caching',
+    'centralserver.i18n',
+    'tastypie',
+    'announcements',
+    'fle_utils.backbone',
+    'kalite.playlist',
+    'kalite.student_testing',
+    'kalite.store',
+    'centralserver.deployment',
+    'centralserver.faq',
+    'centralserver.khanload',
+    'centralserver.registration',
+    'centralserver.stats',
+    'centralserver.testing',
+    'django_snippets',
+    'django.contrib.contenttypes',
+    'securesync.devices',
+    'fle_utils.handlebars',
+    'kalite.dynamic_assets',
+    'centralserver.ab_testing'
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
-    "centralserver.middleware.DummySessionForAPIUrls",
-    "django.contrib.messages.middleware.MessageMiddleware",  # needed for django admin
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'securesync.middleware.RegisteredCheck',
+    'securesync.middleware.DBCheck',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'fle_utils.django_utils.middleware.GetNextParam',
+    'kalite.facility.middleware.AuthFlags',
+    'kalite.facility.middleware.FacilityCheck',
+    'django_snippets.profiling_middleware.ProfileMiddleware',
+    'kalite.i18n.middleware.SessionLanguage',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'centralserver.middleware.DummySessionForAPIUrls'
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.messages.context_processors.messages",  # needed for django admin
-) + getattr(local_settings, 'TEMPLATE_CONTEXT_PROCESSORS', tuple())
 
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, '..', 'static-libraries'),
@@ -130,6 +184,45 @@ STATICFILES_DIRS = (
 )  # libraries common to all apps
 
 DEFAULT_ENCODING = 'utf-8'
+
+##############################
+# Settings for purposes of testing/debugging
+##############################
+
+USE_DEBUG_TOOLBAR = getattr(local_settings, "USE_DEBUG_TOOLBAR", False)
+
+if USE_DEBUG_TOOLBAR:
+    INSTALLED_APPS += ('debug_toolbar',)
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    DEBUG_TOOLBAR_PANELS = (
+        'debug_toolbar.panels.version.VersionDebugPanel',
+        'debug_toolbar.panels.timer.TimerDebugPanel',
+        'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+        'debug_toolbar.panels.headers.HeaderDebugPanel',
+        'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+        'debug_toolbar.panels.template.TemplateDebugPanel',
+        'debug_toolbar.panels.sql.SQLDebugPanel',
+        'debug_toolbar.panels.signals.SignalDebugPanel',
+        'debug_toolbar.panels.logger.LoggingPanel',
+    )
+    DEBUG_TOOLBAR_CONFIG = {
+        'INTERCEPT_REDIRECTS': False,
+        'HIDE_DJANGO_SQL': False,
+        'ENABLE_STACKTRACES' : True,
+    }
+
+if DEBUG:
+
+    INSTALLED_APPS += ('django_extensions',)
+
+    # add ?prof to URL, to see performance stats
+    MIDDLEWARE_CLASSES += (
+        'django_snippets.profiling_middleware.ProfileMiddleware',
+    )
+
+    # TEMPLATE_CONTEXT_PROCESSORS += (
+    #     "django.contrib.auth.context_processors.auth",
+    # )
 
 
 ########################
@@ -147,8 +240,7 @@ CACHES = {
 SESSION_ENGINE = getattr(local_settings, "SESSION_ENGINE", 'django.contrib.sessions.backends.cache' + (''))
 
 # Use our custom message storage to avoid adding duplicate messages
-MESSAGE_STORAGE = 'fle_utils.django_utils.NoDuplicateMessagesSessionStorage'
-
+MESSAGE_STORAGE = 'fle_utils.django_utils.classes.NoDuplicateMessagesSessionStorage'
 
 
 ########################
@@ -167,10 +259,6 @@ MESSAGE_STORAGE = 'fle_utils.django_utils.NoDuplicateMessagesSessionStorage'
 CACHE_TIME = 0
 CACHE_NAME = None
 CENTRAL_SERVER_HOST = ""
-
-import_installed_app_settings(INSTALLED_APPS, globals())
-
-TEST_RUNNER = CENTRALSERVER_TEST_RUNNER
 
 RUNNING_IN_TRAVIS = bool(os.environ.get("TRAVIS"))
 
@@ -202,3 +290,56 @@ POSTMARK_API_KEY = getattr(local_settings, "POSTMARK_API_KEY", "")
 
 # Whether this was built by a build server; it's not.
 BUILT = getattr(local_settings, "BUILT", False)
+
+# Note: this MUST be hard-coded for backwards-compatibility reasons.
+ROOT_UUID_NAMESPACE = uuid.UUID("a8f052c7-8790-5bed-ab15-fe2d3b1ede41")  # print uuid.uuid5(uuid.NAMESPACE_URL, "https://kalite.adhocsync.com/")
+
+# Duplicated from contact
+CENTRAL_SERVER_DOMAIN = getattr(local_settings, "CENTRAL_SERVER_DOMAIN", "learningequality.org")
+
+CENTRAL_WIKI_URL      = getattr(local_settings, "CENTRAL_WIKI_URL",      "http://kalitewiki.%s/" % CENTRAL_SERVER_DOMAIN)
+
+LOGIN_REDIRECT_URL = '/organization/'
+
+########################
+#
+# (The following approach is borrowed from the distributed server.)
+#
+# After all settings, but before config packages,
+#   import settings from other apps.
+#
+# This allows app-specific settings to be localized and augment
+#   the settings here, while also allowing
+#   config packages to override settings.
+########################
+
+#from kalite.distributed.settings import *
+#from kalite.django_cherrypy_wsgiserver.settings import *
+#from securesync.settings import *
+#from fle_utils.chronograph.settings import *
+from kalite.facility.settings import *
+from kalite.main.settings import *
+from kalite.playlist.settings import *
+from kalite.student_testing.settings import *
+from kalite.testing.settings import *
+
+# Import from applications with problematic __init__.py files
+from kalite.legacy.i18n_settings import *
+from kalite.legacy.topic_tools_settings import *
+from kalite.legacy.updates_settings import *
+
+
+########################
+#
+# Now, the same as above, but for the centralserver apps.
+#
+########################
+
+from registration.settings import *
+from testing.settings import *
+from contact.settings import *
+from stats.settings import *
+
+# Import from applications with problematic __init__.py files
+from centralserver.legacy.centralserver_i18n_settings import *
+

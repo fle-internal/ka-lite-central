@@ -10,7 +10,7 @@ from django.db.models import Sum, Max, Count, F, Q, Min
 from . import stats_logger
 from kalite.i18n import get_video_language, get_video_id
 from kalite.main.models import ExerciseLog, VideoLog
-from kalite.shared.decorators import require_authorized_admin
+from kalite.shared.decorators.auth import require_authorized_admin
 from kalite.topic_tools import get_id2slug_map
 from securesync.models import SyncSession, Device
 

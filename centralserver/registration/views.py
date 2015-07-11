@@ -19,7 +19,7 @@ from .backends import get_backend
 from centralserver.central.forms import OrganizationForm
 from centralserver.central.models import Organization, OrganizationInvitation
 from centralserver.contact.views import contact_subscribe
-from fle_utils.internet import set_query_params
+from fle_utils.internet.functions import set_query_params
 from securesync.models import Zone
 
 

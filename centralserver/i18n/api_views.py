@@ -10,7 +10,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 
 from . import get_language_pack_availability_filepath, SUBTITLE_COUNTS_FILEPATH, SUBTITLES_DATA_ROOT, DUBBED_VIDEOS_MAPPING_FILEPATH
-from fle_utils.internet import allow_jsonp, api_handle_error_with_json, JsonResponse, JsonpResponse
+from fle_utils.internet.decorators import allow_jsonp, api_handle_error_with_json
+from fle_utils.internet.classes import JsonResponse
 
 
 @allow_jsonp
