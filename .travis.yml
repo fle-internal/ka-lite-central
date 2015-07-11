@@ -10,6 +10,9 @@ install:
 - pushd $TRAVIS_BUILD_DIR; npm install; popd
 - pushd $TRAVIS_BUILD_DIR; npm install -g grunt-cli; popd
 - pushd $TRAVIS_BUILD_DIR; pip install -r requirements.txt; popd
+- pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements.txt; popd
+- pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_dev.txt; popd
+- pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_test.txt; popd
 script:
 - grunt jshint
 - python centralserver/manage.py test -v 2 --traceback
