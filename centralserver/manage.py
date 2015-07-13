@@ -12,6 +12,9 @@ if __name__ == "__main__":
     #   Suppress those warnings
     warnings.filterwarnings('ignore', message=r'Module .*? is being added to sys\.path', append=True)
 
+    # Also ignore settings-related warning, since it blows up Ansible, and the central server is its own boss.
+    warnings.filterwarnings('ignore', message=r'Wrong settings module imported', append=True)
+
     # Now build the paths that point to all of the project pieces
     PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
     PROJECT_PYTHON_PATHS = [
