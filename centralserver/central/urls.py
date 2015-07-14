@@ -135,6 +135,11 @@ urlpatterns += patterns('',
     url(r'^languages/', include(centralserver.i18n.urls)),
 )
 
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse'),
+    )
+
 handler403 = __package__ + '.views.handler_403'
 handler404 = __package__ + '.views.handler_404'
 handler500 = __package__ + '.views.handler_500'

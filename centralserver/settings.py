@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'kalite.contentload',
     'kalite.control_panel',
     'centralserver.central',
+    'django_js_reverse',
     'kalite.coachreports',
     'django.contrib.humanize',
     'centralserver.contact',
