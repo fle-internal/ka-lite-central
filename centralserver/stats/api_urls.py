@@ -11,6 +11,4 @@ urlpatterns = patterns(__package__ + '.api_views',
         name="download_language_pack"),
     url(r'^static/srt/(?P<lang_code>.*)/subtitles/(?P<youtube_id>.*).srt$', 'download_subtitle', {}), # v0.10.0: fetching subtitles.
     url(r'^download/videos/(?P<video_path>.*)$', 'download_video'),
-    url(r'^download/installer/windows/$', 'download_windows_installer', {'version': 'latest'}),
-    url(r'^download/installer/windows/(?P<version>.*)/$', 'download_windows_installer', {}),
 )

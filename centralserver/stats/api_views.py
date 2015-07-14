@@ -68,13 +68,3 @@ def download_subtitle(request, lang_code, youtube_id):
 
     return response
 
-
-def download_windows_installer(request, version):
-    if version == "latest":
-        version = KALITE_VERSION  # make sure 'latest' gets translated to the latest version.
-
-    installer_name = "KALiteSetup-%s.exe" % version
-    installer_url = settings.INSTALLER_BASE_URL + installer_name
-    stats_logger("installer").info("wi;%s;%s" % (get_request_ip(request), installer_name))
-
-    return HttpResponseRedirect(installer_url)

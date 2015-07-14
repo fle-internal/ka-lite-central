@@ -11,6 +11,47 @@ import uuid
 # want stuff like INSTALLED_APPS from there to swamp the settings defined in the current file
 from kalite.settings.base import *
 
+########################
+#
+# (The following approach is borrowed from the distributed server.)
+#
+# After all settings, but before config packages,
+#   import settings from other apps.
+#
+# This allows app-specific settings to be localized and augment
+#   the settings here, while also allowing
+#   config packages to override settings.
+########################
+
+#from kalite.distributed.settings import *
+#from kalite.django_cherrypy_wsgiserver.settings import *
+#from securesync.settings import *
+#from fle_utils.chronograph.settings import *
+from kalite.facility.settings import *
+from kalite.main.settings import *
+from kalite.playlist.settings import *
+from kalite.student_testing.settings import *
+from kalite.testing.settings import *
+
+# Import from applications with problematic __init__.py files
+from kalite.legacy.i18n_settings import *
+from kalite.legacy.topic_tools_settings import *
+from kalite.legacy.updates_settings import *
+
+
+########################
+#
+# Now, the same as above, but for the centralserver apps.
+#
+########################
+
+from registration.settings import *
+from contact.settings import *
+
+# Import from applications with problematic __init__.py files
+from centralserver.legacy.centralserver_i18n_settings import *
+
+
 try:
     from local_settings import *
     import local_settings
@@ -136,6 +177,7 @@ INSTALLED_APPS = (
     'kalite.control_panel',
     'centralserver.central',
     'django_js_reverse',
+    'kalite.distributed', # needed in order to get things like window.sessionModel
     'kalite.coachreports',
     'django.contrib.humanize',
     'centralserver.contact',
@@ -153,7 +195,7 @@ INSTALLED_APPS = (
     'centralserver.khanload',
     'centralserver.registration',
     'centralserver.stats',
-    'centralserver.testing',
+    # 'centralserver.testing',
     'django_snippets',
     'django.contrib.contenttypes',
     'securesync.devices',
@@ -301,46 +343,3 @@ CENTRAL_SERVER_DOMAIN = getattr(local_settings, "CENTRAL_SERVER_DOMAIN", "learni
 CENTRAL_WIKI_URL      = getattr(local_settings, "CENTRAL_WIKI_URL",      "http://kalitewiki.%s/" % CENTRAL_SERVER_DOMAIN)
 
 LOGIN_REDIRECT_URL = '/organization/'
-
-########################
-#
-# (The following approach is borrowed from the distributed server.)
-#
-# After all settings, but before config packages,
-#   import settings from other apps.
-#
-# This allows app-specific settings to be localized and augment
-#   the settings here, while also allowing
-#   config packages to override settings.
-########################
-
-#from kalite.distributed.settings import *
-#from kalite.django_cherrypy_wsgiserver.settings import *
-#from securesync.settings import *
-#from fle_utils.chronograph.settings import *
-from kalite.facility.settings import *
-from kalite.main.settings import *
-from kalite.playlist.settings import *
-from kalite.student_testing.settings import *
-from kalite.testing.settings import *
-
-# Import from applications with problematic __init__.py files
-from kalite.legacy.i18n_settings import *
-from kalite.legacy.topic_tools_settings import *
-from kalite.legacy.updates_settings import *
-
-
-########################
-#
-# Now, the same as above, but for the centralserver apps.
-#
-########################
-
-from registration.settings import *
-from testing.settings import *
-from contact.settings import *
-from stats.settings import *
-
-# Import from applications with problematic __init__.py files
-from centralserver.legacy.centralserver_i18n_settings import *
-
