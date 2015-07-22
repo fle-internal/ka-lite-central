@@ -22,7 +22,8 @@
     "xh": {
         "beta": true
     },
-    "zu": {
-        "beta": true
+    "zul": {
+        "beta": true,
+        "crowdin": "zu"
     }
 }
