@@ -26,7 +26,6 @@ from django.core.management.base import BaseCommand, CommandError
 
 from ... import AMARA_HEADERS, LOCALE_ROOT, SRTS_JSON_FILEPATH, SUBTITLES_DATA_ROOT, SUBTITLE_COUNTS_FILEPATH
 from fle_utils.general import convert_date_input, ensure_dir, softload_json
-from fle_utils.internet import make_request
 from kalite.i18n import lcode_to_django_dir, lcode_to_ietf, get_language_name, LanguageNotFoundError
 from ... import get_lang_map_filepath, get_srt_path, get_supported_language_map, get_langs_with_subtitles
 
@@ -233,9 +232,9 @@ def download_subtitle(youtube_id, lang_code, format="srt"):
     # Please see http://amara.readthedocs.org/en/latest/api.html
     base_url = "https://amara.org/api2/partners/videos"
 
-    resp = make_request(AMARA_HEADERS, "%s/%s/languages/%s/subtitles/?format=srt" % (
+    resp = requests.get("%s/%s/languages/%s/subtitles/?format=srt" % (
         base_url, amara_code, lang_code.lower(),
-    ))
+    ), data=AMARA_HEADERS)
     if isinstance(resp, basestring):
         return resp
     else:
