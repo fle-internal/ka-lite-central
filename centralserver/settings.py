@@ -27,16 +27,16 @@ from kalite.settings.base import *
 #from kalite.django_cherrypy_wsgiserver.settings import *
 #from securesync.settings import *
 #from fle_utils.chronograph.settings import *
-from kalite.facility.settings import *
-from kalite.main.settings import *
-from kalite.playlist.settings import *
-from kalite.student_testing.settings import *
-from kalite.testing.settings import *
+# from kalite.facility.settings import *
+# from kalite.main.settings import *
+# from kalite.playlist.settings import *
+# from kalite.student_testing.settings import *
+# from kalite.testing.settings import *
+# from kalite.topic_tools.settings import *
 
-# Import from applications with problematic __init__.py files
-from kalite.legacy.i18n_settings import *
-from kalite.legacy.topic_tools_settings import *
-from kalite.legacy.updates_settings import *
+# # Import from applications with problematic __init__.py files
+# from kalite.legacy.i18n_settings import *
+# from kalite.legacy.updates_settings import *
 
 
 ########################
@@ -97,7 +97,7 @@ LOCALE_PATHS   = tuple([os.path.realpath(lp) + "/" for lp in LOCALE_PATHS])
 DATABASES = getattr(local_settings, "DATABASES", {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "data.sqlite",
+        "NAME": os.path.join(PROJECT_PATH, "database", "data.sqlite"),
         "OPTIONS": {
             "timeout": 60,
         },
