@@ -1,4 +1,7 @@
 import subprocess
+
+from annoying.functions import get_object_or_None
+
 from django.conf import settings
 from django.contrib.auth.models import make_password
 from django.test import LiveServerTestCase
@@ -9,11 +12,13 @@ from .utils.mixins import CreateAdminMixin, CentralServerMixins
 from .utils.mixins import FakeDeviceMixin
 from .utils.distributed_server_factory import DistributedServer
 from kalite.facility.models import Facility, FacilityGroup, FacilityUser
+from kalite.main.models import AttemptLog
 from securesync.models import Device, DeviceZone
 
 FACILITY_MODEL = 'kalite.facility.models.Facility'
 GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
 FACILITY_USER_MODEL = 'kalite.facility.models.FacilityUser'
+ATTEMPT_LOG_MODEL = 'kalite.main.models.AttemptLog'
 
 DUMMY_PASSWORD = make_password('password', '10000', 'sha1')
 
@@ -231,6 +236,38 @@ class SameVersionTests(CreateAdminMixin,
 
 
             # student = FacilityUser.objects.get(id=student_id)
+
+    def test_minversion_models_are_not_skipped(self):
+
+        with self.get_distributed_server() as d1:
+
+            self.register(d1)
+
+            facility_id = d1.addmodel(FACILITY_MODEL, name='fac-%d')
+
+            student_id = d1.addmodel(FACILITY_USER_MODEL,
+                                         username='student-%d',
+                                         first_name='first-name-%d',
+                                         password=DUMMY_PASSWORD,
+                                         facility_id=facility_id)
+
+            log_id = d1.addmodel(ATTEMPT_LOG_MODEL,
+                                         user_id=student_id,
+                                         exercise_id="blah",
+                                         timestamp="2015-08-04")
+
+            sync_results = d1.sync()
+
+            log = get_object_or_None(AttemptLog, id=log_id)
+            self.assertNotEqual(log, None, "AttemptLog did not get synced to the central server")
+            log.exercise_id = "foo"
+            log.zone_fallback = self.zone
+            log.save()
+
+            sync_results = d1.sync()
+
+            self.assertEqual(d1.readmodel(ATTEMPT_LOG_MODEL, id=log_id)["exercise_id"], "foo",
+                "AttemptLog did not sync back to the distributed server")
 
 
     def test_central_server_setting_zone_fallback(self):
