@@ -115,14 +115,28 @@
           {% block analytics %}{% include 'central/web_analytics.html' %}{% endblock analytics %}
       </head>
 
-      <body>
-        <div class="row-fluid" id="navbar-container">
-            <div class="max-width-container">
-                <div class="row-fluid">
-                    <div class="span12">
-                        <ul class="header__horizontal-menu">
-                            <li class="header__logo"><a href="{% if not user.is_authenticated %}{% url 'homepage' %}{% else %}{% url 'org_management' %}{% endif %}"><img src="{% static 'images/horizontal-logo-small.png' %}" alt="{% trans 'Home' %}"></a></li>
-                            <ul class="header__horizontal-menu__right">
+      <body class="{% block bodyclass %}{% endblock %}">
+        <div id="wrapper">
+            {# Header / Navbar #}
+            <div class="navbar kalite-navbar header-footer-bg" role="banner">
+              <div class="container">
+                  <div class="row">
+                      <div class="navbar-header">
+                          {# collapse entire menu #}
+                          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse" aria-hidden="true" id="navbar_toggle">
+                            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+                          </button>
+                          <div class="navbar-brand">
+                          <a href="{% if not user.is_authenticated %}{% url 'homepage' %}{% else %}{% url 'org_management' %}{% endif %}">
+                            <img src="{% static 'images/horizontal-logo-small.png' %}" alt="{% trans 'Home' %}">
+                          </a>
+                              <div class="pull-right visible-xs sitepoint" id="points-xs"></div>
+                          </div>
+
+                      </div>
+
+                      <div class="collapse navbar-collapse top-nav" role="navigation" aria-label="Main menu">
+                            <ul class="nav navbar-nav navbar-right nav-tabs header__horizontal-menu" id="topnav" role="tablist">
                                 <li>
                                   <a href="https://learningequality.org/ka-lite/" target="_blank">
                                     {% trans "About" %}
@@ -159,52 +173,48 @@
                                   </li>
                                 {% endif %}
                             </ul>
-                        </ul>
+                      </div>
+
                     </div>
                 </div>
             </div>
-        </div>
+          {# End Header / Navbar #}
+          <div class="row-fluid" id="navbar-container">
+              <div class="max-width-container">
+                  <div class="row-fluid">
+                      <div class="span12">
 
-
-        {% block super-content %}
-        <div class="container-fluid">
-
-            <div class="row-fluid content">
-                <div class="span12 content-padding">
-                  {% block precontent %}
-                  <div id="message_container">
-                        <!--Ajax messages get inserted here-->
-                        {% if messages %}{# static messages #}
-                        <div id="messages">
-
-                          {% for message in messages %}
-                            <div class="alert alert-{{message.tags}}">
-                              <a class="close" data-dismiss="alert" href="#">&times;</a>
-                              {{message}}
-                            </div>
-                          {% endfor %}
-                        </div>
-                        {% endif %}
+                      </div>
                   </div>
-                  {% endblock precontent %}
-                  {% block content %}{% endblock content %}
-                </div>
-            </div>
-            <div class="row-fluid"> <!-- copyright footer -->
-                <div class="span12 float-right">
-                {% block attribution %}
-                    <p></p>
-                    <p>
-                        &copy; 2015 <a href="//learningequality.org/about/">Foundation for Learning Equality, Inc</a>
-                    </p>
-                    <p>
-                        Except where otherwise noted, content on this site is licensed under a<br/>
-                        <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International license.</a>
-                    </p>
-                {% endblock attribution %}
-                </div>
-            </div>
-        </div> <!-- .container -->
-        {% endblock super-content %}
+              </div>
+          </div>
+
+
+          {% block super-content %}
+          <div id="content-container" class="container content content-padding" role="main">
+
+
+                    {% block precontent %}
+                        {% include "distributed/partials/_messages.html" %}
+                    {% endblock precontent %}
+                    {% block content %}{% endblock content %}
+
+              <div class="row-fluid"> <!-- copyright footer -->
+                  <div class="span12 float-right">
+                  {% block attribution %}
+                      <p></p>
+                      <p>
+                          &copy; 2015 <a href="//learningequality.org/about/">Foundation for Learning Equality, Inc</a>
+                      </p>
+                      <p>
+                          Except where otherwise noted, content on this site is licensed under a<br/>
+                          <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International license.</a>
+                      </p>
+                  {% endblock attribution %}
+                  </div>
+              </div>
+          </div> <!-- .container -->
+          {% endblock super-content %}
+        </div>
     </body>
 </html>
