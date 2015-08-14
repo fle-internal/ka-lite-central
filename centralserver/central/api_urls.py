@@ -7,6 +7,8 @@ import kalite.control_panel.api_urls
 
 from .api_resources import ZoneResource
 
+from kalite.main.api_resources import VideoLogResource, ExerciseLogResource, AttemptLogResource, ContentLogResource
+
 urlpatterns = patterns(__package__ + '.api_views',
     url(r'^organization/(?P<org_id>\w+)/delete$', 'delete_organization', {}, 'delete_organization'),
     url(r'zone/(?P<zone_id>\w+)/delete$', 'delete_zone', {}, 'delete_zone'),
@@ -16,6 +18,10 @@ urlpatterns = patterns(__package__ + '.api_views',
 
     # Zone TastyPie endpoint
     url(r'^export/', include(ZoneResource().urls)),
+    url(r'^', include(VideoLogResource().urls)),
+    url(r'^', include(ExerciseLogResource().urls)),
+    url(r'^', include(AttemptLogResource().urls)),
+    url(r'^', include(ContentLogResource().urls)),
 )
 urlpatterns += patterns('kalite.coachreports.api_views',
     url(r'^coachreports/', include(kalite.coachreports.api_urls)),
