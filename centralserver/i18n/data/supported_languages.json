@@ -22,6 +22,12 @@
     "xh": {
         "beta": true
     },
+    "kn": {
+        "beta": true
+    },
+    "ta": {
+        "beta": true
+    },
     "zul": {
         "beta": true,
         "crowdin": "zu"
