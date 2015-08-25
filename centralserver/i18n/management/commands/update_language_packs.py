@@ -519,7 +519,9 @@ def build_new_po(lang_code, src_path, dest_path=None, combine_with_po_file=None,
             build_po = polib.POFile(fpath=build_file)
 
         for src_file in src_po_files:
-            if os.path.basename(src_file).startswith('kalitejs'):
+            # only include JS po files if it's for the version we're compiling for.
+            if ((os.path.basename(src_file).startswith('kalitejs') and "0.12" in version) or  # pre 0.12 js po files have kalitejs.
+                ("djangojs" in src_file and version in src_file)):  # if it's a JS po file for the version we're compiling for
                 logging.debug('Compiling %s on its own...' % src_file)
                 js_po_file = polib.pofile(src_file)
                 js_mo_file = os.path.join(dest_path, 'djangojs.mo')
