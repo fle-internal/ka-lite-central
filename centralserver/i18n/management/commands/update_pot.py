@@ -100,11 +100,6 @@ def run_makemessages(verbosity=0):
         os.chdir(os.path.join("ka-lite-submodule", "sphinx-docs"))
         subprocess.call(["make", "gettext"])
         subprocess.call(["sphinx-intl", "update", "-p", "_build/locale", "-l", "en"])
-        docs_pofiles = set()
-        for root, _, _ in os.walk(os.getcwd()):
-            os.chdir(root)
-            docs_pofiles.update(glob.glob(os.path.join(os.getcwd(), "*.po")))
-        pofiles += list(docs_pofiles)
         return pofiles
 
 
