@@ -96,10 +96,6 @@ def run_makemessages(verbosity=0):
         call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="django")
         call_command("makemessages", locale="en", ignore_patterns=ignore_patterns, no_obsolete=True, domain="djangojs")
         pofiles = glob.glob(os.path.join(''.join(settings.LOCALE_PATHS), "en", "LC_MESSAGES", "*.po"))
-        # Then for the docs
-        os.chdir(os.path.join("ka-lite-submodule", "sphinx-docs"))
-        subprocess.call(["make", "gettext"])
-        subprocess.call(["sphinx-intl", "update", "-p", "_build/locale", "-l", "en"])
         return pofiles
 
 
