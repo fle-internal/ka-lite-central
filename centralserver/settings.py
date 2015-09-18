@@ -186,7 +186,6 @@ INSTALLED_APPS = (
     'centralserver.i18n',
     'tastypie',
     'announcements',
-    'fle_utils.backbone',
     'kalite.playlist',
     'kalite.student_testing',
     'kalite.store',
@@ -199,7 +198,6 @@ INSTALLED_APPS = (
     'django_snippets',
     'django.contrib.contenttypes',
     'securesync.devices',
-    'fle_utils.handlebars',
     'kalite.dynamic_assets',
     'centralserver.ab_testing'
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())

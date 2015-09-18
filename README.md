@@ -2,20 +2,30 @@
 
 This is the code for the KA Lite Central Server: [https://kalite.learningequality.org](https://kalite.learningequality.org)
 
+## What this is
+
+A django app which is "It's Complicated" with [ka-lite](https://github.com/learningequality/ka-lite.git).
+Distributed servers are configured to point to an instance of the central server, which manages their syncing.
+Could be managing many different versions of KA Lite at once.
+
 ## Environment Setup
 
-1. Install requirements:
+#. Install requirements:
     - [install node](http://nodejs.org/download/) if you don't have it already.
-2. Get the codebase: `git clone --recursive https://github.com/fle-internal/ka-lite-central.git` (if you're planning to make changes, you should fork the repo and clone your fork instead)
-3. Install the dependencies listed in packages.json: `sudo npm install`
-4. Install grunt: `sudo npm install -g grunt-cli`
-5. Go into the centralserver directory: `cd centralserver`
-6. Set up the server: `python manage.py setup`
-7. Return to the root directory: 'cd ..'
-8. Run grunt in the root directory: `grunt`
-9. Return to the code directory: `cd centralserver`
-10. Set up a custom `centralserver/local_settings.py` file (see below)
-11. Run the server: `python manage.py runserver 0.0.0.0:8000`
+    - install the requirements from ka-lite-submodule's requirements.txt.
+    - install requirements from requirements.txt here
+#. Get the codebase: `git clone --recursive https://github.com/fle-internal/ka-lite-central.git` (if you're planning to make changes, you should fork the repo and clone your fork instead)
+#. Install the dependencies listed in packages.json: `sudo npm install`
+    - Also install them in the ka-lite-submodule: `cd ka-lite-submodule` and `npm install`
+#. Install grunt: `sudo npm install -g grunt-cli`
+#. Go into the centralserver directory: `cd centralserver`
+#. Set up the server: `python manage.py setup --no-assessment-items`
+#. Return to the root directory: 'cd ..'
+#. Run grunt in the root directory: `grunt`
+#. Run `node build.js` in the ka-lite-submodule to build js assets.
+#. Return to the code directory: `cd centralserver`
+#. Set up a custom `centralserver/local_settings.py` file (see below)
+#. Run the server: `python manage.py runserver 0.0.0.0:8000`
 
 ### Environment set up with vagrant
 
