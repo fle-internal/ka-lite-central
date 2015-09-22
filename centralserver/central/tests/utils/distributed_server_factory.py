@@ -72,7 +72,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
         other_settings = ['%s = %r' % (k, v) for k, v in kwargs.iteritems()]
         new_settings = '\n'.join([new_settings] + other_settings)
         old_settings_path = self.distributed_dir / 'project/settings/base.py'
-        with open(old_settings_path.as_posix()) as f:
+        with old_settings_path.open() as f:
             old_settings = f.read()
 
         return old_settings + new_settings
@@ -106,7 +106,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             output_to_stdout=output_to_stdout,
             output_to_stderr=output_to_stderr,
             settings=self.settings_name,
-            kalite_dir=self.kalite_submodule_dir.as_posix(),
+            kalite_dir=str(self.kalite_submodule_dir),
             wait=False,
             *args,
             **kwargs
@@ -273,7 +273,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
     def __enter__(self):
         # write our settings file
-        with open(self.settings_path.as_posix(), 'w') as f:
+        with self.settings_path.open('w') as f:
             f.write(self.settings_contents)
 
         # prepare the DB
