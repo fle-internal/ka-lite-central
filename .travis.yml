@@ -15,7 +15,6 @@ install:
 - pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_test.txt; popd
 - pushd ka-lite-submodule; npm install && node build.js --debug; popd
 script:
-- grunt jshint
 - python centralserver/manage.py test ab_testing -v 2 --traceback
 - python centralserver/manage.py test central -v 2 --traceback
 - python centralserver/manage.py test contact -v 2 --traceback
