@@ -318,6 +318,7 @@ def update_translations(lang_codes=None,
                     project_id=settings.CROWDIN_PROJECT_ID,
                     project_key=settings.CROWDIN_PROJECT_KEY,
                     zip_file=zip_file or (os.path.join(CROWDIN_CACHE_DIR, "kalite-%s.zip" % lang_code_crowdin) if settings.DEBUG else None),
+                    version=version,
                 )
 
             # We have the po file, now get metadata.
@@ -343,6 +344,7 @@ def update_translations(lang_codes=None,
                     combine_with_po_file=kalite_po_file,
                     rebuild=False,  # just to be friendly to KA--we shouldn't force a rebuild
                     download_type="ka",
+                    version=version,
                 )
 
             # we have the po file; now
@@ -379,6 +381,7 @@ def download_latest_translations(project_id=None,
                                  zip_file=None,
                                  combine_with_po_file=None,
                                  rebuild=True,
+                                 version=SHORTVERSION,
                                  download_type=None):
     """
     Download latest translations from CrowdIn to corresponding locale
@@ -453,9 +456,10 @@ def download_latest_translations(project_id=None,
     po_file = build_new_po(
         lang_code=lang_code,
         src_path=tmp_dir_path,
-        dest_path=get_lp_build_dir(lang_code, version=SHORTVERSION),  # put latest translations into newest version.
+        dest_path=get_lp_build_dir(lang_code, version=version),  # put latest translations into newest version.
         combine_with_po_file=combine_with_po_file,
         filter_type=download_type,
+        version=version,
     )
 
     # Clean up tracks
