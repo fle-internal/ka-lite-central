@@ -10,7 +10,7 @@ class DummySessionForAPIUrls:
         the session object and create useless sessions -- to make this silly middleware obsolete.
         """
         do_not_create_session = False
-        for prefix in ["/download/", "/securesync/api/"]:
+        for prefix in ["/download/", "/securesync/api/", "/media/", "/static/", "/api/"]:
             if request.path.startswith(prefix):
                 do_not_create_session = True
                 break

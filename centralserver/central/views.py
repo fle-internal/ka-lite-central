@@ -34,7 +34,7 @@ from securesync.models import Zone
 
 @render_to("central/homepage.html")
 def homepage(request):
-    if request.is_logged_in:
+    if getattr(request, "is_logged_in", False):
         return HttpResponseRedirect(reverse("org_management"))
     feed = FeedListing.objects.order_by('-posted_date')[:5]
     return {
