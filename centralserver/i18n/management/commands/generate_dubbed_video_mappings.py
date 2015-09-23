@@ -15,7 +15,7 @@ from optparse import make_option
 from django.conf import settings; logging = settings.LOG
 from django.core.management.base import BaseCommand, CommandError
 
-from ... import DUBBED_VIDEOS_MAPPING_FILEPATH, get_dubbed_video_map
+from ... import DUBBED_VIDEOS_MAPPING_FILEPATH, DUBBED_LANGUAGES_FETCHED_IN_API, get_dubbed_video_map
 from fle_utils.general import ensure_dir, datediff
 from kalite.i18n import get_code2lang_map
 from kalite.topic_tools import get_node_cache
@@ -183,7 +183,7 @@ class Command(BaseCommand):
         if "" in raw_map:
             del raw_map[""]
 
-        for lang_code in settings.DUBBED_LANGUAGES_FETCHED_IN_API:
+        for lang_code in DUBBED_LANGUAGES_FETCHED_IN_API:
             logging.info("Updating {} from the API".format(lang_code))
             map_from_api = dubbed_video_data_from_api(lang_code)
             lang_metadata = get_code2lang_map(lang_code)
