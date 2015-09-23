@@ -13,6 +13,10 @@
           <title>{% block title %}{{ title }} |{% endblock title %} {% block title_tagline %}KA Lite: An Offline, Installable Version of Khan Academy{% endblock title_tagline %}</title>
           {% endblock %}
 
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap/bootstrap.css' %}" />
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap/responsive.css' %}" />
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-datepicker3.min.css' %}" />
+
           {% if debug  %}
 
           <link rel="stylesheet/less" type="text/css" href="{% static 'less/style.less' %}"></link>
@@ -26,7 +30,7 @@
 
           {% else %}
 
-          <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"></link>
+          <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
 
           {% endif %}
 
