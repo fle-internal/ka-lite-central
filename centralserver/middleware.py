@@ -6,11 +6,10 @@ class DummySessionForAPIUrls:
     def process_response(self, request, response):
         """
         If this is an API URL, don't create a session for it.
-        TODO(jamalex): avoid importing unnecessary middleware from facility, i18n, etc, which touch
-        the session object and create useless sessions -- to make this silly middleware obsolete.
+        TODO(jamalex): determine which middleware is creating sessions in the first place, and fix that.
         """
         do_not_create_session = False
-        for prefix in ["/download/", "/securesync/api/"]:
+        for prefix in ["/download/", "/securesync/api/", "/media/", "/static/", "/api/"]:
             if request.path.startswith(prefix):
                 do_not_create_session = True
                 break
