@@ -4,6 +4,12 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'), //To read the values of the package.json file
 
+		concat: {
+			sprintf: {
+				files: {"./static-libraries/js/sprintf.min.js" : "./node_modules/sprintf-js/dist/sprintf.min.js"}
+			}
+		},
+
 		less: {
 			compile: {
 				options: {
@@ -92,7 +98,9 @@ module.exports = function(grunt) {
 	// Load the plugin that provides the "jshint" task.
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 
+	grunt.loadNpmTasks('grunt-contrib-concat');
+
 	// Default task(s).
-	grunt.registerTask('default', ['less']);
+	grunt.registerTask('default', ['less', 'concat']);
 
 };

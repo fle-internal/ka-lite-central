@@ -23,6 +23,10 @@
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-less": "~0.6.4",
-    "grunt-contrib-jshint": "^0.10.0"
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-concat": ""
+  },
+  "dependencies": {
+    "sprintf-js": "^1.0.3"
   }
 }
