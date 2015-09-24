@@ -7,6 +7,10 @@ module.exports = function(grunt) {
 		concat: {
 			sprintf: {
 				files: {"./static-libraries/js/sprintf.min.js" : "./node_modules/sprintf-js/dist/sprintf.min.js"}
+			},
+			organization_js: {
+				src: ["./centralserver/central/static/js/central/api.js", "./centralserver/central/static/js/central/org_management.js"],
+				dest: "./centralserver/central/static/js/central/org_management.concat.js"
 			}
 		},
 
