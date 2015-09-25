@@ -33,10 +33,7 @@ module.exports = function(grunt) {
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
-				files: {
-					"./static-libraries/css/bootstrap/bootstrap.css": "./static-libraries/less/bootstrap/bootstrap.less",
-					"./static-libraries/css/bootstrap/responsive.css": "./static-libraries/less/bootstrap/responsive.less"
-				},
+				files: {},
 			}
 		},
 		jshint: {
