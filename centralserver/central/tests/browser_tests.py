@@ -8,10 +8,10 @@ These require a test server to be running, and multiple ports
 import time
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
 from ..models import Organization
@@ -20,7 +20,7 @@ from kalite.facility.models import Facility
 from kalite.testing.base import KALiteBrowserTestCase
 from kalite.testing.mixins.browser_mixins import BrowserActionMixins
 from securesync.models import Zone, Device, DeviceZone
-from .utils.mixins import CreateAdminMixin, CentralServerMixins
+from .utils.mixins import CreateAdminMixin
 
 class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
     """
@@ -278,13 +278,18 @@ class OrganizationManagementTestCase(KALiteCentralBrowserTestCase):
 
 class OrganizationDeletionTestCase(OrganizationManagementTestCase):
 
+    def setUp(self):
+        super(OrganizationDeletionTestCase, self).setUp()
+        self.WAIT = 10
+
     def test_delete_org(self):
         """Delete an empty org"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.assertNotEqual(self.browser.find_element_by_css_selector(".glyphicon-pencil"), None, "Make sure 'edit' icon appears.")
         self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
         self.browser.find_element_by_css_selector(".org-delete-link").click()
-        self.browser.switch_to_alert().accept()
+        WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
+        self.browser.switch_to.alert.accept()
         self.browser_wait_for_no_element(".org-delete-link")
         self.browser_check_django_message(message_type="success", contains="successfully deleted")
         with self.assertRaises(NoSuchElementException):
@@ -296,7 +301,8 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
         self.assertNotEqual(self.browser.find_element_by_css_selector(".glyphicon-pencil"), None, "Make sure 'edit' icon appears.")
         self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
         self.browser.find_element_by_css_selector(".org-delete-link").click()
-        self.browser.switch_to_alert().dismiss()
+        WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
+        self.browser.switch_to.alert.dismiss()
         self.assertNotEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon appears.")
 
     def test_can_delete_full_org(self):
@@ -312,8 +318,6 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
         with self.assertRaises(NoSuchElementException):
             self.assertEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon does not appear.")
 
-
-
     def test_issue_697_part2(self):
         self.facility = Facility(name=self.FACILITY_NAME)
         self.facility.save()
@@ -328,12 +332,14 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         self.zone.save()
         self.org.add_zone(self.zone)
         self.org.save()
+        self.WAIT = 10
 
     def test_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
-        self.browser.switch_to_alert().accept()
+        WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
+        self.browser.switch_to.alert.accept()
         self.browser_wait_for_no_element(".zone-delete-link")
         time.sleep(1)
         self.browser_check_django_message(message_type="success", contains="successfully deleted")
@@ -344,7 +350,8 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
-        self.browser.switch_to_alert().dismiss()
+        WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
+        self.browser.switch_to.alert.dismiss()
         self.assertNotEqual(self.browser.find_element_by_css_selector(".zone-delete-link"), None, "Make sure 'delete' link still exists.")
         self.browser_check_django_message(num_messages=0)
 

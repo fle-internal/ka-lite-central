@@ -13,9 +13,8 @@
           <title>{% block title %}{{ title }} |{% endblock title %} {% block title_tagline %}KA Lite: An Offline, Installable Version of Khan Academy{% endblock title_tagline %}</title>
           {% endblock %}
 
-          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}"></link>
-          <link rel="stylesheet" type="text/css" href='{% static "css/bootstrap-timepicker.min.css" %}' />
-          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-alerts.css' %}"></link>
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
+          <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-datepicker3.min.css' %}" />
 
           {% if debug  %}
 
@@ -30,7 +29,7 @@
 
           {% else %}
 
-          <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"></link>
+          <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
 
           {% endif %}
 
@@ -50,66 +49,22 @@
 
           <script type="text/javascript" src="{% static 'js/jquery-1.9.1.min.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/jquery-ui/jquery-ui.min.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/purl.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/backbone-min.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/backbone/backbone-tastypie.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/backbone/backbone-helpers.js' %}"></script>
+          <script type="text/javascript" src="{% static 'js/purl.js' %}"></script>
           <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
           <script type="text/javascript" src='{% static "js/bootstrap-timepicker.min.js" %}'></script>
-          <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
 
           <script type="text/javascript" src="{% static 'js/i18n/en.js' %}"></script>
-          <script type="text/javascript" src="{% static 'js/khan-lite.js' %}"></script>
 
-          <script type="text/javascript" src="{% static 'js/distributed/distributed-server.js' %}"></script>
-
-          <script type="text/javascript" src="{% static 'js/distributed/session/models.js' %}"></script>
-
-          <script>
-            var USER_LOGIN_URL              = "{% url 'auth_login' %}";
-            var CURRENT_LANGUAGE            = "{{ current_language }}";
-
-            var DELETE_USERS_URL            = "{% url 'delete_users' %}";
-            var DELETE_GROUPS_URL           = "{% url 'group_delete' %}";
-            var MOVE_TO_GROUP_URL           = "{% url 'move_to_group' %}";
-            var SERVER_INFO_PATH            = "{% url 'get_server_info' %}";
-
-            $(function() {
-                $(".header__horizontal-menu__right").addClass("js").before('<div id="menu">&#9776;</div>');
-                $("#menu").click(function(){
-                  $(".header__horizontal-menu__right").toggle();
-                });
-                $(window).resize(function(){
-                  if(window.innerWidth > 768) {
-                    $(".header__horizontal-menu__right").removeAttr("style");
-                  }
-                });
-
-                // Code below overwrites khan-lite.js setup to ensure that the correct csrftoken is passed for the central server.
-
-                var csrftoken = getCookie("csrftoken_central") || "";
-
-                $.ajaxSetup({
-                    cache: false,
-                    crossDomain: false,
-                    beforeSend: function(xhr, settings) {
-                        if (!csrfSafeMethod(settings.type)) {
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        }
-                    }
-                });
-
-                $(".help-tooltip").tooltip({
-                    placement : 'right'
-                });
-            });
+          <script type="text/javascript">
+                var USER_LOGIN_URL              = "{% url 'auth_login' %}";
+                var CURRENT_LANGUAGE            = "{{ current_language }}";
+                var DELETE_USERS_URL            = "{% url 'delete_users' %}";
+                var DELETE_GROUPS_URL           = "{% url 'group_delete' %}";
+                var MOVE_TO_GROUP_URL           = "{% url 'move_to_group' %}";
+                var SERVER_INFO_PATH            = "{% url 'get_server_info' %}";
           </script>
-
-          <!-- Imports for handlebars, our JS templating engine -->
-          <script src="{% static "js/handlebars/handlebars-v1.3.0.js" %}"></script>
-          <script src="{% static "js/handlebars/handlebars-helpers.js" %}"></script>
-          <script src="{% static "js/handlebars/handlebars-wrapper.js" %}"></script>
+          <script type="text/javascript" src="{% static 'js/central/base.js' %}"></script>
 
           {% block headjs %}{% endblock headjs %}
           {% block analytics %}{% include 'central/web_analytics.html' %}{% endblock analytics %}

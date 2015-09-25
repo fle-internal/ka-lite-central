@@ -4,6 +4,16 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'), //To read the values of the package.json file
 
+		concat: {
+			sprintf: {
+				files: {"./static-libraries/js/sprintf.min.js" : "./node_modules/sprintf-js/dist/sprintf.min.js"}
+			},
+			organization_js: {
+				src: ["./centralserver/central/static/js/central/api.js", "./centralserver/central/static/js/central/org_management.js"],
+				dest: "./centralserver/central/static/js/central/org_management.concat.js"
+			}
+		},
+
 		less: {
 			compile: {
 				options: {
@@ -23,10 +33,7 @@ module.exports = function(grunt) {
 					yuicompress: true,
 					strictImports: true //Force evaluation of imports.
 				},
-				files: {
-					"./static-libraries/css/bootstrap/bootstrap.css": "./static-libraries/less/bootstrap/bootstrap.less",
-					"./static-libraries/css/bootstrap/responsive.css": "./static-libraries/less/bootstrap/responsive.less"
-				},
+				files: {},
 			}
 		},
 		jshint: {
@@ -92,7 +99,9 @@ module.exports = function(grunt) {
 	// Load the plugin that provides the "jshint" task.
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 
+	grunt.loadNpmTasks('grunt-contrib-concat');
+
 	// Default task(s).
-	grunt.registerTask('default', ['less']);
+	grunt.registerTask('default', ['less', 'concat']);
 
 };

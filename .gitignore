@@ -38,3 +38,6 @@ writeup/
 /data/logs
 /data/subtitles
 .vagrant/
+
+# PyCharm
+.idea

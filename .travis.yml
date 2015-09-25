@@ -1,4 +1,5 @@
 language: python
+sudo: false
 python:
 - '2.7'
 before_install:
@@ -13,9 +14,15 @@ install:
 - pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements.txt; popd
 - pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_dev.txt; popd
 - pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_test.txt; popd
+- pushd ka-lite-submodule; npm install && node build.js --debug; popd
+- grunt
 script:
-- grunt jshint
-- python centralserver/manage.py test -v 2 --traceback
+- python centralserver/manage.py test ab_testing -v 2 --traceback
+- python centralserver/manage.py test central -v 2 --traceback
+- python centralserver/manage.py test contact -v 2 --traceback
+- python centralserver/manage.py test faq -v 2 --traceback
+- python centralserver/manage.py test i18n -v 2 --traceback
+- python centralserver/manage.py test registration -v 2 --traceback
 notifications:
   hipchat:
     rooms:

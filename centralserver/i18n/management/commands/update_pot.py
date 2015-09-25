@@ -89,7 +89,8 @@ def run_makemessages(verbosity=0):
         os.chdir(olddir)
 
     ignore_patterns = ["*/python-packages/*", "*/kalite/static/*", "*/js/i18n/*.js",
-                       "*/i18n/build/*", "*/media/language_packs/*", "*/node_modules/*", "*/centralserver/*"]
+                       "*/i18n/build/*", "*/media/language_packs/*", "*/node_modules/*", "*/centralserver/*",
+                       "Gruntfile.js", ]
     with inside_kalite():
         # First make messages for the application
         ensure_dir("locale")
