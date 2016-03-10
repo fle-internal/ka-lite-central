@@ -226,18 +226,3 @@ def get_langs_with_subtitles():
         return os.listdir(subtitles_path)
     else:
         return []
-
-
-def scrub_locale_paths():
-    # Used in update_language_packs
-    for locale_root in settings.LOCALE_PATHS:
-        if not os.path.exists(locale_root):
-            continue
-        for lang in os.listdir(locale_root):
-            # Skips if not a directory
-            if not os.path.isdir(os.path.join(locale_root, lang)):
-                continue
-            # If it isn't crowdin/django format, keeeeeeellllllll
-            if lang != lcode_to_django_dir(lang):
-                logging.info("Deleting %s directory because it does not fit our language code format standards" % lang)
-                shutil.rmtree(os.path.join(locale_root, lang))

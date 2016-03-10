@@ -165,9 +165,6 @@ class Command(BaseCommand):
             logging.info('Making the GC more aggressive...')
             gc.set_threshold(36, 2, 2)
 
-        # For dealing with central server changes across versions
-        upgrade_old_schema()
-
         # Now, we're going to build the language packs, collecting metadata long the way.
         package_metadata = update_language_packs(lang_codes, options)
 
@@ -365,14 +362,6 @@ def update_translations(lang_codes=None,
 
 
     return package_metadata
-
-
-def upgrade_old_schema():
-    """Move srt files from static/srt to locale directory and file them by language code, delete any old locale directories"""
-
-    scrub_locale_paths()
-
-    #refactor_central_locale_folders(src_dir=LOCALE_ROOT, dest_dir=LANGUAGE_PACK_BUILD_DIR)
 
 
 def download_latest_translations(project_id=None,
