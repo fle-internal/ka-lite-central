@@ -189,7 +189,6 @@ INSTALLED_APPS = (
     'kalite.store',
     'centralserver.deployment',
     'centralserver.faq',
-    'centralserver.khanload',
     'centralserver.registration',
     'centralserver.stats',
     # 'centralserver.testing',
