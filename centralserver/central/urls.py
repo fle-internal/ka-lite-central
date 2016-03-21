@@ -11,7 +11,6 @@ import centralserver.faq.urls
 import centralserver.i18n.urls
 import centralserver.registration.urls
 import centralserver.stats.api_urls
-import centralserver.stats.urls
 import fle_utils.feeds.urls
 import kalite.coachreports.urls
 import kalite.control_panel.urls
@@ -122,7 +121,6 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
-    url(r'^stats/', include(centralserver.stats.urls)),
     url(r'^deployments/', include(centralserver.deployment.urls)),
     url(r'^languages/', include(centralserver.i18n.urls)),
 )

@@ -24,8 +24,8 @@ from django.views.i18n import javascript_catalog
 ###                                          ###
 ################################################
 from kalite.version import SHORTVERSION
-from fle_utils.general import ensure_dir, softload_json
-from kalite.i18n import lcode_to_django_lang, lcode_to_django_dir, lcode_to_ietf, get_language_name, get_langcode_map, get_code2lang_map
+from fle_utils.general import softload_json
+from kalite.i18n.base import get_locale_path, get_langcode_map
 
 AMARA_HEADERS = {
     "X-api-username": getattr(settings, "AMARA_USERNAME", None),
@@ -206,7 +206,7 @@ def get_srt_path(lang_code=None, youtube_id=None):
     """
     srt_path = os.path.join(settings.STATIC_ROOT, "srt")
     if lang_code:
-        srt_path = os.path.join(srt_path, lcode_to_django_dir(lang_code), "subtitles")
+        srt_path = os.path.join(srt_path, get_locale_path(lang_code), "subtitles")
     if youtube_id:
         srt_path = os.path.join(srt_path, youtube_id + ".srt")
 
@@ -226,18 +226,3 @@ def get_langs_with_subtitles():
         return os.listdir(subtitles_path)
     else:
         return []
-
-
-def scrub_locale_paths():
-    # Used in update_language_packs
-    for locale_root in settings.LOCALE_PATHS:
-        if not os.path.exists(locale_root):
-            continue
-        for lang in os.listdir(locale_root):
-            # Skips if not a directory
-            if not os.path.isdir(os.path.join(locale_root, lang)):
-                continue
-            # If it isn't crowdin/django format, keeeeeeellllllll
-            if lang != lcode_to_django_dir(lang):
-                logging.info("Deleting %s directory because it does not fit our language code format standards" % lang)
-                shutil.rmtree(os.path.join(locale_root, lang))
