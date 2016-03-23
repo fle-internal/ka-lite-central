@@ -130,6 +130,14 @@ if settings.DEBUG:
         url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse'),
     )
 
+# Dummy URL patterns, to avoid Javascript errors for code coming from the distributed server
+urlpatterns += patterns('',
+    url(r'^dummy/search/$', lambda request: HttpResponseRedirect("/"), {}, 'search'),
+    url(r'^dummy/search_api/(?P<channel>\w+)/$', lambda request: HttpResponseRedirect("/"), {}, 'search_api'),
+    url(r'^dummy/learn/$', lambda request: HttpResponseRedirect("/"), {}, 'learn'),
+    url(r'^dummy/zone_redirect/$', lambda request: HttpResponseRedirect("/"), {}, 'zone_redirect'),
+)
+
 handler403 = __package__ + '.views.handler_403'
 handler404 = __package__ + '.views.handler_404'
 handler500 = __package__ + '.views.handler_500'

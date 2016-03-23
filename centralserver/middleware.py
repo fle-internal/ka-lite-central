@@ -18,3 +18,9 @@ class DummySessionForAPIUrls:
             request.session.accessed = False
         return response
 
+
+class SetRequestLanguage:
+
+    def process_request(self, request):
+
+        request.language = "en"

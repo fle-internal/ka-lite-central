@@ -56,13 +56,27 @@
 
           <script type="text/javascript" src="{% static 'js/i18n/en.js' %}"></script>
 
+          <script src="{% static 'js/distributed/bundles/bundle_common.js' %}"></script>
+          <script src="{% static 'js/distributed/bundles/bundle_base.js' %}"></script>
+
+          {% if settings.INCLUDE_QTIP %}
+              <script src="{% static 'js/distributed/bundles/bundle_qtip.js' %}"></script>
+          {% endif %}
+
           <script type="text/javascript">
-                var USER_LOGIN_URL              = "{% url 'auth_login' %}";
-                var CURRENT_LANGUAGE            = "{{ current_language }}";
-                var DELETE_USERS_URL            = "{% url 'delete_users' %}";
-                var DELETE_GROUPS_URL           = "{% url 'group_delete' %}";
-                var MOVE_TO_GROUP_URL           = "{% url 'move_to_group' %}";
-                var SERVER_INFO_PATH            = "{% url 'get_server_info' %}";
+            window.sessionModel.set({
+              USER_URL                    : "{% url 'api_dispatch_list' resource_name='user' %}",
+
+              STATIC_URL                  : "{% static "" %}",
+
+              GET_VIDEO_LOGS_URL          : "{% url 'api_dispatch_list' resource_name='videolog' %}",
+              GET_EXERCISE_LOGS_URL       : "{% url 'api_dispatch_list' resource_name='exerciselog' %}",
+              GET_CONTENT_LOGS_URL        : "{% url 'api_dispatch_list' resource_name='contentlog' %}",
+              GET_ATTEMPT_LOGS_URL        : "{% url 'api_dispatch_list' resource_name='attemptlog' %}",
+
+              CURRENT_LANGUAGE            : "en",
+              CHANNEL                     : "khan"
+            });
           </script>
           <script type="text/javascript" src="{% static 'js/central/base.js' %}"></script>
 
@@ -91,7 +105,7 @@
                       </div>
 
                       <div class="collapse navbar-collapse top-nav" role="navigation" aria-label="Main menu">
-                            <ul class="nav navbar-nav navbar-right nav-tabs header__horizontal-menu" id="topnav" role="tablist">
+                            <ul class="nav navbar-nav navbar-right nav-tabs header__horizontal-menu" role="tablist">
                                 <li>
                                   <a href="https://learningequality.org/ka-lite/" target="_blank">
                                     {% trans "About" %}
@@ -154,12 +168,12 @@
                     {% endblock precontent %}
                     {% block content %}{% endblock content %}
 
-              <div class="row-fluid"> <!-- copyright footer -->
+              <footer class="row-fluid"> <!-- copyright footer -->
                   <div class="span12 float-right">
                   {% block attribution %}
                       <p></p>
                       <p>
-                          &copy; 2015 <a href="//learningequality.org/about/">Foundation for Learning Equality, Inc</a>
+                          &copy; 2016 <a href="//learningequality.org/">Learning Equality</a>
                       </p>
                       <p>
                           Except where otherwise noted, content on this site is licensed under a<br/>
@@ -167,7 +181,7 @@
                       </p>
                   {% endblock attribution %}
                   </div>
-              </div>
+              </footer>
           </div> <!-- .container -->
           {% endblock super-content %}
         </div>
