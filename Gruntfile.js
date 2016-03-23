@@ -43,7 +43,6 @@ module.exports = function(grunt) {
 				'ka-lite-submodule/kalite/control_panel/static/js/control_panel/',
 				'ka-lite-submodule/kalite/distributed/static/js/distributed/',
 				'ka-lite-submodule/kalite/updates/static/js/updates/',
-				'ka-lite-submodule/python-packages/securesync/static/js/securesync/'
 			],
 			// http://www.jshint.com/docs/options/
 			options: {
