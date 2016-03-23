@@ -208,7 +208,8 @@ MIDDLEWARE_CLASSES = (
     'kalite.facility.middleware.AuthFlags',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'centralserver.middleware.DummySessionForAPIUrls'
+    'centralserver.middleware.DummySessionForAPIUrls',
+    'centralserver.middleware.SetRequestLanguage',
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
 
 STATICFILES_DIRS = (
