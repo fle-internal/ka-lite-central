@@ -25,7 +25,7 @@ from django.views.i18n import javascript_catalog
 ################################################
 from kalite.version import SHORTVERSION
 from fle_utils.general import softload_json
-from kalite.i18n.base import get_locale_path, get_langcode_map
+from kalite.i18n.base import get_locale_path, get_langcode_map, lcode_to_ietf
 
 AMARA_HEADERS = {
     "X-api-username": getattr(settings, "AMARA_USERNAME", None),
