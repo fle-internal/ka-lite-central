@@ -17,13 +17,15 @@ def download_video(request, video_path):
     """Dummy function for capturing a video download request and logging
     to output, so we can collect stats."""
 
-    # Log the info
     youtube_id, file_ext = os.path.splitext(os.path.basename(video_path))
     if file_ext.lower() in [".mp4"]:
+        # Log the info
         stats_logger("videos").info("vd;%s;%s" % (get_request_ip(request), youtube_id))
-
-    # Redirect to amazon
-    return HttpResponseRedirect(OUTSIDE_DOWNLOAD_BASE_URL + video_path)
+        # Redirect to amazon
+        return HttpResponseRedirect(OUTSIDE_DOWNLOAD_BASE_URL + video_path)
+    else:
+        # redirect to Youtube for thumbnails
+        return HttpResponseRedirect("https://img.youtube.com/vi/{youtube_id}/mqdefault.jpg".format(youtube_id=youtube_id))
 
 
 # central server
