@@ -20,7 +20,7 @@ resource "google_sql_database_instance" "master" {
   settings {
     # Second-generation instance tiers are based on the machine
     # type. See argument reference below.
-    tier = "db-n1-standard-4"
+    tier = "db-n1-standard-8"
 
     backup_configuration {
       binary_log_enabled = true
