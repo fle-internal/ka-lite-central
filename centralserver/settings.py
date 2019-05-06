@@ -59,7 +59,7 @@ except ImportError:
     local_settings = object()
 
 # Used everywhere, so ... set it up top.
-DEBUG          = getattr(local_settings, "DEBUG", False)
+DEBUG          = getattr(local_settings, "DEBUG", True)
 
 CENTRAL_SERVER = True  # Hopefully will be removed soon.
 
@@ -244,20 +244,6 @@ if USE_DEBUG_TOOLBAR:
         'HIDE_DJANGO_SQL': False,
         'ENABLE_STACKTRACES' : True,
     }
-
-if DEBUG:
-
-    INSTALLED_APPS += ('django_extensions',)
-
-    # add ?prof to URL, to see performance stats
-    MIDDLEWARE_CLASSES += (
-        'django_snippets.profiling_middleware.ProfileMiddleware',
-    )
-
-    # TEMPLATE_CONTEXT_PROCESSORS += (
-    #     "django.contrib.auth.context_processors.auth",
-    # )
-
 
 ########################
 # Storage and caching
