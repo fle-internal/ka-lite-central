@@ -10,14 +10,14 @@ Could be managing many different versions of KA Lite at once.
 
 ## Bootstrapping a dev env
 
-#. Install Docker
-#. Build assets:
+1. Install Docker
+1. Build assets:
 
    ```
    make assets
    ```
 
-#. Create a virtualenv and install dependencies
+1. Create a virtualenv and install dependencies
 
    ```
    mkvirtualenv centralserver
@@ -26,14 +26,14 @@ Could be managing many different versions of KA Lite at once.
    pip install -r ka-lite-submodule/requirements.txt
    ```
 
-#. Go into the centralserver directory and bootstrap it:
+1. Go into the centralserver directory and bootstrap it:
 
    ```
    cd centralserver
    python manage.py setup --no-assessment-items
    ```
 
-#. Run the server:
+1. Run the server:
 
    ```
    cd centralserver
