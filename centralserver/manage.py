@@ -6,7 +6,6 @@ import sys
 import warnings
 
 if __name__ == "__main__":
-    import warnings
 
     # We are overriding a few packages (like Django) from the system path.
     #   Suppress those warnings
@@ -26,20 +25,6 @@ if __name__ == "__main__":
         os.path.join(PROJECT_PATH, "..", "ka-lite-submodule", "python-packages"),  # libraries (python-packages)
     ]
     sys.path = [os.path.realpath(p) for p in PROJECT_PYTHON_PATHS] + sys.path
-
-
-    ########################
-    # manual clean_pyc
-    ########################
-
-    # Manually clean all pyc files before entering any real codepath
-    for root, dirs, files in os.walk(os.path.join(PROJECT_PATH, "..")):
-        for pyc_file in glob.glob(os.path.join(root, "*.pyc")):
-            try:
-                os.remove(pyc_file)
-            except:
-                pass
-
 
     ########################
     # Run it.
