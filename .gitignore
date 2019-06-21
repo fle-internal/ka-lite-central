@@ -8,6 +8,8 @@
 *.pid
 *.prof
 *.pyc
+# Exports from management scripts
+/centralserver/*.csv
 *~
 *.sublime-*
 *.zip
