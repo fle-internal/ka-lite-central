@@ -102,9 +102,9 @@ def top_sync_zones(csv_file, min_date=None, order_by="-sessions"):
                 zone["devices"],
                 zone["sessions"],
                 float(zone["sessions"]) / zone["devices"],
-                zone["first_session"].date() if "first_session" in zone.keys() else None,
-                zone["last_session"].date() if "last_session" in zone.keys() else None,
-                (zone["last_session"] - zone["first_session"]).days if "first_session" in zone.keys() else None,
+                zone["first_session"].date() if zone["first_session"] else None,
+                zone["last_session"].date() if zone["last_session"] else None,
+                (zone["last_session"] - zone["first_session"]).days if zone["last_session"] and zone["first_session"] else None,
             )
         )
     
@@ -142,9 +142,9 @@ def top_sync_organizations(csv_file, min_date=None, order_by="-sessions"):
                 org["devices"],
                 org["sessions"],
                 float(org["sessions"]) / org["devices"],
-                org["first_session"].date() if "first_session" in org.keys() else None,
-                org["last_session"].date() if "last_session" in org.keys() else None,
-                (org["last_session"] - org["first_session"]).days if "first_session" in org.keys() else None,
+                org["first_session"].date() if org["first_session"] else None,
+                org["last_session"].date() if org["last_session"] else None,
+                (org["last_session"] - org["first_session"]).days if org["first_session"] and org["last_session"] else None,
             )
         )
     
@@ -183,14 +183,15 @@ class Command(BaseCommand):
         # Print out some general statistics
         
         total_organizations = Organization.objects.all().count()
-        total_devices = Device.objects.all().count()
+        total_devices = Device.objects.exclude(devicezone__zone__organization=Organization.get_or_create_headless_organization()).values("id").distinct().count()
         total_zones = Zone.objects.all().count()
         unregistered_devices = UnregisteredDevice.objects.all().count()
+        unclaimed_devices = Device.objects.filter(devicezone__zone__organization=Organization.get_or_create_headless_organization()).values("id").distinct().count()
         
         print(
             "Total organizations: {}\n".format(total_organizations) +
             "Total devices registered: {}\n".format(total_devices) +
-            "Total devices one-click: TBD\n" +
+            "Total devices one-click: {}\n".format(unclaimed_devices) +
             "Total devices unregistered: {}\n".format(unregistered_devices) +
             "Total zones: {}\n".format(total_zones)
         )
