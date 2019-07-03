@@ -1,21 +1,23 @@
 language: python
+
 sudo: false
+
 python:
 - '2.7'
+
+services:
+  - docker
+
 before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile
   --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
+
 install:
-- pushd $TRAVIS_BUILD_DIR; npm install; popd
-- pushd $TRAVIS_BUILD_DIR; npm install -g grunt-cli; popd
-- pushd $TRAVIS_BUILD_DIR; pip install -r requirements.txt; popd
-- pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements.txt; popd
-- pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_dev.txt; popd
-- pushd $TRAVIS_BUILD_DIR; pip install -r ka-lite-submodule/requirements_test.txt; popd
-- pushd ka-lite-submodule; npm install && node build.js --debug; popd
-- grunt
+- make assets
+- pip install -r ka-lite-submodule/requirements_test.txt; popd
+
 script:
 - python centralserver/manage.py test ab_testing -v 2 --traceback
 - python centralserver/manage.py test central -v 2 --traceback
@@ -23,7 +25,3 @@ script:
 - python centralserver/manage.py test faq -v 2 --traceback
 - python centralserver/manage.py test i18n -v 2 --traceback
 - python centralserver/manage.py test registration -v 2 --traceback
-notifications:
-  hipchat:
-    rooms:
-      secure: AEhKZjmpdgyRBcdb+/XZ1UfuFLJixyG7LnX+cSE+WhRpj7McY0AvemyPmh9X4MwoFpYBOh1fdTTW9NiHPAMo/V7uLGgTXp2dsNUuya/uz7g25E1nkMf+WeK+kXIMgTQ+SWPgYdGWknVc7LHBNsGikndVPx8PlEEXfzGuw6Mlatk=
