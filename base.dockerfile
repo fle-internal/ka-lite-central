@@ -1,5 +1,11 @@
 FROM ubuntu:bionic
 
+ARG buildtime_uid
+ARG buildtime_gid
+
+ENV RUNTIME_UID=$buildtime_uid
+ENV RUNTIME_GID=$buildtime_gid
+
 # install latest python and nodejs
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -25,9 +31,16 @@ RUN apt-get update && \
       python-sphinx \
       python-virtualenv \
       libmysqlclient-dev \
-      make
+      make \
+      python-yaml \
+      wget
 
-RUN useradd -ms /bin/bash kalite
+RUN pip install protobuf
+
+RUN npm install -g "grunt-cli"
+
+RUN addgroup --gid $RUNTIME_GID kalite && \
+    adduser --uid $RUNTIME_UID --ingroup kalite --home /home/kalite --shell /bin/sh --disabled-password --gecos "" kalite
 WORKDIR /home/kalite
 USER kalite
 
@@ -43,11 +56,12 @@ CMD cd /docker/mnt \
     && npm install \
     && cd ka-lite-submodule \
     && npm install \
-    && make assets \
+    && ../make_assets_kalite.sh \
     && cd .. \
-    && npm install grunt-cli \
+#    && npm install grunt-cli \
     && cd centralserver \
     && python manage.py setup --no-assessment-items --noinput \
     && grunt \
+    && cd .. \
+    && cd ka-lite-submodule \
     && node build.js
-
