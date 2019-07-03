@@ -42,15 +42,16 @@ Could be managing many different versions of KA Lite at once.
 
 ### Docker workflow
 
-The docker container mounts your current dir in the container, builds assets and shuts down. All changes are stored directly in your git checkout.
+The docker container mounts your current working directory in the container, builds assets and shuts down. All changes are stored directly in your git checkout.
 
-There is no workflow for quickly building assets.
+There is no workflow for quickly building assets while editing source files and having a development web server automatically reload. None of that.
 
 If you are changing Docker stuff, remember to run `docker image prune` once in a while to delete garbage images.
 
 ### Pointing distributed ka-lite servers to local central server
 
-After cloning the distrbuted server codebase from https://github.com/learningequality/ka-lite, add the following to its `kalite/local_settings.py` prior to running `install.sh` or `install.bat`:
+After cloning the distributed server codebase from https://github.com/learningequality/ka-lite, add the following to its `~/.kalite/settings.py`:
+
 ```
 CENTRAL_SERVER_HOST   = "127.0.0.1:8000"
 SECURESYNC_PROTOCOL   = "http"
@@ -65,4 +66,3 @@ You may create a `centralserver/local_settings.py` file to customize your setup.
 You don't have to. The default is `DEBUG=True` and to use a local sqlite db.
 
 Use `USE_DEBUG_TOOLBAR = True` for the Django debug toolbar.
-
