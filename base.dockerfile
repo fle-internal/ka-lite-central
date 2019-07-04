@@ -39,10 +39,12 @@ RUN pip install protobuf
 
 RUN npm install -g "grunt-cli"
 
-RUN addgroup --gid $RUNTIME_GID kalite && \
-    adduser --uid $RUNTIME_UID --ingroup kalite --home /home/kalite --shell /bin/sh --disabled-password --gecos "" kalite
+RUN ( cat /etc/group | grep "^.*:.*:${RUNTIME_GID}:" ) || addgroup --gid $RUNTIME_GID kalite && \
+    adduser --uid $RUNTIME_UID --gid $RUNTIME_GID --home /home/kalite --shell /bin/sh --disabled-password --gecos "" kalite
+
 WORKDIR /home/kalite
-USER kalite
+
+USER $RUNTIME_UID:$RUNTIME_GID
 
 # A volume used to share `pex`/`whl` files and fixtures with docker host
 VOLUME /docker/mnt
