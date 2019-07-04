@@ -163,10 +163,11 @@
           <div id="content-container" class="container content content-padding" role="main">
 
 
-                    {% block precontent %}
-                        {% include "distributed/partials/_messages.html" %}
-                    {% endblock precontent %}
-                    {% block content %}{% endblock content %}
+            {% block precontent %}
+                {% include "distributed/partials/_messages.html" %}
+            {% endblock precontent %}
+
+            {% block content %}{% endblock content %}
 
               <footer class="row-fluid"> <!-- copyright footer -->
                   <div class="span12 float-right">
