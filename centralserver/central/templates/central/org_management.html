@@ -128,6 +128,15 @@
                         </tr>
                         {% endfor %}
                     </table>
+                    {% if zones_paginator.count > 1 %}
+                    <form method="GET">
+                        Page: <select name="zones_page" onchange="this.form.submit()">
+                            {% for page in zones_paginator.page_range %}
+                            <option value="{{ page }}"{% if zones_page == page %} selected{% endif %}>{{ page }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    {% endif %}
                     {% if org.name != HEADLESS_ORG_NAME %}
                     <form method="link" action="{% url 'zone_add_to_org' org_id=org.id zone_id='new' %}">
                         <input class="button--small" type="submit" value="Create a new sharing network">
