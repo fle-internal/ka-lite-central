@@ -16,7 +16,7 @@ before_install:
 
 install:
 - make assets
-- pip install -r ka-lite-submodule/requirements_test.txt; popd
+- pip install -r ka-lite-submodule/requirements_test.txt
 
 script:
 - python centralserver/manage.py test ab_testing -v 2 --traceback
