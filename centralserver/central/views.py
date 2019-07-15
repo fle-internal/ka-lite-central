@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, Http404, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
@@ -72,9 +73,23 @@ def org_management(request, org_id=None):
                     org.form = form
 
     zones = {}
+    
+    zones_qs = org.get_zones()
+    zones_paginator = Paginator(zones_qs, 20)
+    
+    page_query = request.GET.get("zones_page", "1")
+    
+    # Only numeric
+    if unicode(page_query).isnumeric():
+        page_no = int(page_query)
+    else:
+        page_no = 1
+    
+    zone_page = page_no
+    
     for org in organizations.values():
         zones[org.pk] = []
-        for zone in list(org.get_zones()):
+        for zone in list(zones_paginator.page(zone_page)):
             zones[org.pk].append({
                 "id": zone.id,
                 "name": zone.name,
@@ -83,6 +98,8 @@ def org_management(request, org_id=None):
         "title": _("Account administration"),
         "organizations": organizations,
         "zones": zones,
+        "zones_paginator": zones_paginator,
+        "zones_page": page_no,
         "HEADLESS_ORG_NAME": Organization.HEADLESS_ORG_NAME,
         "my_invitations": list(OrganizationInvitation.objects \
             .filter(email_to_invite=request.user.email)
