@@ -18,7 +18,7 @@ before_install:
 install:
   - make assets
   - pip install -r ka-lite-submodule/requirements_test.txt
-  - pip install --upgrade selenium\<3  # Upgrade Selenium because we don't want to change the 0.16.x sub module
+  - pip install --upgrade selenium  # Upgrade Selenium because we don't want to change the 0.16.x sub module
 
 # See: https://docs.travis-ci.com/user/gui-and-headless-browsers/#using-xvfb-to-run-tests-that-require-a-gui
 before_script:
