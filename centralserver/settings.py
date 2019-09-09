@@ -92,7 +92,9 @@ EMAIL_BACKEND = getattr(local_settings, "EMAIL_BACKEND", "django.core.mail.backe
 PROJECT_PATH = os.path.realpath(getattr(local_settings, "PROJECT_PATH", os.path.dirname(os.path.realpath(__file__)))) + "/"
 ROOT_DATA_PATH = os.path.realpath(getattr(local_settings, "ROOT_DATA_PATH", os.path.join(PROJECT_PATH, "..", "data"))) + "/"
 STATS_PATH = ROOT_DATA_PATH
-KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
+
+# Find out what this is used for
+# KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
 
 LOCALE_PATHS   = getattr(local_settings, "LOCALE_PATHS", (PROJECT_PATH + "/../locale",))
 LOCALE_PATHS   = tuple([os.path.realpath(lp) + "/" for lp in LOCALE_PATHS])
@@ -217,7 +219,8 @@ MIDDLEWARE_CLASSES = (
 
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, '..', 'static-libraries'),
-    os.path.join(PROJECT_PATH, '..', 'ka-lite-submodule', 'static-libraries'),
+    # Need this somehow
+    # os.path.join(PROJECT_PATH, '..', 'ka-lite-submodule', 'static-libraries'),
 )  # libraries common to all apps
 
 DEFAULT_ENCODING = 'utf-8'

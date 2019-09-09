@@ -23,7 +23,6 @@ Could be managing many different versions of KA Lite at once.
    mkvirtualenv centralserver
    workon centralserver
    pip install -r requirements.txt
-   pip install -r ka-lite-submodule/requirements.txt
    ```
 
 1. Go into the centralserver directory and bootstrap it:

@@ -21,8 +21,6 @@ if __name__ == "__main__":
     PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
     PROJECT_PYTHON_PATHS = [
         os.path.join(PROJECT_PATH, ".."),  # centralserver.settings
-        os.path.join(PROJECT_PATH, "..", 'ka-lite-submodule'),  # kalite.*
-        os.path.join(PROJECT_PATH, "..", "ka-lite-submodule", "python-packages"),  # libraries (python-packages)
     ]
     sys.path = [os.path.realpath(p) for p in PROJECT_PYTHON_PATHS] + sys.path
 

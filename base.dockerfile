@@ -54,12 +54,11 @@ CMD cd /docker/mnt \
     && virtualenv -p python2 --system-site-packages ~/venv \
     && . ~/venv/bin/activate \
     && pip install -r requirements.txt \
-    && pip install -r ka-lite-submodule/requirements.txt \
     && npm install \
-    && cd ka-lite-submodule \
-    && npm install \
-    && ../make_assets_kalite.sh \
-    && cd .. \
+#    && cd ka-lite-submodule \
+#    && npm install \
+#    && ../make_assets_kalite.sh \
+#    && cd .. \
 # Commented out and replaced with a system-wide install further up, since grunt command wasn't in the path with this method
 #    && npm install grunt-cli \
     && cd centralserver \
@@ -70,5 +69,5 @@ CMD cd /docker/mnt \
     && python manage.py setup --no-assessment-items --noinput --traceback \
     && grunt \
     && cd .. \
-    && cd ka-lite-submodule \
-    && node build.js
+#    && cd ka-lite-submodule \
+#    && node build.js

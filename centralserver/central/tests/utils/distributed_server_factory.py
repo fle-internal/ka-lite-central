@@ -20,8 +20,9 @@ def call_outside_command_with_output(command, *args, **kwargs):
     """
     
     if settings.IS_SOURCE:
-        assert "kalite_dir" in kwargs, "don't forget to specify the kalite_dir"
-        kalite_dir = kwargs.pop('kalite_dir')
+        #assert "kalite_dir" in kwargs, "don't forget to specify the kalite_dir"
+        #kalite_dir = kwargs.pop('kalite_dir')
+        pass
     else:
         kalite_dir = None
     
@@ -83,9 +84,9 @@ def call_outside_command_with_output(command, *args, **kwargs):
 class DistributedServer(object):
 
     def __init__(self, *args, **kwargs):
-        self.kalite_submodule_dir = pathlib.Path(settings.PROJECT_PATH).parent / 'ka-lite-submodule'
-        self.distributed_dir = (self.kalite_submodule_dir / 'kalite')
-        self.manage_py_path = self.distributed_dir / 'manage.py'
+        # self.kalite_submodule_dir = pathlib.Path(settings.PROJECT_PATH).parent / 'ka-lite-submodule'
+        # self.distributed_dir = (self.kalite_submodule_dir / 'kalite')
+        # self.manage_py_path = self.distributed_dir / 'manage.py'
 
         uniq_name = 'settings_' + ''.join(choice(string.ascii_lowercase) for _ in range(10))
         self.db_path = ((self.distributed_dir / 'database' / uniq_name)
@@ -174,7 +175,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             output_to_stdout=output_to_stdout,
             output_to_stderr=output_to_stderr,
             settings=self.settings_name,
-            kalite_dir=str(self.kalite_submodule_dir),
+            # kalite_dir=str(self.kalite_submodule_dir),
             wait=False,
             *args,
             **kwargs
