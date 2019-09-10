@@ -61,12 +61,12 @@ CMD cd /docker/mnt \
 #    && cd .. \
 # Commented out and replaced with a system-wide install further up, since grunt command wasn't in the path with this method
 #    && npm install grunt-cli \
-    && cd centralserver \
     # Add syncdb and migratedb because setup script fails to do so on 0.16.x
     # for the central server
     && python manage.py syncdb --noinput \
     && python manage.py migrate \
     && python manage.py setup --no-assessment-items --noinput --traceback \
+    && cd centralserver \
     && grunt \
     && cd .. \
 #    && cd ka-lite-submodule \

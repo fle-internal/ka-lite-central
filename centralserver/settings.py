@@ -177,7 +177,8 @@ INSTALLED_APPS = (
     'securesync',
     'kalite.main',
     'django.contrib.admin',
-    'kalite.testing.loadtesting',
+# Commented out in 0.17 upgrade since it doesn't exist anymore
+#    'kalite.testing.loadtesting',
     'kalite.contentload',
     'kalite.control_panel',
     'centralserver.central',
@@ -189,7 +190,6 @@ INSTALLED_APPS = (
     'kalite.updates',
     'centralserver.i18n',
     'tastypie',
-    'announcements',
     'kalite.student_testing',
     'kalite.store',
     'centralserver.deployment',
@@ -197,11 +197,11 @@ INSTALLED_APPS = (
     'centralserver.registration',
     'centralserver.stats',
     # 'centralserver.testing',
-    'django_snippets',
     'django.contrib.contenttypes',
     'securesync.devices',
     'kalite.dynamic_assets',
-    'centralserver.ab_testing'
+    'centralserver.ab_testing',
+    'announcements',
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
@@ -217,10 +217,11 @@ MIDDLEWARE_CLASSES = (
     'centralserver.middleware.SetRequestLanguage',
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
 
+import kalite
+
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, '..', 'static-libraries'),
-    # Need this somehow
-    # os.path.join(PROJECT_PATH, '..', 'ka-lite-submodule', 'static-libraries'),
+    os.path.realpath(os.path.join(os.path.dirname(kalite.__file__), 'static-libraries')),
 )  # libraries common to all apps
 
 DEFAULT_ENCODING = 'utf-8'

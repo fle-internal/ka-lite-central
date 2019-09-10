@@ -19,7 +19,6 @@ before_install:
 
 install:
   - make assets
-  - pip install -r ka-lite-submodule/requirements_test.txt
   - pip install --upgrade selenium  # Upgrade Selenium because we don't want to change the 0.16.x sub module
   - wget -O geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-linux64.tar.gz
   - gunzip -c geckodriver.tar.gz | tar xopf -
@@ -35,9 +34,9 @@ before_script:
   - export PATH="$PATH:/home/ubuntu/bin"
 
 script:
-  - python centralserver/manage.py test ab_testing -v 2 --traceback
-  - python centralserver/manage.py test central -v 2 --traceback
-  - python centralserver/manage.py test contact -v 2 --traceback
-  - python centralserver/manage.py test faq -v 2 --traceback
-  - python centralserver/manage.py test i18n -v 2 --traceback
-  - python centralserver/manage.py test registration -v 2 --traceback
+  - python manage.py test ab_testing -v 2 --traceback
+  - python manage.py test central -v 2 --traceback
+  - python manage.py test contact -v 2 --traceback
+  - python manage.py test faq -v 2 --traceback
+  - python manage.py test i18n -v 2 --traceback
+  - python manage.py test registration -v 2 --traceback
