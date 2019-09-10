@@ -1,6 +1,6 @@
 -r requirements.txt
 behave==1.2.4
-selenium<3
+selenium
 unittest2==0.7.1
 mock==1.0.1
 coverage>=4
