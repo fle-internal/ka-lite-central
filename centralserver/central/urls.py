@@ -7,7 +7,6 @@ from django.http import HttpResponseRedirect
 
 import centralserver.contact.urls
 import centralserver.deployment.urls
-import centralserver.faq.urls
 import centralserver.i18n.urls
 import centralserver.registration.urls
 import centralserver.stats.api_urls
@@ -116,7 +115,6 @@ urlpatterns += patterns('',
 
 urlpatterns += patterns('',
     url(r'^contact/', lambda request: HttpResponseRedirect("https://learningequality.org/ka-lite/map/add/#contact")),
-    url(r'^faq/', include(centralserver.faq.urls)),
     url(r'^accounts/', include(centralserver.registration.urls)),
 )
 

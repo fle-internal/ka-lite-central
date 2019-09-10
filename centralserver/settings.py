@@ -193,7 +193,6 @@ INSTALLED_APPS = (
     'kalite.student_testing',
     'kalite.store',
     'centralserver.deployment',
-    'centralserver.faq',
     'centralserver.registration',
     'centralserver.stats',
     # 'centralserver.testing',
