@@ -1,6 +1,5 @@
 from .auth_tests import *
 from .browser_tests import *
-from .code_tests import *
 from .ecosystem_tests import *
 from .fixture_tests import *
 from .invitation_tests import *
