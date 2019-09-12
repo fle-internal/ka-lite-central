@@ -8,9 +8,9 @@ import sys
 from random import choice
 from urlparse import urlparse
 
-from django.conf import settings
 from fle_utils.crypto import Key
 from fle_utils.importing import resolve_model
+import tempfile
 
 
 def call_outside_command_with_output(command, *args, **kwargs):
@@ -19,12 +19,7 @@ def call_outside_command_with_output(command, *args, **kwargs):
     and returns the output.
     """
     
-    if settings.IS_SOURCE:
-        #assert "kalite_dir" in kwargs, "don't forget to specify the kalite_dir"
-        #kalite_dir = kwargs.pop('kalite_dir')
-        pass
-    else:
-        kalite_dir = None
+    kalite_dir = None
     
     # some custom variables that have to be put inside kwargs
     # or else will mess up the way the command is called
@@ -67,6 +62,11 @@ def call_outside_command_with_output(command, *args, **kwargs):
     new_env = os.environ.copy()
     new_env["DJANGO_SETTINGS_MODULE"] = kwargs.get("settings") or "kalite.settings"
 
+    extra_path = kwargs.pop("pythonpath", None)
+    
+    if extra_path:
+        new_env["PYTHONPATH"] = extra_path
+
     p = subprocess.Popen(
         cmd,
         shell=False,
@@ -88,17 +88,19 @@ class DistributedServer(object):
         # self.distributed_dir = (self.kalite_submodule_dir / 'kalite')
         # self.manage_py_path = self.distributed_dir / 'manage.py'
 
+        self.path_temp = tempfile.mkdtemp()
+
+        # Create an __init__ to make it a package
+        # open(os.path.join(self.path_temp, "__init__.py"), "w").write("\n")
+
         uniq_name = 'settings_' + ''.join(choice(string.ascii_lowercase) for _ in range(10))
-        self.db_path = ((self.distributed_dir / 'database' / uniq_name)
-                        .with_suffix('.sqlite'))
 
         self.key = kwargs.pop("key", None) or Key()
 
         # setup for custom settings for this distributed server
         self.settings_name = uniq_name
         self.settings_contents = self._generate_settings(**kwargs)
-        self.settings_path = ((self.distributed_dir / self.settings_name)
-                              .with_suffix('.py'))
+        self.settings_path = (pathlib.Path(self.path_temp) / self.settings_name).with_suffix(".py")
 
         self.running_process = None
 
@@ -108,14 +110,13 @@ class DistributedServer(object):
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME"  : "%s",
+        "NAME"  : ":memory:",
         "OPTIONS": {
             "timeout": 60,
         },
     }
 }
         '''
-        new_settings = new_settings % self.db_path
 
         # super hack to not run migrations on the distributed servers.
         # Basically, we replace south's syncdb (which adds migrations)
@@ -140,8 +141,9 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         other_settings = ['%s = %r' % (k, v) for k, v in kwargs.iteritems()]
         new_settings = '\n'.join([new_settings] + other_settings)
-        old_settings_path = self.distributed_dir / 'project/settings/base.py'
-        with old_settings_path.open() as f:
+        import kalite
+        old_settings_path = os.path.join(os.path.dirname(kalite.__file__), 'project/settings/base.py')
+        with open(old_settings_path, "r") as f:
             old_settings = f.read()
 
         return old_settings + new_settings
@@ -169,6 +171,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
             raise Exception('Command {} already started.'.format(commandname))
 
         kwargs['traceback'] = True
+        kwargs['pythonpath'] = self.path_temp
 
         _, _err, _ret, self.running_process = call_outside_command_with_output(
             commandname,
@@ -201,10 +204,11 @@ OWN_DEVICE_PRIVATE_KEY = %r
         self.running_process = None  # so we can run other commands
 
         if not noerr and returncode != 0:
-            errmsgtemplate = "command returned non-zero errcode: stderr is %s"
+            errmsgtemplate = "command returned non-zero errcode: stderr is %s" % stderr
+            print(errmsgtemplate)
             raise subprocess.CalledProcessError(returncode,
                                                 self.commandname,
-                                                output=errmsgtemplate % stderr)
+                                                output=errmsgtemplate)
 
         return (stdout, stderr, returncode)
 
@@ -343,7 +347,9 @@ OWN_DEVICE_PRIVATE_KEY = %r
     def __enter__(self):
         # write our settings file
         with self.settings_path.open('w') as f:
-            f.write(self.settings_contents)
+            f.write(unicode(self.settings_contents))
+
+        sys.path.append(self.path_temp)
 
         # prepare the DB
         self.call_command('syncdb', noinput=True, output_to_stdout=False)
@@ -353,9 +359,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
     def __exit__(self, exc_type, exc_value, traceback):
         # delete our settings file
+        sys.path.remove(self.path_temp)
+        
         if self.settings_path.exists():
             self.settings_path.unlink()
-
-        # delete the db file
-        if self.db_path.exists():
-            self.db_path.unlink()
