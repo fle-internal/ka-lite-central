@@ -337,6 +337,7 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
     def test_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
+        time.sleep(1)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
         WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
         self.browser.switch_to.alert.accept()
@@ -349,6 +350,7 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
     def test_cancel_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
+        time.sleep(1)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
         WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
         self.browser.switch_to.alert.dismiss()
