@@ -5,7 +5,6 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 
-import centralserver.contact.urls
 import centralserver.deployment.urls
 import centralserver.i18n.urls
 import centralserver.registration.urls

@@ -46,7 +46,6 @@ from kalite.settings.base import *
 ########################
 
 from registration.settings import *
-from contact.settings import *
 
 # Import from applications with problematic __init__.py files
 from centralserver.legacy.centralserver_i18n_settings import *
@@ -186,7 +185,6 @@ INSTALLED_APPS = (
     'kalite.distributed', # needed in order to get things like window.sessionModel
     'kalite.coachreports',
     'django.contrib.humanize',
-    'centralserver.contact',
     'kalite.updates',
     'centralserver.i18n',
     'tastypie',

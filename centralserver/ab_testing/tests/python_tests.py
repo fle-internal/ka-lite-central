@@ -7,8 +7,8 @@ from django.test import LiveServerTestCase, TestCase, Client
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
 
-from central.models import Organization
-from central.tests.utils.mixins import CreateAdminMixin
+from centralserver.central.models import Organization
+from centralserver.central.tests.utils.mixins import CreateAdminMixin
 
 class ABTestingTestCases(LiveServerTestCase, CreateAdminMixin):
     """
