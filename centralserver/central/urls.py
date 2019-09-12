@@ -57,24 +57,8 @@ urlpatterns += patterns('',
 urlpatterns += patterns(__package__ + '.views',
     url(r'^$', 'homepage', {}, 'homepage'),
     url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
-    url(r'^wiki/(?P<path>.*)$', 'wiki_redirect', {}, 'wiki'),
-    url(r'^wiki/installation/$', 'wiki_redirect', {"path": "installation/"}, 'install'),
 
     url(r'^glossary/$', 'glossary', {}, 'glossary'),
-
-    # The install wizard app has two views: both options available (here)
-    #   or an "edition" selected (to get more info, or redirect to download, below)
-    #url(r'^download/wizard/$', 'download_wizard', {}, 'download_wizard'),
-    #url(r'^download/wizard/(?P<edition>[\w-]+)/$', 'download_wizard', {}, 'download_wizard'),
-    #url(r'^download/thankyou/$', 'download_thankyou', {}, 'download_thankyou'),
-
-    # Downloads: public
-    url(r'^download/kalite/(?P<version>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
-    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
-    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/$', 'download_kalite_public', {}, 'download_kalite_public'),
-    # Downloads: private
-    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/(?P<zone_id>[^\/]+)/$', 'download_kalite_private', {}, 'download_kalite_private'),
-    url(r'^download/kalite/(?P<version>[^\/]+)/(?P<platform>[^\/]+)/(?P<locale>[^\/]+)/(?P<zone_id>[^\/]+)/(?P<include_data>[^\/]+)/$', 'download_kalite_private', {}, 'download_kalite_private'),
 
     # The following has been superceded by the stats app, but we
     #   keep it here so that things will function even if that app is removed.
