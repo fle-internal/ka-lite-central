@@ -9,4 +9,4 @@ six==1.9.0
 wsgiref==0.1.2
 MySQL-python==1.2.5
 django-postmark==0.1.6
-ka-lite==0.17.6b3
+ka-lite==0.17.6b4

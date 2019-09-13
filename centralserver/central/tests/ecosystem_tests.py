@@ -29,6 +29,9 @@ class SameVersionTests(CreateAdminMixin,
                        LiveServerTestCase):
 
     def setUp(self):
+        
+        # We need the live server's error reports, otherwise hard to troubleshoot
+        settings.DEBUG = True
         self.setup_fake_device(name="Central")
         self.user = self.create_admin()
         self.org = self.create_organization(owner=self.user)
@@ -40,6 +43,10 @@ class SameVersionTests(CreateAdminMixin,
             'CENTRAL_SERVER_URL': self.live_server_url,
             'SYNCING_MAX_RECORDS_PER_REQUEST': settings.SYNCING_MAX_RECORDS_PER_REQUEST,
         }
+
+    def tearDown(self):
+        # We need the live server's error reports, otherwise hard to troubleshoot
+        settings.DEBUG = False
 
     def get_distributed_server(self, **kwargs):
 

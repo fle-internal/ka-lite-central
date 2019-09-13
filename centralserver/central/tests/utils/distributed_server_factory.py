@@ -110,19 +110,22 @@ class DistributedServer(object):
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME"  : ":memory:",
+        "NAME"  : "%s",
         "OPTIONS": {
             "timeout": 60,
         },
     }
 }
         '''
+        new_settings = new_settings % os.path.join(self.path_temp, "db.sqlite3")
 
         # super hack to not run migrations on the distributed servers.
         # Basically, we replace south's syncdb (which adds migrations)
         # with the normal syncdb
         new_settings += '''
 INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
+
+INSTALLED_APPS.append("fle_utils.testing")  # Contains 'runcode' command
         '''
 
         # write some pregenerated pub/priv keys to the settings file,
@@ -349,8 +352,6 @@ OWN_DEVICE_PRIVATE_KEY = %r
         with self.settings_path.open('w') as f:
             f.write(unicode(self.settings_contents))
 
-        sys.path.append(self.path_temp)
-
         # prepare the DB
         self.call_command('syncdb', noinput=True, output_to_stdout=False)
         self.wait()
@@ -358,8 +359,6 @@ OWN_DEVICE_PRIVATE_KEY = %r
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        # delete our settings file
-        sys.path.remove(self.path_temp)
-        
+
         if self.settings_path.exists():
             self.settings_path.unlink()
