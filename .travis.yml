@@ -26,4 +26,4 @@ install:
   - mv geckodriver /home/travis/bin
 
 script:
-  - xvfb-run python manage.py test ab_testing central i18n registration -v 2 --traceback
+  - python manage.py test ab_testing central i18n registration -v 2 --traceback
