@@ -14,10 +14,6 @@ env:
   - MOZ_HEADLESS=1
   - PATH="$PATH:/home/travis/bin"
 
-#before_install:
-#  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile
-#    --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
-
 install:
   - make assets
   - pip install -r requirements_test.txt
@@ -28,7 +24,4 @@ install:
   - mv geckodriver /home/travis/bin
 
 script:
-  - python manage.py test ab_testing -v 2 --traceback
-  - python manage.py test central -v 2 --traceback
-  - python manage.py test i18n -v 2 --traceback
-  - python manage.py test registration -v 2 --traceback
+  - xvfb-run python manage.py test ab_testing central i18n registration -v 2 --traceback
