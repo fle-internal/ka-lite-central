@@ -26,7 +26,7 @@ class FakeDeviceMixin(object):
 
 class CreateAdminMixin(object):
     DEFAULTS = {
-        'username': 'admin-1',
+        'username': 'admin1',
         'password': 'password',
     }
 
@@ -38,6 +38,7 @@ class CreateAdminMixin(object):
         user = User.objects.create(**fields)
         user.real_password = fields['password']
         user.set_password(user.real_password)
+        user.is_superuser = True
         user.save()
 
         return user

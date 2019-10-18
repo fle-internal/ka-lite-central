@@ -142,7 +142,7 @@ class SuperUserTest(KALiteCentralBrowserTestCase, CreateAdminMixin):
         Tests that an existing admin user can log in.
         """
 
-        admin_user = self.create_admin(username="adminuser", password="test")
+        self.create_admin(username="adminuser", password="test")
         self.browser_login_user("adminuser", "test")
 
 
