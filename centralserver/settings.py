@@ -60,7 +60,9 @@ except ImportError:
 # Used everywhere, so ... set it up top.
 DEBUG          = getattr(local_settings, "DEBUG", True)
 
-if not DEBUG and (POSTMARK_API_KEY == "Q?" or not POSTMARK_API_KEY):
+if DEBUG:
+    POSTMARK_TEST_MODE = True
+elif (POSTMARK_API_KEY == "Q?" or not POSTMARK_API_KEY):
     raise RuntimeError("Does not allow running in non-Debug without a POSTMARK_API_KEY set")
 
 CENTRAL_SERVER = True  # Hopefully will be removed soon.

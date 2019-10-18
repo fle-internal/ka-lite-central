@@ -48,6 +48,10 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
         self.browser_form_fill("")  # newsletter subscription; don't check it!
         self.browser_send_keys(Keys.RETURN)  # submit the form
 
+        # This is apparently a very slow step, so to avoid random failure, we
+        # sleep a bit...
+        time.sleep(2)
+
         # Make sure that the page changed to the "thank you" confirmation page
         if expect_success:
             self.assertTrue(self.wait_for_page_change(register_url), "RETURN causes page to change")
