@@ -98,8 +98,10 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
             self.assertTrue(self.wait_for_page_change(login_url), "RETURN causes page to change")
             self.assertIn(self.reverse("homepage"), self.browser.current_url, "Login browses to homepage (account admin)" )
             self.assertIn(_("Account administration"), self.browser.title, "Check account admin page title")
-        else:
-            time.sleep(1)
+
+        # Sleep for 1 second because callee will expect the next success page to
+        # be ready.
+        time.sleep(1)
 
     def browser_logout_user(self, expect_success=True):
         """Logs a user account out of the central server (and performs relevant checks, unless expect_success=False)"""
