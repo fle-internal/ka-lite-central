@@ -15,6 +15,8 @@ from kalite.facility.models import Facility, FacilityGroup, FacilityUser
 from kalite.main.models import AttemptLog
 from securesync.models import Device, DeviceZone
 
+from centralserver.central.models import Organization
+
 FACILITY_MODEL = 'kalite.facility.models.Facility'
 GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
 FACILITY_USER_MODEL = 'kalite.facility.models.FacilityUser'
@@ -38,6 +40,9 @@ class SameVersionTests(CreateAdminMixin,
         self.zone = self.create_zone(organizations=[self.org])
 
         self._key_factory = KeyFactory()
+
+        # Do not reuse the cached property
+        Organization.HEADLESS_ORG_PK = None
 
         self.settings = {
             'CENTRAL_SERVER_URL': self.live_server_url,
