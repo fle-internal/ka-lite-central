@@ -88,7 +88,10 @@ class Organization(ExtendedModel):
         """
         if cls.HEADLESS_ORG_PK is not None:
             # Already exists and cached, just query fast and return
-            headless_org = cls.objects.get(pk=cls.HEADLESS_ORG_PK)
+            try:
+                headless_org = cls.objects.get(pk=cls.HEADLESS_ORG_PK)
+            except cls.DoesNotExist:
+                raise RuntimeError("Cached organization PK {} which does not exist".format(cls.HEADLESS_ORG_PK))
 
         else:
             # Potentially inefficient query, so limit this to once per server thread
