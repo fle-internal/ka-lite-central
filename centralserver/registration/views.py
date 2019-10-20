@@ -18,7 +18,6 @@ from django.utils.translation import ugettext as _
 from .backends import get_backend
 from centralserver.central.forms import OrganizationForm
 from centralserver.central.models import Organization, OrganizationInvitation
-from centralserver.contact.views import contact_subscribe
 from fle_utils.internet.functions import set_query_params
 from securesync.models import Zone
 
@@ -242,11 +241,6 @@ def register(request, backend, success_url=None, form_class=None,
                         org.save()
                     else:
                         validation_successful = False
-
-                # Finally, try and subscribe the user to the mailing list
-                # (silently; don't return anything to the user)
-                if do_subscribe:
-                    contact_subscribe(request, form.cleaned_data['email'])  # no "return"
 
             except IntegrityError as e:
                 if e.message=='column username is not unique':

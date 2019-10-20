@@ -39,10 +39,6 @@ module.exports = function(grunt) {
 		jshint: {
 			files: [
 				'Gruntfile.js',
-				'ka-lite-submodule/kalite/coachreports/static/js/coachreports/',
-				'ka-lite-submodule/kalite/control_panel/static/js/control_panel/',
-				'ka-lite-submodule/kalite/distributed/static/js/distributed/',
-				'ka-lite-submodule/kalite/updates/static/js/updates/',
 			],
 			// http://www.jshint.com/docs/options/
 			options: {

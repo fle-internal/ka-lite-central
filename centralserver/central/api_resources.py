@@ -2,7 +2,7 @@ from annoying.functions import get_object_or_None
 from tastypie.exceptions import NotFound
 from tastypie.resources import ModelResource
 
-from central.models import Organization
+from models import Organization
 from kalite.shared.api_auth.auth import ObjectAdminAuthorization, UserObjectsOnlyAuthorization
 from securesync.models import Zone
 
@@ -25,4 +25,4 @@ class ZoneResource(ModelResource):
             zone_list = Zone.objects.all()
 
         # call super to trigger auth
-        return super(ZoneResource, self).authorized_read_list(zone_list, bundle)        
+        return super(ZoneResource, self).authorized_read_list(zone_list, bundle)

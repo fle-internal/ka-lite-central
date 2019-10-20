@@ -1,35 +1,106 @@
 import json
 import pathlib
+import os
 import re
 import string
 import subprocess
+import sys
 from random import choice
 from urlparse import urlparse
 
-from django.conf import settings
 from fle_utils.crypto import Key
-from fle_utils.django_utils.command import call_outside_command_with_output
 from fle_utils.importing import resolve_model
+import tempfile
+
+
+def call_outside_command_with_output(command, *args, **kwargs):
+    """
+    Runs call_command for a KA Lite installation at the given location,
+    and returns the output.
+    """
+    
+    kalite_dir = None
+    
+    # some custom variables that have to be put inside kwargs
+    # or else will mess up the way the command is called
+    output_to_stdout = kwargs.pop('output_to_stdout', False)
+    output_to_stderr = kwargs.pop('output_to_stderr', False)
+    wait = kwargs.pop('wait', True)
+
+    # build the command
+    if kalite_dir:
+        kalite_bin = os.path.join(kalite_dir, "bin", "kalite")
+    else:
+        kalite_bin = 'kalite'
+
+    cmd = (kalite_bin, "manage", command) if os.name != "nt" else (sys.executable, kalite_bin, "manage", command)
+    for arg in args:
+        cmd += (arg,)
+
+    kwargs_keys = kwargs.keys()
+    
+    # Ensure --settings occurs first, as otherwise docopt parsing barfs
+    kwargs_keys = sorted(kwargs_keys, cmp=lambda x,y: -1 if x=="settings" else 0)
+    
+    for key in kwargs_keys:
+        val = kwargs[key]
+        key = key.replace(u"_",u"-")
+        prefix = u"--" if command != "runcherrypyserver" else u""  # hack, but ... whatever!
+        if isinstance(val, bool):
+            cmd += (u"%s%s" % (prefix, key),)
+        else:
+            # TODO(jamalex): remove this replacement, after #4066 is fixed:
+            # https://github.com/learningequality/ka-lite/issues/4066
+            cleaned_val = unicode(val).replace(" ", "")
+            cmd += (u"%s%s=%s" % (prefix, key, cleaned_val),)
+
+    # we also need to change the environment to point to the the local
+    # kalite settings. This is especially important for when the
+    # central server calls this function, as if we don't change this,
+    # kalitectl.py wil look for centralserver.settings instead of
+    # kalite.settings.
+    new_env = os.environ.copy()
+    new_env["DJANGO_SETTINGS_MODULE"] = kwargs.get("settings") or "kalite.settings"
+
+    extra_path = kwargs.pop("pythonpath", None)
+    
+    if extra_path:
+        new_env["PYTHONPATH"] = extra_path
+
+    p = subprocess.Popen(
+        cmd,
+        shell=False,
+        # cwd=os.path.split(cmd[0])[0],
+        stdout=None if output_to_stdout else subprocess.PIPE,
+        stderr=None if output_to_stderr else subprocess.PIPE,
+        env=new_env,
+    )
+    out = p.communicate() if wait else (None, None)
+
+    # tuple output of stdout, stderr, exit code and process object
+    return out + (1 if out[1] else 0, p)
 
 
 class DistributedServer(object):
 
     def __init__(self, *args, **kwargs):
-        self.kalite_submodule_dir = pathlib.Path(settings.PROJECT_PATH).parent / 'ka-lite-submodule'
-        self.distributed_dir = (self.kalite_submodule_dir / 'kalite')
-        self.manage_py_path = self.distributed_dir / 'manage.py'
+        # self.kalite_submodule_dir = pathlib.Path(settings.PROJECT_PATH).parent / 'ka-lite-submodule'
+        # self.distributed_dir = (self.kalite_submodule_dir / 'kalite')
+        # self.manage_py_path = self.distributed_dir / 'manage.py'
+
+        self.path_temp = tempfile.mkdtemp()
+
+        # Create an __init__ to make it a package
+        # open(os.path.join(self.path_temp, "__init__.py"), "w").write("\n")
 
         uniq_name = 'settings_' + ''.join(choice(string.ascii_lowercase) for _ in range(10))
-        self.db_path = ((self.distributed_dir / 'database' / uniq_name)
-                        .with_suffix('.sqlite'))
 
         self.key = kwargs.pop("key", None) or Key()
 
         # setup for custom settings for this distributed server
         self.settings_name = uniq_name
         self.settings_contents = self._generate_settings(**kwargs)
-        self.settings_path = ((self.distributed_dir / self.settings_name)
-                              .with_suffix('.py'))
+        self.settings_path = (pathlib.Path(self.path_temp) / self.settings_name).with_suffix(".py")
 
         self.running_process = None
 
@@ -46,13 +117,15 @@ DATABASES = {
     }
 }
         '''
-        new_settings = new_settings % self.db_path
+        new_settings = new_settings % os.path.join(self.path_temp, "db.sqlite3")
 
         # super hack to not run migrations on the distributed servers.
         # Basically, we replace south's syncdb (which adds migrations)
         # with the normal syncdb
         new_settings += '''
 INSTALLED_APPS = filter(lambda app: 'south' not in app, INSTALLED_APPS)
+
+INSTALLED_APPS.append("fle_utils.testing")  # Contains 'runcode' command
         '''
 
         # write some pregenerated pub/priv keys to the settings file,
@@ -71,8 +144,9 @@ OWN_DEVICE_PRIVATE_KEY = %r
 
         other_settings = ['%s = %r' % (k, v) for k, v in kwargs.iteritems()]
         new_settings = '\n'.join([new_settings] + other_settings)
-        old_settings_path = self.distributed_dir / 'project/settings/base.py'
-        with old_settings_path.open() as f:
+        import kalite
+        old_settings_path = os.path.join(os.path.dirname(kalite.__file__), 'project/settings/base.py')
+        with open(old_settings_path, "r") as f:
             old_settings = f.read()
 
         return old_settings + new_settings
@@ -100,13 +174,14 @@ OWN_DEVICE_PRIVATE_KEY = %r
             raise Exception('Command {} already started.'.format(commandname))
 
         kwargs['traceback'] = True
+        kwargs['pythonpath'] = self.path_temp
 
         _, _err, _ret, self.running_process = call_outside_command_with_output(
             commandname,
             output_to_stdout=output_to_stdout,
             output_to_stderr=output_to_stderr,
             settings=self.settings_name,
-            kalite_dir=str(self.kalite_submodule_dir),
+            # kalite_dir=str(self.kalite_submodule_dir),
             wait=False,
             *args,
             **kwargs
@@ -132,10 +207,11 @@ OWN_DEVICE_PRIVATE_KEY = %r
         self.running_process = None  # so we can run other commands
 
         if not noerr and returncode != 0:
-            errmsgtemplate = "command returned non-zero errcode: stderr is %s"
+            errmsgtemplate = "command returned non-zero errcode: stderr is %s" % stderr
+            print(errmsgtemplate)
             raise subprocess.CalledProcessError(returncode,
                                                 self.commandname,
-                                                output=errmsgtemplate % stderr)
+                                                output=errmsgtemplate)
 
         return (stdout, stderr, returncode)
 
@@ -274,7 +350,7 @@ OWN_DEVICE_PRIVATE_KEY = %r
     def __enter__(self):
         # write our settings file
         with self.settings_path.open('w') as f:
-            f.write(self.settings_contents)
+            f.write(unicode(self.settings_contents))
 
         # prepare the DB
         self.call_command('syncdb', noinput=True, output_to_stdout=False)
@@ -283,10 +359,6 @@ OWN_DEVICE_PRIVATE_KEY = %r
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        # delete our settings file
+
         if self.settings_path.exists():
             self.settings_path.unlink()
-
-        # delete the db file
-        if self.db_path.exists():
-            self.db_path.unlink()

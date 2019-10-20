@@ -46,7 +46,6 @@ from kalite.settings.base import *
 ########################
 
 from registration.settings import *
-from contact.settings import *
 
 # Import from applications with problematic __init__.py files
 from centralserver.legacy.centralserver_i18n_settings import *
@@ -61,7 +60,9 @@ except ImportError:
 # Used everywhere, so ... set it up top.
 DEBUG          = getattr(local_settings, "DEBUG", True)
 
-if not DEBUG and (POSTMARK_API_KEY == "Q?" or not POSTMARK_API_KEY):
+if DEBUG:
+    POSTMARK_TEST_MODE = True
+elif (POSTMARK_API_KEY == "Q?" or not POSTMARK_API_KEY):
     raise RuntimeError("Does not allow running in non-Debug without a POSTMARK_API_KEY set")
 
 CENTRAL_SERVER = True  # Hopefully will be removed soon.
@@ -92,7 +93,9 @@ EMAIL_BACKEND = getattr(local_settings, "EMAIL_BACKEND", "django.core.mail.backe
 PROJECT_PATH = os.path.realpath(getattr(local_settings, "PROJECT_PATH", os.path.dirname(os.path.realpath(__file__)))) + "/"
 ROOT_DATA_PATH = os.path.realpath(getattr(local_settings, "ROOT_DATA_PATH", os.path.join(PROJECT_PATH, "..", "data"))) + "/"
 STATS_PATH = ROOT_DATA_PATH
-KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
+
+# Find out what this is used for
+# KALITE_PATH    = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ka-lite-submodule') + "/"
 
 LOCALE_PATHS   = getattr(local_settings, "LOCALE_PATHS", (PROJECT_PATH + "/../locale",))
 LOCALE_PATHS   = tuple([os.path.realpath(lp) + "/" for lp in LOCALE_PATHS])
@@ -175,7 +178,8 @@ INSTALLED_APPS = (
     'securesync',
     'kalite.main',
     'django.contrib.admin',
-    'kalite.testing.loadtesting',
+# Commented out in 0.17 upgrade since it doesn't exist anymore
+#    'kalite.testing.loadtesting',
     'kalite.contentload',
     'kalite.control_panel',
     'centralserver.central',
@@ -183,23 +187,20 @@ INSTALLED_APPS = (
     'kalite.distributed', # needed in order to get things like window.sessionModel
     'kalite.coachreports',
     'django.contrib.humanize',
-    'centralserver.contact',
     'kalite.updates',
     'centralserver.i18n',
     'tastypie',
-    'announcements',
     'kalite.student_testing',
     'kalite.store',
     'centralserver.deployment',
-    'centralserver.faq',
     'centralserver.registration',
     'centralserver.stats',
     # 'centralserver.testing',
-    'django_snippets',
     'django.contrib.contenttypes',
     'securesync.devices',
     'kalite.dynamic_assets',
-    'centralserver.ab_testing'
+    'centralserver.ab_testing',
+    'announcements',
 ) + getattr(local_settings, 'INSTALLED_APPS', tuple())
 
 MIDDLEWARE_CLASSES = (
@@ -215,9 +216,11 @@ MIDDLEWARE_CLASSES = (
     'centralserver.middleware.SetRequestLanguage',
 ) + getattr(local_settings, 'MIDDLEWARE_CLASSES', tuple())
 
+import kalite
+
 STATICFILES_DIRS = (
     os.path.join(PROJECT_PATH, '..', 'static-libraries'),
-    os.path.join(PROJECT_PATH, '..', 'ka-lite-submodule', 'static-libraries'),
+    os.path.realpath(os.path.join(os.path.dirname(kalite.__file__), 'static-libraries')),
 )  # libraries common to all apps
 
 DEFAULT_ENCODING = 'utf-8'
@@ -319,7 +322,5 @@ ROOT_UUID_NAMESPACE = uuid.UUID("a8f052c7-8790-5bed-ab15-fe2d3b1ede41")  # print
 
 # Duplicated from contact
 CENTRAL_SERVER_DOMAIN = getattr(local_settings, "CENTRAL_SERVER_DOMAIN", "learningequality.org")
-
-CENTRAL_WIKI_URL      = getattr(local_settings, "CENTRAL_WIKI_URL",      "http://kalitewiki.%s/" % CENTRAL_SERVER_DOMAIN)
 
 LOGIN_REDIRECT_URL = '/organization/'

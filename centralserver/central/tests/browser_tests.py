@@ -27,6 +27,13 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
     Base class for browser-based central server test cases.
     """
 
+    def setUp(self):
+
+        super(KALiteCentralBrowserTestCase, self).setUp()
+
+        # Do not reuse the cached property
+        Organization.HEADLESS_ORG_PK = None
+
     def browser_register_user(self, username, password, first_name="firstname", last_name="lastname", org_name="orgname", expect_success=True):
         """Registers a user on the central server (and performs relevant checks, unless expect_success=False)"""
 
@@ -47,6 +54,10 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
         self.browser_form_fill(Keys.SPACE)  # checkbox 2: EULA2
         self.browser_form_fill("")  # newsletter subscription; don't check it!
         self.browser_send_keys(Keys.RETURN)  # submit the form
+
+        # This is apparently a very slow step, so to avoid random failure, we
+        # sleep a bit...
+        time.sleep(2)
 
         # Make sure that the page changed to the "thank you" confirmation page
         if expect_success:
@@ -94,8 +105,10 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
             self.assertTrue(self.wait_for_page_change(login_url), "RETURN causes page to change")
             self.assertIn(self.reverse("homepage"), self.browser.current_url, "Login browses to homepage (account admin)" )
             self.assertIn(_("Account administration"), self.browser.title, "Check account admin page title")
-        else:
-            time.sleep(1)
+
+        # Sleep for 1 second because callee will expect the next success page to
+        # be ready.
+        time.sleep(1)
 
     def browser_logout_user(self, expect_success=True):
         """Logs a user account out of the central server (and performs relevant checks, unless expect_success=False)"""
@@ -136,7 +149,7 @@ class SuperUserTest(KALiteCentralBrowserTestCase, CreateAdminMixin):
         Tests that an existing admin user can log in.
         """
 
-        admin_user = self.create_admin(username="adminuser", password="test")
+        self.create_admin(username="adminuser", password="test")
         self.browser_login_user("adminuser", "test")
 
 
@@ -337,6 +350,7 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
     def test_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
+        time.sleep(1)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
         WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
         self.browser.switch_to.alert.accept()
@@ -349,6 +363,7 @@ class ZoneDeletionTestCase(OrganizationManagementTestCase):
     def test_cancel_delete_zone_from_org_admin(self):
         """Delete a zone from the org_management page"""
         self.browser_login_user(self.USER_EMAIL, self.USER_PASSWORD)
+        time.sleep(1)
         self.browser.find_element_by_css_selector(".zone-delete-link").click()
         WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
         self.browser.switch_to.alert.dismiss()
