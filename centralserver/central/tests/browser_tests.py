@@ -27,6 +27,13 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
     Base class for browser-based central server test cases.
     """
 
+    def setUp(self):
+
+        super(KALiteCentralBrowserTestCase, self).setUp()
+
+        # Do not reuse the cached property
+        Organization.HEADLESS_ORG_PK = None
+
     def browser_register_user(self, username, password, first_name="firstname", last_name="lastname", org_name="orgname", expect_success=True):
         """Registers a user on the central server (and performs relevant checks, unless expect_success=False)"""
 
