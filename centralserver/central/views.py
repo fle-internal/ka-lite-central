@@ -253,5 +253,6 @@ def handler_403(request, *args, **kwargs):
 def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
 
+
 def handler_500(request):
     return HttpResponseServerError(render_to_string("central/500.html", {}, context_instance=RequestContext(request)))

@@ -55,6 +55,7 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns(__package__ + '.views',
+    url(r'^test/500/$', 'handler_500', {}, 'test500'),  # Test for error handling
     url(r'^$', 'homepage', {}, 'homepage'),
     url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
 
