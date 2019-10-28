@@ -7,4 +7,4 @@ simplekml==1.2.3
 wsgiref==0.1.2
 MySQL-python==1.2.5
 django-postmark==0.1.6
-ka-lite==0.17.6b4
+ka-lite==0.17.6b5
