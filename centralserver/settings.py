@@ -51,6 +51,9 @@ from registration.settings import *
 from centralserver.legacy.centralserver_i18n_settings import *
 
 
+ADMINS = (('FLE Errors', 'errors@learningequality.org'),)
+SERVER_EMAIL = 'kalite@learningequality.org'
+
 try:
     from local_settings import *
     import local_settings
@@ -79,9 +82,6 @@ TEMPLATE_DEBUG = getattr(local_settings, "TEMPLATE_DEBUG", DEBUG)
 logging.basicConfig()
 LOG.setLevel(LOGGING_LEVEL)
 logging.getLogger("requests").setLevel(logging.WARNING)  # shut up requests!
-
-ADMINS = (('FLE Errors', 'errors@learningequality.org'),)
-SERVER_EMAIL = 'kalite@learningequality.org'
 
 EMAIL_BACKEND = getattr(local_settings, "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend" if DEBUG else "postmark.backends.PostmarkBackend")
 
@@ -135,7 +135,7 @@ MEDIA_ROOT     = os.path.realpath(getattr(local_settings, "MEDIA_ROOT", PROJECT_
 STATIC_URL     = getattr(local_settings, "STATIC_URL", "/static/")
 STATIC_ROOT    = os.path.realpath(getattr(local_settings, "STATIC_ROOT", PROJECT_PATH + "/static/")) + "/"
 
- # Make this unique, and don't share it with anybody.
+# Make this unique, and don't share it with anybody.
 SECRET_KEY     = getattr(local_settings, "SECRET_KEY", "8qq-!fa$92i=s1gjjitd&%s@4%ka9lj+=@n7a&fzjpwu%3kd#u")
 
 AUTH_PROFILE_MODULE     = "centralserver.central.UserProfile"
