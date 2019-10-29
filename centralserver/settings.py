@@ -51,7 +51,10 @@ from registration.settings import *
 from centralserver.legacy.centralserver_i18n_settings import *
 
 
-ADMINS = (('FLE Errors', 'errors@learningequality.org'),)
+ADMINS = (
+    ('ben', 'benjamin@learningequality.org'),
+    ('aron', 'aron@learningequality.org'),
+)
 SERVER_EMAIL = 'kalite@learningequality.org'
 
 try:
