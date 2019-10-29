@@ -250,6 +250,10 @@ def handler_403(request, *args, **kwargs):
         return HttpResponseRedirect(set_query_params(reverse("auth_login"), {"next": request.get_full_path()}))
 
 
+def test500(request):
+    raise RuntimeError("This is a test. The canary is alive.")
+
+
 def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
 
