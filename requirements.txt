@@ -6,4 +6,4 @@ responses==0.3.0
 simplekml==1.2.3
 wsgiref==0.1.2
 django-postmark==0.1.6
-ka-lite==0.17.6b9
+ka-lite==0.17.6b10
