@@ -1,28 +1,19 @@
 """
 """
-import json
-import os
-import re
-import sys
-import tempfile
 from annoying.decorators import render_to
-from annoying.functions import get_object_or_None
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.management import call_command
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, Http404, HttpResponseServerError
-from django.shortcuts import render_to_response, get_object_or_404
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-import kalite.version  # for software version
 from .forms import OrganizationForm, OrganizationInvitationForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
@@ -31,7 +22,6 @@ from fle_utils.internet.functions import set_query_params
 from kalite.control_panel import views as kalite_control_panel_views
 from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.engine.api_client import SyncClient
-from securesync.models import Zone
 
 
 @render_to("central/homepage.html")
@@ -67,7 +57,7 @@ def org_management(request, org_id=None):
             form.save()
             return HttpResponseRedirect(reverse("org_management"))
         else: # we need to inject the form into the correct organization, so errors are displayed inline
-            for pk,org in organizations.items():
+            for __, org in organizations.items():
                 if org.pk == int(request.POST.get("organization")):
                     org.form = form
 
@@ -197,17 +187,6 @@ def zone_add_to_org(request, zone_id, org_id=None, **kwargs):
     return context
 
 
-def content_page(request, page, **kwargs):
-    context = RequestContext(request)
-    context.update(kwargs)
-    return render_to_response("central/content/%s.html" % page, context_instance=context)
-
-
-@render_to("central/glossary.html")
-def glossary(request):
-    return {}
-
-
 def get_request_var(request, var_name, default_val="__empty__"):
     """
     Allow getting parameters from the POST object (from submitting a HTML form),
@@ -241,8 +220,6 @@ def crypto_login(request):
 
 
 def handler_403(request, *args, **kwargs):
-    context = RequestContext(request)
-
     if request.is_ajax():
         return JsonResponseMessageError(_("You must be logged in with an account authorized to view this page (API)."), status=403)
     else:

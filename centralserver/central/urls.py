@@ -57,9 +57,6 @@ urlpatterns += patterns('',
 urlpatterns += patterns(__package__ + '.views',
     url(r'^test/500/$', 'test500', {}, 'test500'),  # Test for error handling
     url(r'^$', 'homepage', {}, 'homepage'),
-    url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
-
-    url(r'^glossary/$', 'glossary', {}, 'glossary'),
 
     # The following has been superceded by the stats app, but we
     #   keep it here so that things will function even if that app is removed.
