@@ -1,0 +1,3 @@
+# Moved to separate file because it started having issues compiling
+# on a default docker/Ubuntu setup
+MySQL-python==1.2.5
