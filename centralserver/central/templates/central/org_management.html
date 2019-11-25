@@ -11,23 +11,10 @@
     <script type="text/javascript" src="{% static 'js/bootstrap/popover.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/sprintf.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/central/org_management.concat.js' %}"></script>
-    <script type="text/javascript">
-        var GLOSSARY_URL = "{% url 'glossary' %}";
-    </script>
 {% endblock headjs %}
 
 {% block headcss %}{{ block.super }}
     <style>
-        .glossary-link {
-            background: url('/static/images/question_mark.png') no-repeat center;
-            display: inline-block;
-            width: 14px;
-            height: 10px;
-            float: center;
-            margin-bottom: -51px;
-            margin-left: -5px;
-            margin-right: -5px;
-        }
         span.glyphicon {
             font-size: 1.4em;
             top: 4px;
