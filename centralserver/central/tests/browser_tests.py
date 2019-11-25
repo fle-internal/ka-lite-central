@@ -82,7 +82,7 @@ class KALiteCentralBrowserTestCase(BrowserActionMixins, KALiteBrowserTestCase):
 
         # Verify what we see!
         if expect_success:
-            self.browser_check_django_message(message_type="success", contains="Your account is now activ", num_messages=1)
+            self.browser_check_django_message(message_type="success", contains="Your account is now activ", num_messages=1, ignore_count=True)
 
 
     def browser_login_user(self, username, password, expect_success=True):
@@ -304,7 +304,7 @@ class OrganizationDeletionTestCase(OrganizationManagementTestCase):
         WebDriverWait(self.browser, self.WAIT).until(EC.alert_is_present())
         self.browser.switch_to.alert.accept()
         self.browser_wait_for_no_element(".org-delete-link")
-        self.browser_check_django_message(message_type="success", contains="successfully deleted")
+        self.browser_check_django_message(message_type="success", contains="successfully deleted", ignore_count=True)
         with self.assertRaises(NoSuchElementException):
             self.assertEqual(self.browser.find_element_by_css_selector(".org-delete-link"), None, "Make sure 'delete' icon is gone.")
 
