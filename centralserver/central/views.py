@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from .forms import OrganizationForm, OrganizationInvitationForm
+from .forms import OrganizationForm, OrganizationInvitationForm, ExportForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
 from fle_utils.internet.classes import JsonResponseMessageError
@@ -22,6 +22,9 @@ from fle_utils.internet.functions import set_query_params
 from kalite.control_panel import views as kalite_control_panel_views
 from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.engine.api_client import SyncClient
+from securesync.models import Zone
+from centralserver.central.models import ExportJob
+from django.http.response import StreamingHttpResponse
 
 
 @render_to("central/homepage.html")
@@ -218,6 +221,94 @@ def crypto_login(request):
         return HttpResponse(_("Unable to establish a session with KA Lite server at %s") % host)
     return HttpResponseRedirect("%ssecuresync/cryptologin/?client_nonce=%s" % (host, client.session.client_nonce))
 
+
+@require_authorized_admin
+@render_to("central/export.html")
+def export(request):
+    """
+    2019-11-25
+    This overwrites the previously central+distributed view function in
+    kalite.control_panel.views where the same view function was parameterized
+    by settings.CENTRAL_SERVER.
+    """
+
+    zone_id = request.GET.get("zone_id", "")
+    facility_id = request.GET.get("facility_id", "")
+    group_id = request.GET.get("group_id", "")
+
+    if 'facility_user' in request.session:
+        facility_id = request.session['facility_user'].facility.id
+
+    if zone_id:
+        zone = Zone.objects.get(id=zone_id)
+    else:
+        zone = ""
+
+    all_zones_url = reverse("api_dispatch_list", kwargs={"resource_name": "zone"})
+    if zone_id:
+        org = Zone.objects.get(id=zone_id).get_org()
+        org_id = org.id
+    else:
+        org_id = request.GET.get("org_id", "")
+        if not org_id:
+            return HttpResponseNotFound()
+        else:
+            org = Organization.objects.get(id=org_id)
+
+    if request.method == 'POST':
+        form = ExportForm(org, data=request.POST)
+        if form.is_valid() and form.cleaned_data['submitted'] > 0:
+            job = form.save()
+            messages.success(request, _(
+                "Job ID {id} was created and will run after {cnt} other jobs "
+                "are completed."
+            ).format(
+                id=job.id,
+                cnt=ExportJob.objects.filter(completed=None).count(),
+            ))
+            # This is not pretty, but the usage of querystring stuff for
+            # maintaining state ain't pretty neither. Some old school PHP
+            # patterns :)
+            return HttpResponseRedirect(
+                request.path_info + '?' + request.META['QUERY_STRING']
+            )
+    else:
+        form = ExportForm(org)
+
+    jobs = ExportJob.objects.filter(organization=org)
+
+    context = {
+        "form": form,
+        "jobs": jobs,
+        "org": org,
+        "zone": zone,
+        "org_id": org_id,
+        "zone_id": zone_id,
+        "facility_id": facility_id,
+        "group_id": group_id,
+        "all_zones_url": all_zones_url,
+        "is_facility_user": "true" if "facility_user" in request.session else "false",
+    }
+
+    return context
+
+
+@require_authorized_admin
+def export_csv(request, job_id):
+    org_id = request.GET.get("org_id", "")
+    job = get_object_or_404(
+        ExportJob.objects.filter(organization__id=org_id),
+        id=job_id,
+    )
+    response = StreamingHttpResponse(
+        content_type="text/csv"
+    )
+    response['Content-Disposition'] = 'attachment; filename="{org}_{type}_{dtm}.csv"'.format(
+        org=job.organization.name,
+        type=job.resource,
+        dtm=job.completed.strftime("%Y%m%d")
+    )
+    return response
 
 def handler_403(request, *args, **kwargs):
     if request.is_ajax():

@@ -84,6 +84,11 @@ urlpatterns += patterns(__package__ + '.api_views',
     url(r'^api/', include(api_urls)),
 )
 
+urlpatterns += patterns('centralserver.central.views',
+    url(r'^export/$', 'export', {}, 'data_export'),
+    url(r'^export/job/(?P<jobid>\d+)/csv/$', 'export_csv', {}, 'data_export_csv'),
+)
+
 urlpatterns += patterns('kalite.control_panel.views',
     # Zone, facility, device
     url(r'^', include(kalite.control_panel.urls)),

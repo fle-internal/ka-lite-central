@@ -12,6 +12,7 @@ from django.template import RequestContext
 
 from fle_utils.django_utils.classes import ExtendedModel
 from securesync.models import Zone
+from kalite.facility.models import Facility, FacilityGroup
 
 
 def get_or_create_user_profile(user):
@@ -206,3 +207,36 @@ class DeletionRecord(ExtendedModel):
     deleter = models.ForeignKey(User, related_name="deletion_actor")
     deleted_user = models.ForeignKey(User, related_name="deletion_recipient", blank=True, null=True)
     deleted_invite = models.ForeignKey(OrganizationInvitation, blank=True, null=True)
+
+
+class ExportJob(models.Model):
+
+    organization = models.ForeignKey(Organization)
+    zone = models.ForeignKey(Zone)
+    facility = models.ForeignKey(Facility, null=True, blank=True)
+    facility_group = models.ForeignKey(FacilityGroup, null=True, blank=True)
+    resource = models.CharField(
+        choices=[
+            ('user_logs', "User logs"),
+            ('attempt_logs', "Attempt logs"),
+            ('exercise_logs', "Exercise logs"),
+            ('ratings', "Ratings"),
+            ('device_logs', "Device logs"),
+        ],
+        null=False,
+        blank=False,
+        max_length=32,
+    )
+    
+    requested = models.DateTimeField(auto_now_add=True)
+    started = models.DateTimeField(null=True, blank=True)
+    completed = models.DateTimeField(null=True, blank=True)
+
+    def get_file_path(self):
+        if self.completed is None:
+            raise RuntimeError("No file for an uncompleted export job.")
+        return "..."
+
+    class Meta:
+        verbose_name = "Export Job"
+        verbose_name_plural = "Export Jobs"
