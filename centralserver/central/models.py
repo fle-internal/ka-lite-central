@@ -1,5 +1,6 @@
-"""
-"""
+import csv
+import os
+
 from fle_utils.collections_local_copy import OrderedDict
 
 from django.conf import settings
@@ -13,6 +14,7 @@ from django.template import RequestContext
 from fle_utils.django_utils.classes import ExtendedModel
 from securesync.models import Zone
 from kalite.facility.models import Facility, FacilityGroup
+from kalite.packages.bundled.fle_utils.general import ensure_dir
 
 
 def get_or_create_user_profile(user):
@@ -235,7 +237,111 @@ class ExportJob(models.Model):
     def get_file_path(self):
         if self.completed is None:
             raise RuntimeError("No file for an uncompleted export job.")
-        return "..."
+        root = os.path.join(
+            settings.CSV_EXPORT_ROOT,
+            self.zone.id,
+        )
+        ensure_dir(root)
+        return os.path.join(
+            root,
+            "{type}-{dtm}-{id}.csv".format(
+                type=self.resource,
+                dtm=str(self.created.strftime("%Y%m%d")),
+                id=self.id,
+            )
+        )
+
+    def run(self):
+        csv_file = open(self.get_file_path(), 'wb')
+        if self.resource == 'user_logs':
+            data = self.get_user_logs()
+        if not data:
+            csv_file.write("")
+            return
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=data[0].keys()
+        )
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
+            
+    def get_user_logs(self):
+        """
+        Returns a list of dicts for CSV export
+        """
+        queryset = FacilityUser.objects.all()
+        excludes = ['password', 'signature', 'deleted', 'signed_version', 'counter', 'notes']
+        columns = [
+            "username",
+            "first_name",
+            "last_name",
+            "facility_name",
+            "default_language",
+            "is_teacher",
+            "facility_id",
+            "id",
+        ]
+
+    def get_exercise_logs(self):
+        queryset = ExerciseLog.objects.all()
+        excludes = ['signed_version', 'counter', 'signature']
+        for bundle in to_be_serialized["objects"]:
+            user_id = bundle.data["user"].data["id"]
+            user = self._facility_users.get(user_id)
+            bundle.data["username"] = user.username
+            bundle.data["user_id"] = user.id
+            bundle.data["facility_name"] = user.facility.name
+            bundle.data["facility_id"] = user.facility.id
+            bundle.data["is_teacher"] = user.is_teacher
+            attempt_logs = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], context_type__in=["playlist", "exercise"])
+            bundle.data["timestamp_first"] = attempt_logs.count() and attempt_logs.aggregate(Min('timestamp'))['timestamp__min'] or None
+            bundle.data["timestamp_last"] = attempt_logs.count() and attempt_logs.aggregate(Max('timestamp'))['timestamp__max'] or None
+            bundle.data["part1_answered"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], context_type__in=["playlist", "exercise"]).count()
+            bundle.data["part1_correct"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], correct=True, context_type__in=["playlist", "exercise"]).count()
+            bundle.data["part2_attempted"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], context_type__in=["exercise_fixedblock", "playlist_fixedblock"]).count()
+            bundle.data["part2_correct"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], correct=True, context_type__in=["exercise_fixedblock", "playlist_fixedblock"]).count()
+            bundle.data.pop("user")
+
+    def get_content_rating(self):
+        queryset = ContentRating.objects.all()
+        content_ratings = ContentRating.objects.filter(user__id__in=self._facility_users.keys())
+        excludes = ['signed_version', 'counter', 'signature', 'id', 'deleted']
+        for bundle in filtered_bundles:
+            user_id = bundle.data["user"].data["id"]
+            user = self._facility_users.get(user_id)
+            bundle.data["username"] = user.username
+            bundle.data["facility_name"] = user.facility.name
+            bundle.data["is_teacher"] = user.is_teacher
+            bundle.data.pop("user")
+
+            content_id = bundle.data.pop("content_id", None)
+            content = get_content_item(language=request.language, content_id=content_id)
+            bundle.data["content_title"] = content.get("title", "Missing title") if content else "Unknown content"
+
+            serializable_objects.append(bundle)
+
+    def get_device_logs(self):
+        queryset = Device.objects.all()
+        excludes = ['signed_version', 'public_key', 'counter', 'signature']
+
+    def get_attempt_logs(self):
+        AttemptLog.objects.all()
+        excludes = ['user', 'signed_version', 'language', 'deleted', 'response_log', 'signature', 'version', 'counter']
+        columns = [
+            ""
+        ]
+
+    def annotate_users(self, rows):
+        for row in rows:
+            user = row['user']
+            row["username"] = user.username
+            row["user_id"] = user.id
+            row["facility_name"] = user.facility.name
+            row["facility_id"] = user.facility.id
+            row["is_teacher"] = user.is_teacher
+            del row['user']
+        return rows
 
     class Meta:
         verbose_name = "Export Job"

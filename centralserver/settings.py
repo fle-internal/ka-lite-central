@@ -108,6 +108,11 @@ LOGGING = {
     }
 }
 
+# Default export root. Should not be a dir served through HTTP as these data
+# are private to each organization
+# Have plenty of drive space.
+CSV_EXPORT_ROOT = os.path.dirname(__file__)
+
 try:
     from local_settings import *
     import local_settings
