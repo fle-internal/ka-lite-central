@@ -72,10 +72,10 @@
         
             <thead>
             <tr>
+                <th>{% trans "Resource" %}</th>
                 <th>{% trans "Zone" %}</th>
                 <th>{% trans "Facility" %}</th>
                 <th>{% trans "Group" %}</th>
-                <th>{% trans "Resource" %}</th>
                 <th>{% trans "Status" %}</th>
                 <th>{% trans "CSV" %}</th>
             </tr>
@@ -84,10 +84,10 @@
             <tbody>
             {% for job in jobs %}
             <tr>
-                <td>{{ job.zone.name }}</td>
+                <td>{{ job.get_resource_display }}</td>
+                <td>{{ job.zone.name|default:_("All") }}</td>
                 <td>{{ job.facility.name|default:_("All") }}</td>
                 <td>{{ job.facility_group.name|default:_("All") }}</td>
-                <td>{{ job.get_resource_display }}</td>
                 <td>
                     {% if job.completed %}
                         {% trans "Completed" %} {{ job.completed|naturaltime }}
