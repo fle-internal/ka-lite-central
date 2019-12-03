@@ -18,7 +18,7 @@ class Migration(SchemaMigration):
         db.create_table(u'central_exportjob', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('organization', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['central.Organization'])),
-            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['securesync.Zone'])),
+            ('zone', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['securesync.Zone'], null=True, blank=True)),
             ('facility', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['securesync.Facility'], null=True, blank=True)),
             ('facility_group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['securesync.FacilityGroup'], null=True, blank=True)),
             ('resource', self.gf('django.db.models.fields.CharField')(max_length=32)),
@@ -102,7 +102,7 @@ class Migration(SchemaMigration):
             'requested': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'resource': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'started': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['securesync.Zone']"})
+            'zone': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['securesync.Zone']", 'null': 'True', 'blank': 'True'})
         },
         u'central.organization': {
             'Meta': {'object_name': 'Organization'},

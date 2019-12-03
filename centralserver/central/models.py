@@ -10,10 +10,11 @@ from django.core.mail import send_mail
 from django.db import models
 from django.template.loader import render_to_string
 from django.template import RequestContext
+from django.db.models import Q
 
 from fle_utils.django_utils.classes import ExtendedModel
 from securesync.models import Zone
-from kalite.facility.models import Facility, FacilityGroup
+from kalite.facility.models import Facility, FacilityGroup, FacilityUser
 from kalite.packages.bundled.fle_utils.general import ensure_dir
 
 
@@ -214,7 +215,7 @@ class DeletionRecord(ExtendedModel):
 class ExportJob(models.Model):
 
     organization = models.ForeignKey(Organization)
-    zone = models.ForeignKey(Zone)
+    zone = models.ForeignKey(Zone, null=True, blank=True)
     facility = models.ForeignKey(Facility, null=True, blank=True)
     facility_group = models.ForeignKey(FacilityGroup, null=True, blank=True)
     resource = models.CharField(
@@ -235,18 +236,16 @@ class ExportJob(models.Model):
     completed = models.DateTimeField(null=True, blank=True)
 
     def get_file_path(self):
-        if self.completed is None:
-            raise RuntimeError("No file for an uncompleted export job.")
         root = os.path.join(
             settings.CSV_EXPORT_ROOT,
-            self.zone.id,
+            str(self.organization.id),
         )
         ensure_dir(root)
         return os.path.join(
             root,
             "{type}-{dtm}-{id}.csv".format(
                 type=self.resource,
-                dtm=str(self.created.strftime("%Y%m%d")),
+                dtm=str(self.requested.strftime("%Y%m%d")),
                 id=self.id,
             )
         )
@@ -270,19 +269,36 @@ class ExportJob(models.Model):
         """
         Returns a list of dicts for CSV export
         """
-        queryset = FacilityUser.objects.all()
-        excludes = ['password', 'signature', 'deleted', 'signed_version', 'counter', 'notes']
-        columns = [
-            "username",
-            "first_name",
-            "last_name",
-            "facility_name",
-            "default_language",
-            "is_teacher",
-            "facility_id",
-            "id",
-        ]
-
+        # They must have a zone_id, and may have a facility_id and group_id.
+        # Try to filter from most specific, to least
+        if self.facility_group:
+            queryset = FacilityUser.objects.filter(group=self.facility_group)
+        elif self.facility:
+            queryset = FacilityUser.objects.filter(facility=self.facility)
+        elif self.zone:
+            queryset = FacilityUser.objects.by_zone(self.zone)
+        else:
+            queryset = FacilityUser.objects.filter(
+                Q(signed_by__devicezone__zone__organization=self.organization, signed_by__devicezone__revoked=False) | \
+                Q(signed_by__devicemetadata__is_trusted=True, zone_fallback__organization=self.organization)
+            )
+        
+        data = []
+        
+        for user in queryset:
+            data.append({
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "facility_name": user.facility.name,
+                "default_language": user.default_language,
+                "is_teacher": user.is_teacher,
+                "facility_id": user.facility.id,
+                "id": user.id,
+            })
+        
+        return data
+        
     def get_exercise_logs(self):
         queryset = ExerciseLog.objects.all()
         excludes = ['signed_version', 'counter', 'signature']

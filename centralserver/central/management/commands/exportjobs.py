@@ -1,10 +1,8 @@
 """
 """
 import logging
-import os
 from optparse import make_option
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from centralserver.central.models import ExportJob
 from django.utils import timezone
@@ -35,6 +33,9 @@ class Command(BaseCommand):
         # This maintains state when using --dry-run
         last_id = 0
         
+        if options['resetall']:
+            ExportJob.objects.all().update(started=None, completed=None)
+        
         while True:
             next_job = ExportJob.objects.filter(
                 completed=None,
@@ -57,5 +58,5 @@ class Command(BaseCommand):
             job.run()
             
             if not options.get('dryrun', False):
-                job.comleted = timezone.now()
+                job.completed = timezone.now()
                 job.save()

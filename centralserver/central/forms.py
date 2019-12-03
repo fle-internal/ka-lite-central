@@ -45,7 +45,7 @@ class ExportForm(forms.ModelForm):
     submitted = forms.IntegerField(initial=0, widget=forms.HiddenInput())
     
     # The QuerySet objects are filled once the form is instantiated
-    zone = forms.ModelChoiceField(Zone.objects.none(), required=True)
+    zone = forms.ModelChoiceField(Zone.objects.none(), required=False)
     facility = forms.ModelChoiceField(Facility.objects.none(), required=False)
     facility_group = forms.ModelChoiceField(FacilityGroup.objects.none(), required=False)
     

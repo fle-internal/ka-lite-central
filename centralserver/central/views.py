@@ -264,7 +264,7 @@ def export(request):
                 "are completed."
             ).format(
                 id=job.id,
-                cnt=ExportJob.objects.filter(completed=None).count(),
+                cnt=ExportJob.objects.exclude(id=job.id).filter(completed=None).count(),
             ))
             # This is not pretty, but the usage of querystring stuff for
             # maintaining state ain't pretty neither. Some old school PHP
@@ -294,14 +294,16 @@ def export(request):
 
 
 @require_authorized_admin
-def export_csv(request, job_id):
+def export_csv(request, jobid=0):
     org_id = request.GET.get("org_id", "")
     job = get_object_or_404(
         ExportJob.objects.filter(organization__id=org_id),
-        id=job_id,
+        id=jobid,
     )
+    f = open(job.get_file_path(), "r")
     response = StreamingHttpResponse(
-        content_type="text/csv"
+        f,
+        content_type="text/csv",
     )
     response['Content-Disposition'] = 'attachment; filename="{org}_{type}_{dtm}.csv"'.format(
         org=job.organization.name,

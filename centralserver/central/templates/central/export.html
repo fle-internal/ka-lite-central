@@ -15,6 +15,10 @@
         select:disabled {
             color: graytext;
         }
+        #exportform select
+        {
+            width: 100%;
+        }
     </style>
 {% endblock %}
 
@@ -85,7 +89,7 @@
             {% for job in jobs %}
             <tr>
                 <td>{{ job.get_resource_display }}</td>
-                <td>{{ job.zone.name|default:_("All") }}</td>
+                <td>{{ job.zone.name|default:_("All")|truncatechars:40 }}</td>
                 <td>{{ job.facility.name|default:_("All") }}</td>
                 <td>{{ job.facility_group.name|default:_("All") }}</td>
                 <td>
@@ -99,7 +103,9 @@
                 </td>
                 <td>
                     {% if job.completed %}
-                        <a href="{% url 'data_export_csv' jobid=job.id %}?org_id={{ org.id }}"></a>
+                        <a href="{% url 'data_export_csv' jobid=job.id %}?org_id={{ org.id }}">
+                            {% trans "Download" %}
+                        </a>
                     {% else %}
                         -
                     {% endif %}
