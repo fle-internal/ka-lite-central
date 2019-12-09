@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 
 from fle_utils.collections_local_copy import OrderedDict
@@ -10,12 +11,18 @@ from django.core.mail import send_mail
 from django.db import models
 from django.template.loader import render_to_string
 from django.template import RequestContext
-from django.db.models import Q
+from django.db.models import Q, Max, Min
 
 from fle_utils.django_utils.classes import ExtendedModel
 from securesync.models import Zone
 from kalite.facility.models import Facility, FacilityGroup, FacilityUser
+from kalite.main.models import AttemptLog, ExerciseLog
 from kalite.packages.bundled.fle_utils.general import ensure_dir
+from kalite.main.content_rating_models import ContentRating
+from kalite.topic_tools.content_models import get_content_item
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_or_create_user_profile(user):
@@ -254,6 +261,14 @@ class ExportJob(models.Model):
         csv_file = open(self.get_file_path(), 'wb')
         if self.resource == 'user_logs':
             data = self.get_user_logs()
+        if self.resource == 'attempt_logs':
+            data = self.get_attempt_logs()
+        if self.resource == 'exercise_logs':
+            data = self.get_exercise_logs()
+        if self.resource == 'ratings':
+            data = self.get_content_rating()
+        if self.resource == 'device_logs':
+            data = self.get_device_logs()
         if not data:
             csv_file.write("")
             return
@@ -264,7 +279,7 @@ class ExportJob(models.Model):
         writer.writeheader()
         for row in data:
             writer.writerow(row)
-            
+
     def get_user_logs(self):
         """
         Returns a list of dicts for CSV export
@@ -276,13 +291,23 @@ class ExportJob(models.Model):
         elif self.facility:
             queryset = FacilityUser.objects.filter(facility=self.facility)
         elif self.zone:
-            queryset = FacilityUser.objects.by_zone(self.zone)
+            # We could have used this queryset method, but in order to be clear
+            # and precise, we use the extracted actual query
+            # queryset = FacilityUser.objects.by_zone(self.zone)
+            queryset = FacilityUser.objects.filter(
+                Q(signed_by__devicezone__zone=self.zone, signed_by__devicezone__revoked=False) | \
+                Q(signed_by__devicemetadata__is_trusted=True, zone_fallback=self.zone)
+            )
+
         else:
             queryset = FacilityUser.objects.filter(
                 Q(signed_by__devicezone__zone__organization=self.organization, signed_by__devicezone__revoked=False) | \
                 Q(signed_by__devicemetadata__is_trusted=True, zone_fallback__organization=self.organization)
             )
-        
+
+        # Prefetch the facility relation
+        queryset = queryset.select_related('facility')
+
         data = []
         
         for user in queryset:
@@ -300,63 +325,179 @@ class ExportJob(models.Model):
         return data
         
     def get_exercise_logs(self):
-        queryset = ExerciseLog.objects.all()
-        excludes = ['signed_version', 'counter', 'signature']
-        for bundle in to_be_serialized["objects"]:
-            user_id = bundle.data["user"].data["id"]
-            user = self._facility_users.get(user_id)
-            bundle.data["username"] = user.username
-            bundle.data["user_id"] = user.id
-            bundle.data["facility_name"] = user.facility.name
-            bundle.data["facility_id"] = user.facility.id
-            bundle.data["is_teacher"] = user.is_teacher
-            attempt_logs = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], context_type__in=["playlist", "exercise"])
-            bundle.data["timestamp_first"] = attempt_logs.count() and attempt_logs.aggregate(Min('timestamp'))['timestamp__min'] or None
-            bundle.data["timestamp_last"] = attempt_logs.count() and attempt_logs.aggregate(Max('timestamp'))['timestamp__max'] or None
-            bundle.data["part1_answered"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], context_type__in=["playlist", "exercise"]).count()
-            bundle.data["part1_correct"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], correct=True, context_type__in=["playlist", "exercise"]).count()
-            bundle.data["part2_attempted"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], context_type__in=["exercise_fixedblock", "playlist_fixedblock"]).count()
-            bundle.data["part2_correct"] = AttemptLog.objects.filter(user=user, exercise_id=bundle.data["exercise_id"], correct=True, context_type__in=["exercise_fixedblock", "playlist_fixedblock"]).count()
-            bundle.data.pop("user")
+
+        if self.facility_group:
+            queryset = ExerciseLog.objects.filter(user__group=self.facility_group)
+        elif self.facility:
+            queryset = ExerciseLog.objects.filter(user__facility=self.facility)
+        elif self.zone:
+            queryset = ExerciseLog.objects.filter(
+                Q(user__signed_by__devicezone__zone=self.zone, user__signed_by__devicezone__revoked=False) | \
+                Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback=self.zone)
+            )
+        else:
+            queryset = ExerciseLog.objects.filter(
+                Q(user__signed_by__devicezone__zone__organization=self.organization, user__signed_by__devicezone__revoked=False) | \
+                Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback__organization=self.organization)
+            )
+
+        # Prefetch the user relation
+        queryset = queryset.select_related('user')
+        # Prefetch the facility relation
+        queryset = queryset.select_related('user__facility')
+        
+        columns = [
+            "user",
+            "exercise_id",
+            "streak_progress",
+            "attempts",
+            "points",
+            "language",
+            "complete",
+            "struggling",
+            "attempts_before_completion",
+            "completion_timestamp",
+            "completion_counter",
+            "latest_activity_timestamp",
+        ]
+
+        data = []
+        for log in queryset:
+            dct = {}
+            for key in columns:
+                dct[key] = getattr(log, key)
+            user = dct['user']
+            
+            # Here is a bunch of insane and very costly lookups
+            attempt_logs = AttemptLog.objects.filter(user=user, exercise_id=log.exercise_id, context_type__in=["playlist", "exercise"])
+            dct["timestamp_first"] = attempt_logs.count() and attempt_logs.aggregate(Min('timestamp'))['timestamp__min'] or None
+            dct["timestamp_last"] = attempt_logs.count() and attempt_logs.aggregate(Max('timestamp'))['timestamp__max'] or None
+            dct["part1_answered"] = AttemptLog.objects.filter(user=user, exercise_id=log.exercise_id, context_type__in=["playlist", "exercise"]).count()
+            dct["part1_correct"] = AttemptLog.objects.filter(user=user, exercise_id=log.exercise_id, correct=True, context_type__in=["playlist", "exercise"]).count()
+            dct["part2_attempted"] = AttemptLog.objects.filter(user=user, exercise_id=log.exercise_id, context_type__in=["exercise_fixedblock", "playlist_fixedblock"]).count()
+            dct["part2_correct"] = AttemptLog.objects.filter(user=user, exercise_id=log.exercise_id, correct=True, context_type__in=["exercise_fixedblock", "playlist_fixedblock"]).count()
+            data.append(dct)
+        data = self.annotate_users(data)
+        
+        logger.info("Created exercises log of {} rows".format(len(data)))
+        
+        return data
 
     def get_content_rating(self):
-        queryset = ContentRating.objects.all()
-        content_ratings = ContentRating.objects.filter(user__id__in=self._facility_users.keys())
-        excludes = ['signed_version', 'counter', 'signature', 'id', 'deleted']
-        for bundle in filtered_bundles:
-            user_id = bundle.data["user"].data["id"]
-            user = self._facility_users.get(user_id)
-            bundle.data["username"] = user.username
-            bundle.data["facility_name"] = user.facility.name
-            bundle.data["is_teacher"] = user.is_teacher
-            bundle.data.pop("user")
 
-            content_id = bundle.data.pop("content_id", None)
-            content = get_content_item(language=request.language, content_id=content_id)
-            bundle.data["content_title"] = content.get("title", "Missing title") if content else "Unknown content"
+        if self.facility_group:
+            queryset = ContentRating.objects.filter(user__group=self.facility_group)
+        elif self.facility:
+            queryset = ContentRating.objects.filter(user__facility=self.facility)
+        elif self.zone:
+            queryset = ContentRating.objects.filter(
+                Q(user__signed_by__devicezone__zone=self.zone, user__signed_by__devicezone__revoked=False) | \
+                Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback=self.zone)
+            )
+        else:
+            queryset = ContentRating.objects.filter(
+                Q(user__signed_by__devicezone__zone__organization=self.organization, user__signed_by__devicezone__revoked=False) | \
+                Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback__organization=self.organization)
+            )
 
-            serializable_objects.append(bundle)
+        # Prefetch the user relation
+        queryset = queryset.select_related('user')
+        # Prefetch the facility relation
+        queryset = queryset.select_related('user__facility')
+
+        columns = [
+            "user",
+            "content_kind",
+            "content_id",
+            "content_source",
+            "quality",
+            "difficulty",
+            "text",
+        ]
+
+        data = []
+        for log in queryset:
+            dct = {}
+            for key in columns:
+                dct[key] = getattr(log, key)
+            
+            # Do a lookup of the title
+            content = get_content_item(content_id=log.content_id)
+            dct["content_title"] = content.get("title", "Missing title") if content else "Unknown content"
+
+            data.append(dct)
+
+        data = self.annotate_users(data)
+        
+        logger.info("Exported ratings of {} rows".format(len(data)))
+        
+        return data
 
     def get_device_logs(self):
         queryset = Device.objects.all()
         excludes = ['signed_version', 'public_key', 'counter', 'signature']
 
     def get_attempt_logs(self):
-        AttemptLog.objects.all()
-        excludes = ['user', 'signed_version', 'language', 'deleted', 'response_log', 'signature', 'version', 'counter']
+        """
+        Fetches all attempt log rows
+        """
+        if self.facility_group:
+            queryset = AttemptLog.objects.filter(user__group=self.facility_group)
+        elif self.facility:
+            queryset = AttemptLog.objects.filter(user__facility=self.facility)
+        elif self.zone:
+            queryset = AttemptLog.objects.filter(
+                Q(user__signed_by__devicezone__zone=self.zone, user__signed_by__devicezone__revoked=False) | \
+                Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback=self.zone)
+            )
+        else:
+            queryset = FacilityUser.objects.filter(
+                Q(user__signed_by__devicezone__zone__organization=self.organization, user__signed_by__devicezone__revoked=False) | \
+                Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback__organization=self.organization)
+            )
+
+        # Prefetch the user relation
+        queryset = queryset.select_related('user')
+        # Prefetch the facility relation
+        queryset = queryset.select_related('user__facility')
+
         columns = [
-            ""
+            "user",
+            "exercise_id",
+            "seed",
+            "answer_given",
+            "points",
+            "correct",
+            "complete",
+            "context_type",
+            "context_id",
+            "language",
+            "timestamp",
+            "time_taken",
+            "assessment_item_id",
         ]
+        data = []
+        for log in queryset:
+            dct = {}
+            for key in columns:
+                dct[key] = getattr(log, key)
+            data.append(dct)
+        data = self.annotate_users(data)
+
+        logger.info("Exported attempt logs of {} rows".format(len(data)))
+
+        return data
 
     def annotate_users(self, rows):
         for row in rows:
-            user = row['user']
+            user = row.pop('user', None)
+            if not user:
+                continue
             row["username"] = user.username
             row["user_id"] = user.id
             row["facility_name"] = user.facility.name
             row["facility_id"] = user.facility.id
             row["is_teacher"] = user.is_teacher
-            del row['user']
         return rows
 
     class Meta:
