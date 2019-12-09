@@ -66,13 +66,11 @@ class ExportForm(forms.ModelForm):
         self.fields['zone'].queryset = self.organization.zones
         data = self.data
         if 'zone' in data:
-            self.fields['facility'].queryset = Facility.objects.filter(
-                zone_fallback__organization__id=self.organization.id,
-                zone_fallback__id=data.get('zone', 0)
-            ).distinct()
+            self.fields['facility'].queryset = Facility.objects.by_zone(
+                data.get('zone', 0)
+            )
         if 'facility' in data:
             self.fields['facility_group'].queryset = FacilityGroup.objects.filter(
-                facility__zone_fallback__organization__id=self.organization.id,
                 facility__id=data.get('facility', 0)
             ).distinct()
 
