@@ -20,6 +20,8 @@ from kalite.main.models import AttemptLog, ExerciseLog
 from kalite.packages.bundled.fle_utils.general import ensure_dir
 from kalite.main.content_rating_models import ContentRating
 from kalite.topic_tools.content_models import get_content_item
+from securesync.devices.models import Device
+from securesync.engine.models import SyncSession
 
 
 logger = logging.getLogger(__name__)
@@ -434,8 +436,48 @@ class ExportJob(models.Model):
         return data
 
     def get_device_logs(self):
-        queryset = Device.objects.all()
-        excludes = ['signed_version', 'public_key', 'counter', 'signature']
+        # Facility and FacilityGroup are a bit unsure in the export since the
+        # mapping from facility to zone to device is unsure. We use the
+        # Facility.fallback_zone
+        zone = None
+        if self.zone:
+            zone = self.zone
+        if self.facility or self.facility_group:
+            facility = self.facility or self.facility_group.facility
+            zone = facility.fallback_zone
+
+        if zone:
+            queryset = Device.objects.filter(
+                devicezone__zone=self.zone, devicezone__revoked=False
+            )
+        else:
+            queryset = Device.objects.filter(
+                devicezone__zone__organization=self.organization, devicezone__revoked=False
+            )
+
+        columns = [
+            "name",
+            "description",
+            "public_key",
+            "version",
+        ]
+        
+        data = []
+
+        for log in queryset:
+            dct = {}
+            for key in columns:
+                dct[key] = getattr(log, key)
+                all_sessions = SyncSession.objects.filter(client_device__id=log.id)
+                last_sync = "Never" if not all_sessions else all_sessions.order_by("-timestamp")[0].timestamp
+                dct["last_sync"] = last_sync
+                dct["total_sync_sessions"] = len(all_sessions)
+
+            data.append(dct)
+
+        logger.info("Exported devices of {} rows".format(len(data)))
+        
+        return data
 
     def get_attempt_logs(self):
         """
