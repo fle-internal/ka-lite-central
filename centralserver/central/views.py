@@ -1,29 +1,20 @@
 """
 """
-import json
-import os
-import re
-import sys
-import tempfile
 from annoying.decorators import render_to
-from annoying.functions import get_object_or_None
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.management import call_command
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, Http404, HttpResponseServerError
-from django.shortcuts import render_to_response, get_object_or_404
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-import kalite.version  # for software version
-from .forms import OrganizationForm, OrganizationInvitationForm
+from .forms import OrganizationForm, OrganizationInvitationForm, ExportForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
 from fle_utils.internet.classes import JsonResponseMessageError
@@ -32,6 +23,8 @@ from kalite.control_panel import views as kalite_control_panel_views
 from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.engine.api_client import SyncClient
 from securesync.models import Zone
+from centralserver.central.models import ExportJob
+from django.http.response import StreamingHttpResponse
 
 
 @render_to("central/homepage.html")
@@ -67,7 +60,7 @@ def org_management(request, org_id=None):
             form.save()
             return HttpResponseRedirect(reverse("org_management"))
         else: # we need to inject the form into the correct organization, so errors are displayed inline
-            for pk,org in organizations.items():
+            for __, org in organizations.items():
                 if org.pk == int(request.POST.get("organization")):
                     org.form = form
 
@@ -197,17 +190,6 @@ def zone_add_to_org(request, zone_id, org_id=None, **kwargs):
     return context
 
 
-def content_page(request, page, **kwargs):
-    context = RequestContext(request)
-    context.update(kwargs)
-    return render_to_response("central/content/%s.html" % page, context_instance=context)
-
-
-@render_to("central/glossary.html")
-def glossary(request):
-    return {}
-
-
 def get_request_var(request, var_name, default_val="__empty__"):
     """
     Allow getting parameters from the POST object (from submitting a HTML form),
@@ -240,9 +222,98 @@ def crypto_login(request):
     return HttpResponseRedirect("%ssecuresync/cryptologin/?client_nonce=%s" % (host, client.session.client_nonce))
 
 
-def handler_403(request, *args, **kwargs):
-    context = RequestContext(request)
+@require_authorized_admin
+@render_to("central/export.html")
+def export(request):
+    """
+    2019-11-25
+    This overwrites the previously central+distributed view function in
+    kalite.control_panel.views where the same view function was parameterized
+    by settings.CENTRAL_SERVER.
+    """
 
+    zone_id = request.GET.get("zone_id", "")
+    facility_id = request.GET.get("facility_id", "")
+    group_id = request.GET.get("group_id", "")
+
+    if 'facility_user' in request.session:
+        facility_id = request.session['facility_user'].facility.id
+
+    if zone_id:
+        zone = Zone.objects.get(id=zone_id)
+    else:
+        zone = ""
+
+    all_zones_url = reverse("api_dispatch_list", kwargs={"resource_name": "zone"})
+    if zone_id:
+        org = Zone.objects.get(id=zone_id).get_org()
+        org_id = org.id
+    else:
+        org_id = request.GET.get("org_id", "")
+        if not org_id:
+            return HttpResponseNotFound()
+        else:
+            org = Organization.objects.get(id=org_id)
+
+    if request.method == 'POST':
+        form = ExportForm(org, data=request.POST)
+        if form.is_valid() and form.cleaned_data['submitted'] > 0:
+            job = form.save()
+            messages.success(request, _(
+                "Job ID {id} was created and will run after {cnt} other jobs "
+                "are completed. Please refresh this page to download the CSV data "
+                "and expect up to 5-10 minutes before the file is generated."
+            ).format(
+                id=job.id,
+                cnt=ExportJob.objects.exclude(id=job.id).filter(completed=None).count(),
+            ))
+            # This is not pretty, but the usage of querystring stuff for
+            # maintaining state ain't pretty neither. Some old school PHP
+            # patterns :)
+            return HttpResponseRedirect(
+                request.path_info + '?' + request.META['QUERY_STRING']
+            )
+    else:
+        form = ExportForm(org)
+
+    jobs = ExportJob.objects.filter(organization=org)
+
+    context = {
+        "form": form,
+        "jobs": jobs,
+        "org": org,
+        "zone": zone,
+        "org_id": org_id,
+        "zone_id": zone_id,
+        "facility_id": facility_id,
+        "group_id": group_id,
+        "all_zones_url": all_zones_url,
+        "is_facility_user": "true" if "facility_user" in request.session else "false",
+    }
+
+    return context
+
+
+@require_authorized_admin
+def export_csv(request, jobid=0):
+    org_id = request.GET.get("org_id", "")
+    job = get_object_or_404(
+        ExportJob.objects.filter(organization__id=org_id),
+        id=jobid,
+    )
+    f = open(job.get_file_path(), "r")
+    response = StreamingHttpResponse(
+        f,
+        content_type="text/csv",
+    )
+    response['Content-Disposition'] = 'attachment; filename="{org}_{type}_{dtm}.csv"'.format(
+        org=job.organization.name,
+        type=job.resource,
+        dtm=job.completed.strftime("%Y%m%d")
+    )
+    return response
+
+def handler_403(request, *args, **kwargs):
     if request.is_ajax():
         return JsonResponseMessageError(_("You must be logged in with an account authorized to view this page (API)."), status=403)
     else:

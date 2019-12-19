@@ -57,9 +57,6 @@ urlpatterns += patterns('',
 urlpatterns += patterns(__package__ + '.views',
     url(r'^test/500/$', 'test500', {}, 'test500'),  # Test for error handling
     url(r'^$', 'homepage', {}, 'homepage'),
-    url(r'^content/(?P<page>\w+)/', 'content_page', {}, 'content_page'), # Example of a new landing page
-
-    url(r'^glossary/$', 'glossary', {}, 'glossary'),
 
     # The following has been superceded by the stats app, but we
     #   keep it here so that things will function even if that app is removed.
@@ -85,6 +82,11 @@ urlpatterns += patterns(__package__ + '.views',
 
 urlpatterns += patterns(__package__ + '.api_views',
     url(r'^api/', include(api_urls)),
+)
+
+urlpatterns += patterns('centralserver.central.views',
+    url(r'^export/$', 'export', {}, 'data_export'),
+    url(r'^export/job/(?P<jobid>\d+)/csv/$', 'export_csv', {}, 'data_export_csv'),
 )
 
 urlpatterns += patterns('kalite.control_panel.views',
