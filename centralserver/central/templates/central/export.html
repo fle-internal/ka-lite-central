@@ -46,7 +46,12 @@
 
 {% block control_panel_content %}
 <h1>{% trans "Export CSV data" %}</h1>
-<p style="max-width: 50%">{% trans "On this page, you can request CSV data from our system. As some datasets are large, our server will handle the export and show you a link to download the data on this page, once the export has finished." %}</p>
+<p style="max-width: 50%">
+    {% trans "On this page, you can request CSV data from our system. As some datasets are large, our server will handle the export and show you a link to download the data on this page, once the export has finished." %}
+</p>
+<p style="max-width: 50%">
+    {% trans "To save time, generate all the export jobs that you need and refresh the page in 10 minutes time." %}
+</p>
 <hr>
 <div class="row">
     <div class="col-md-4">

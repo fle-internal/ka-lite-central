@@ -261,7 +261,8 @@ def export(request):
             job = form.save()
             messages.success(request, _(
                 "Job ID {id} was created and will run after {cnt} other jobs "
-                "are completed."
+                "are completed. Please refresh this page to download the CSV data "
+                "and expect up to 5-10 minutes before the file is generated."
             ).format(
                 id=job.id,
                 cnt=ExportJob.objects.exclude(id=job.id).filter(completed=None).count(),
