@@ -493,7 +493,7 @@ class ExportJob(models.Model):
                 Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback=self.zone)
             )
         else:
-            queryset = FacilityUser.objects.filter(
+            queryset = AttemptLog.objects.filter(
                 Q(user__signed_by__devicezone__zone__organization=self.organization, user__signed_by__devicezone__revoked=False) | \
                 Q(user__signed_by__devicemetadata__is_trusted=True, user__zone_fallback__organization=self.organization)
             )
