@@ -229,11 +229,6 @@ $(function() {
         return false;
     });
 
-    /*
-        setting up glossary
-    */
-    $('.glossary-link').wrap(sprintf('<a href="%s"></a>', GLOSSARY_URL));
-
     // Used <div> instead of <a> to avoid a dirty js hack to avoid the reload to top page.
     $('.button-popover-zone').each(function() { $(this).popover(); }); //Each popover needs an individual callback
     $('.button-popover-orgadmin').each(function() { $(this).popover(); });

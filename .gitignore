@@ -1,3 +1,6 @@
+centralserver/csv_exports
+.coverage
+geckodriver.log
 .project
 .pydevproject
 .DS_Store

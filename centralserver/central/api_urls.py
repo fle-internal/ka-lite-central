@@ -13,7 +13,6 @@ urlpatterns = patterns(__package__ + '.api_views',
     url(r'zone/(?P<zone_id>\w+)/delete$', 'delete_zone', {}, 'delete_zone'),
 
     url(r'^version$', 'get_kalite_version', {}, 'get_kalite_version'),
-    url(r'^download/kalite/$', 'get_download_urls', {}, 'get_download_urls'),
 
     # Zone TastyPie endpoint
     url(r'^export/', include(ZoneResource().urls)),

@@ -1,14 +1,6 @@
 """
 Test support harness to make setup.py test work.
 """
-import functools
-import os
-import pdb
-import sys
-
-from django.conf import settings
-from django.core import management
-
 from kalite.testing.testrunner import KALiteTestRunner
 
 

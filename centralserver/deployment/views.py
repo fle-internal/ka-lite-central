@@ -1,7 +1,7 @@
 import datetime
 import os
 from annoying.decorators import render_to
-from collections_local_copy import Counter, OrderedDict
+from fle_utils.collections_local_copy import Counter, OrderedDict
 from datetime import timedelta  # this is OK; central server code can be 2.7+
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger

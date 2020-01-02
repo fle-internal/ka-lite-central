@@ -1,0 +1,131 @@
+{% extends "control_panel/base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% load include_block %}
+{% load humanize %}
+
+{% block i18n_do_not_translate %}
+    {% block facility_active %}active{% endblock %}
+{% endblock %}
+
+{% block title %}{{ org.name }} - {% trans "Data Export" %} {{ block.super }}{% endblock title %}
+
+{% block headcss %}{{ block.super }}
+    <style>
+        select:disabled {
+            color: graytext;
+        }
+        #exportform select
+        {
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block titlebar %}
+    <div class="titlebar">
+        <ul class="titlebar__title">
+        {% block titlebar_title %}
+            {% if org %}
+                <li>
+                    <a href="{% url 'org_management' %}"> {{ org.name }}</a> > 
+                </li>
+            {% endif %}
+            {% if zone %}
+                <li>
+                    <a href="{% url 'zone_management' zone_id=zone.id %}"> {{ zone.name }}</a> / 
+                </li>
+            {% endif %}
+            <li>
+                {% trans "Data Export" %}
+            </li>
+        {% endblock titlebar_title %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block control_panel_content %}
+<h1>{% trans "Export CSV data" %}</h1>
+<p style="max-width: 50%">
+    {% trans "On this page, you can request CSV data from our system. As some datasets are large, our server will handle the export and show you a link to download the data on this page, once the export has finished." %}
+</p>
+<p style="max-width: 50%">
+    {% trans "To save time, generate all the export jobs that you need and refresh the page in 10 minutes time." %}
+</p>
+<hr>
+<div class="row">
+    <div class="col-md-4">
+        <h2>{% trans "Create job" %}</h2>
+        <div>
+        <form method="POST" class="basic-form" id="exportform">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p></p>
+            <input type="submit" value="{% trans 'Create CSV job' %}" class="submit button" onclick="this.form.submitted.value=1" />
+        </form>
+        <script type="text/javascript">
+        $(function() {
+            $('#id_submitted').val("0");
+            $('#id_zone,#id_facility,#id_facility_group').change(function() {
+                $('#id_submitted').val("0");
+                $('#exportform').submit();
+            });
+        });
+        </script>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h2>{% trans "Finished jobs" %}</h2>
+        
+        <table class="table table-striped">
+        
+            <thead>
+            <tr>
+                <th>{% trans "Resource" %}</th>
+                <th>{% trans "Zone" %}</th>
+                <th>{% trans "Facility" %}</th>
+                <th>{% trans "Group" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "CSV" %}</th>
+            </tr>
+            </thead>
+        
+            <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.get_resource_display }}</td>
+                <td>{{ job.zone.name|default:_("All")|truncatechars:40 }}</td>
+                <td>{{ job.facility.name|default:_("All") }}</td>
+                <td>{{ job.facility_group.name|default:_("All") }}</td>
+                <td>
+                    {% if job.completed %}
+                        {% trans "Completed" %} {{ job.completed|naturaltime }}
+                    {% elif job.started %}
+                        {% trans "Started" %} {{ job.started|naturaltime }}
+                    {% else %}
+                        {% trans "Requested" %} {{ job.requested|naturaltime }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if job.completed %}
+                        <a href="{% url 'data_export_csv' jobid=job.id %}?org_id={{ org.id }}">
+                            {% trans "Download" %}
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+            <td colspan="100"><em>{% trans "No jobs found." %}</em></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        
+        </table>
+        
+    </div>
+</div>
+<!-- End container -->
+{% endblock %}

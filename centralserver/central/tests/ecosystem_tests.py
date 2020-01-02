@@ -15,6 +15,8 @@ from kalite.facility.models import Facility, FacilityGroup, FacilityUser
 from kalite.main.models import AttemptLog
 from securesync.models import Device, DeviceZone
 
+from centralserver.central.models import Organization
+
 FACILITY_MODEL = 'kalite.facility.models.Facility'
 GROUP_MODEL = 'kalite.facility.models.FacilityGroup'
 FACILITY_USER_MODEL = 'kalite.facility.models.FacilityUser'
@@ -29,6 +31,9 @@ class SameVersionTests(CreateAdminMixin,
                        LiveServerTestCase):
 
     def setUp(self):
+        
+        # We need the live server's error reports, otherwise hard to troubleshoot
+        settings.DEBUG = True
         self.setup_fake_device(name="Central")
         self.user = self.create_admin()
         self.org = self.create_organization(owner=self.user)
@@ -36,10 +41,17 @@ class SameVersionTests(CreateAdminMixin,
 
         self._key_factory = KeyFactory()
 
+        # Do not reuse the cached property
+        Organization.HEADLESS_ORG_PK = None
+
         self.settings = {
             'CENTRAL_SERVER_URL': self.live_server_url,
             'SYNCING_MAX_RECORDS_PER_REQUEST': settings.SYNCING_MAX_RECORDS_PER_REQUEST,
         }
+
+    def tearDown(self):
+        # We need the live server's error reports, otherwise hard to troubleshoot
+        settings.DEBUG = False
 
     def get_distributed_server(self, **kwargs):
 

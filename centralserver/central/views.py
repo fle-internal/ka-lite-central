@@ -1,36 +1,30 @@
 """
 """
-import json
-import os
-import re
-import sys
-import tempfile
 from annoying.decorators import render_to
-from annoying.functions import get_object_or_None
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.management import call_command
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, Http404, HttpResponseServerError
-from django.shortcuts import render_to_response, get_object_or_404
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-import kalite.version  # for software version
-from .forms import OrganizationForm, OrganizationInvitationForm
+from .forms import OrganizationForm, OrganizationInvitationForm, ExportForm
 from .models import Organization, OrganizationInvitation, DeletionRecord, get_or_create_user_profile
 from fle_utils.feeds.models import FeedListing
+from fle_utils.internet.classes import JsonResponseMessageError
 from fle_utils.internet.functions import set_query_params
 from kalite.control_panel import views as kalite_control_panel_views
 from kalite.shared.decorators.auth import require_authorized_admin
 from securesync.engine.api_client import SyncClient
 from securesync.models import Zone
+from centralserver.central.models import ExportJob
+from django.http.response import StreamingHttpResponse
 
 
 @render_to("central/homepage.html")
@@ -40,8 +34,6 @@ def homepage(request):
     feed = FeedListing.objects.order_by('-posted_date')[:5]
     return {
         "feed": feed,
-        "central_contact_email": settings.CENTRAL_CONTACT_EMAIL,
-        "wiki_url": settings.CENTRAL_WIKI_URL
     }
 
 @login_required
@@ -68,7 +60,7 @@ def org_management(request, org_id=None):
             form.save()
             return HttpResponseRedirect(reverse("org_management"))
         else: # we need to inject the form into the correct organization, so errors are displayed inline
-            for pk,org in organizations.items():
+            for __, org in organizations.items():
                 if org.pk == int(request.POST.get("organization")):
                     org.form = form
 
@@ -104,7 +96,6 @@ def org_management(request, org_id=None):
         "my_invitations": list(OrganizationInvitation.objects \
             .filter(email_to_invite=request.user.email)
             .order_by("organization__name")),
-        "download_url": reverse("install"),
     }
 
 
@@ -199,21 +190,6 @@ def zone_add_to_org(request, zone_id, org_id=None, **kwargs):
     return context
 
 
-def content_page(request, page, **kwargs):
-    context = RequestContext(request)
-    context.update(kwargs)
-    return render_to_response("central/content/%s.html" % page, context_instance=context)
-
-
-def wiki_redirect(request, path, **kwargs):
-    return HttpResponseRedirect(os.path.join(settings.CENTRAL_WIKI_URL, path.strip("/")))
-
-
-@render_to("central/glossary.html")
-def glossary(request):
-    return {}
-
-
 def get_request_var(request, var_name, default_val="__empty__"):
     """
     Allow getting parameters from the POST object (from submitting a HTML form),
@@ -222,196 +198,6 @@ def get_request_var(request, var_name, default_val="__empty__"):
     This isn't very RESTful, but it makes a lot of sense to me!
     """
     return  request.POST.get(var_name, request.GET.get(var_name, default_val))
-
-
-def download_wizard(request, edition=None):
-    """
-    NOTE that this wizard is ONLY PARTIALLY FUNCTIONAL (see below)
-
-    Install wizard accepts "edition" as an optional argument.
-
-    If the user is not logged in, they are shown both choices.
-    If they select edition=single-server, then they download right away.
-
-    If the user is logged in, they are only shown the multiple-servers edition.
-    When they submit the form (to choose the zone), they get the download package.
-
-    TODO(bcipolli):
-    * Don't show org, only show zone.
-    * If a user has more than one organization, you only get zone information for the first zone.
-    there's no way to show information from other orgs.
-        If the user is logged in, theyIf not sent, the user has two options: "single server" or "multiple server".
-
-    """
-    if not edition and request.user.is_anonymous():
-        @render_to("central/download_wizard.html")
-        def wizard_fn(request):
-            return {}
-        return wizard_fn(request)
-
-    elif edition == "multiple-server" or not request.user.is_anonymous():
-        return download_multiple_server_edition(request)
-
-    elif edition == "single-server":
-        return download_single_server_edition(request)
-
-    else:
-        raise Http404("Unknown server edition: %s" % edition)
-
-
-
-@render_to("central/download_thankyou.html")
-def download_thankyou(request, **kwargs):
-    return kwargs
-
-
-def download_single_server_edition(request):
-    """
-    """
-    version = get_request_var(request, "version",  kalite.version.VERSION)
-    platform = get_request_var(request, "platform", "all")
-    locale = get_request_var(request, "locale", "en")
-
-    return download_thankyou(
-        request,
-        version=kalite.version.VERSION,
-        download_url=reverse("download_kalite_public", kwargs={
-            "version": kalite.version.VERSION,
-            "platform": platform,
-            "locale": locale,
-        }),
-    )
-
-
-@login_required
-def download_multiple_server_edition(request):
-    # get a list of all the organizations this user helps administer,
-    #   then choose the selected organization (if possible)
-    # Get all data
-    zone_id = get_request_var(request, "zone", None)
-    kwargs={
-        "version": kalite.version.VERSION,
-        "platform": get_request_var(request, "platform", "all"),
-        "locale": get_request_var(request, "locale", "en"),
-        "include_data": bool(get_request_var(request, "include_data", True)),
-    }
-
-    # Loop over orgs and zones, building the dict of all zones
-    #   while searching for the zone_id.
-
-    zones = []
-    for org in request.user.organization_set.all().order_by("name"):
-        for zone in org.zones.all().order_by("name"):
-            if zone_id and zone_id == zone.id:
-                kwargs["zone_id"] = zone_id
-                return download_thankyou(
-                    request,
-                    version=kwargs["version"],
-                    download_url=reverse("download_kalite_private", kwargs=kwargs),
-                )
-            else:
-                zones.append({
-                    "id": zone.id,
-                    "name": "%s / %s" % (org.name, zone.name),
-                })
-
-    # If we get here, then we failed to find the zone.
-    if zone_id:
-        if Zone.objects.filter(id=zone_id):
-            # The zone exists, we must just not have access to it
-            raise PermissionDenied()
-        else:
-            # We didnt't find it because it doesn't exist
-            raise Http404(_("Zone ID not found: %s") % zone_id)
-
-    # If we get here, then no zone was specified.  So list the options.
-    if len(zones) == 1:
-        zone_id = zones[0]["id"]
-
-    @render_to("central/download_wizard.html")
-    def wizard_fn(request):
-        return {
-            "zones": zones,
-            "selected_zone": zone_id or (zones[0]["id"] if len(zones) == 1 else None),
-            "edition": "multiple-server",
-        }
-    return wizard_fn(request)
-
-
-def download_kalite_public(request, *args, **kwargs):
-    """
-    Download the public version of KA Lite--make sure they don't
-    try to sneak in unauthorized zone info!
-    """
-    if "zone_id" in kwargs or "zone" in request.REQUEST:
-        raise PermissionDenied(_("Must be logged in to download with zone information."))
-    return download_kalite(request, *args, **kwargs)
-
-
-@login_required
-def download_kalite_private(request, *args, **kwargs):
-    """
-    Download with zone info--will authenticate that zone info
-    below.
-    """
-    zone_id = kwargs.get("zone_id") or request.REQUEST.get("zone")
-    if not zone_id:
-        # No zone information = bad request (400)
-        return HttpResponse(_("Must specify zone information."), status=400)
-
-    kwargs["zone_id"] = zone_id
-    return download_kalite(request, *args, **kwargs)
-
-
-def download_kalite(request, *args, **kwargs):
-    """
-    A request to download KA Lite, either without zone info, or with it.
-    If with it, then we have to make sure it's OK for this user.
-
-    This endpoint is also set up to deal with platform, locale, and version,
-    though right now only direct URLs would set this (not via the download wizard).
-    """
-
-    # Parse args
-    zone = get_object_or_None(Zone, id=kwargs.get('zone_id', None))
-    platform = kwargs.get("platform", "all")
-    locale = kwargs.get("locale", "en")
-    version = kwargs.get("version", kalite.version.VERSION)
-    if version == "latest":
-        version = kalite.version.VERSION
-
-    # Make sure this user has permission to admin this zone
-    if zone and not request.user.is_authenticated():
-        raise PermissionDenied(_("Requires authentication"))
-    elif zone:
-        zone_orgs = Organization.from_zone(zone)
-        if not zone_orgs or not set([org.id for org in zone_orgs]).intersection(set(get_or_create_user_profile(request.user).get_organizations().keys())):
-            raise PermissionDenied(_("You are not authorized to access this zone information."))
-
-    # Generate the zip file.  Pre-specify the zip filename,
-    #   as we won't know the output location otherwise.
-    zip_file = tempfile.mkstemp()[1]
-    call_command(
-        "package_for_download",
-        file=zip_file,
-        central_server=request.get_host(),
-        **kwargs
-    )
-
-    # Build the outgoing filename."
-    user_facing_filename = "kalite"
-    for val in [platform, locale, kalite.version.VERSION, zone.name if zone else None]:
-        user_facing_filename +=  ("-%s" % val) if val not in [None, "", "all"] else ""
-    user_facing_filename += ".zip"
-
-    # Stream it back to the user
-    zh = open(zip_file,"rb")
-    response = HttpResponse(content=zh, mimetype='application/zip', content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename="%s"' % user_facing_filename
-
-    # Not sure if we could remove the zip file here; possibly not,
-    #   if it's a streaming response or byte-range reesponse
-    return response
 
 
 @login_required
@@ -436,9 +222,98 @@ def crypto_login(request):
     return HttpResponseRedirect("%ssecuresync/cryptologin/?client_nonce=%s" % (host, client.session.client_nonce))
 
 
-def handler_403(request, *args, **kwargs):
-    context = RequestContext(request)
+@require_authorized_admin
+@render_to("central/export.html")
+def export(request):
+    """
+    2019-11-25
+    This overwrites the previously central+distributed view function in
+    kalite.control_panel.views where the same view function was parameterized
+    by settings.CENTRAL_SERVER.
+    """
 
+    zone_id = request.GET.get("zone_id", "")
+    facility_id = request.GET.get("facility_id", "")
+    group_id = request.GET.get("group_id", "")
+
+    if 'facility_user' in request.session:
+        facility_id = request.session['facility_user'].facility.id
+
+    if zone_id:
+        zone = Zone.objects.get(id=zone_id)
+    else:
+        zone = ""
+
+    all_zones_url = reverse("api_dispatch_list", kwargs={"resource_name": "zone"})
+    if zone_id:
+        org = Zone.objects.get(id=zone_id).get_org()
+        org_id = org.id
+    else:
+        org_id = request.GET.get("org_id", "")
+        if not org_id:
+            return HttpResponseNotFound()
+        else:
+            org = Organization.objects.get(id=org_id)
+
+    if request.method == 'POST':
+        form = ExportForm(org, data=request.POST)
+        if form.is_valid() and form.cleaned_data['submitted'] > 0:
+            job = form.save()
+            messages.success(request, _(
+                "Job ID {id} was created and will run after {cnt} other jobs "
+                "are completed. Please refresh this page to download the CSV data "
+                "and expect up to 5-10 minutes before the file is generated."
+            ).format(
+                id=job.id,
+                cnt=ExportJob.objects.exclude(id=job.id).filter(completed=None).count(),
+            ))
+            # This is not pretty, but the usage of querystring stuff for
+            # maintaining state ain't pretty neither. Some old school PHP
+            # patterns :)
+            return HttpResponseRedirect(
+                request.path_info + '?' + request.META['QUERY_STRING']
+            )
+    else:
+        form = ExportForm(org)
+
+    jobs = ExportJob.objects.filter(organization=org)
+
+    context = {
+        "form": form,
+        "jobs": jobs,
+        "org": org,
+        "zone": zone,
+        "org_id": org_id,
+        "zone_id": zone_id,
+        "facility_id": facility_id,
+        "group_id": group_id,
+        "all_zones_url": all_zones_url,
+        "is_facility_user": "true" if "facility_user" in request.session else "false",
+    }
+
+    return context
+
+
+@require_authorized_admin
+def export_csv(request, jobid=0):
+    org_id = request.GET.get("org_id", "")
+    job = get_object_or_404(
+        ExportJob.objects.filter(organization__id=org_id),
+        id=jobid,
+    )
+    f = open(job.get_file_path(), "r")
+    response = StreamingHttpResponse(
+        f,
+        content_type="text/csv",
+    )
+    response['Content-Disposition'] = 'attachment; filename="{org}_{type}_{dtm}.csv"'.format(
+        org=job.organization.name,
+        type=job.resource,
+        dtm=job.completed.strftime("%Y%m%d")
+    )
+    return response
+
+def handler_403(request, *args, **kwargs):
     if request.is_ajax():
         return JsonResponseMessageError(_("You must be logged in with an account authorized to view this page (API)."), status=403)
     else:
@@ -446,8 +321,13 @@ def handler_403(request, *args, **kwargs):
         return HttpResponseRedirect(set_query_params(reverse("auth_login"), {"next": request.get_full_path()}))
 
 
+def test500(request):
+    raise RuntimeError("This is a test. The canary is alive.")
+
+
 def handler_404(request):
     return HttpResponseNotFound(render_to_string("central/404.html", {}, context_instance=RequestContext(request)))
+
 
 def handler_500(request):
     return HttpResponseServerError(render_to_string("central/500.html", {}, context_instance=RequestContext(request)))

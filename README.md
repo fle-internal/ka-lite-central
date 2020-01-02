@@ -2,11 +2,16 @@
 
 This is the code for the KA Lite Central Server: [https://kalite.learningequality.org](https://kalite.learningequality.org)
 
+The repo contains two branches:
+
+* `develop`: The default branch, deployed to a staging server
+* `master`: Intended for deployment, not to be pushed to (except from `develop`)
+
 ## What this is
 
-A django app which is "It's Complicated" with [ka-lite](https://github.com/learningequality/ka-lite.git).
-Distributed servers are configured to point to an instance of the central server, which manages their syncing.
-Could be managing many different versions of KA Lite at once.
+* A Django app which is "It's Complicated" with [ka-lite](https://github.com/learningequality/ka-lite.git).
+* Distributed servers (KA Lite) are configured to point to an instance of the central server, which manages their syncing.
+* Could be managing many different versions of KA Lite at once.
 
 ## Bootstrapping a dev env
 
@@ -23,7 +28,6 @@ Could be managing many different versions of KA Lite at once.
    mkvirtualenv centralserver
    workon centralserver
    pip install -r requirements.txt
-   pip install -r ka-lite-submodule/requirements.txt
    ```
 
 1. Go into the centralserver directory and bootstrap it:

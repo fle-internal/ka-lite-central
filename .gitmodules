@@ -1,4 +1,0 @@
-[submodule "ka-lite-submodule"]
-	path = ka-lite-submodule
-	url = https://github.com/learningequality/ka-lite.git
-        branch = central-develop
