@@ -208,6 +208,10 @@ def register(request, backend, success_url=None, form_class=None,
     # if they've been invited, don't force org creation
     invited_email = request.REQUEST.get("email_invite") 
     if request.method == 'POST':
+        if getattr(settings, "KALITE_2020_REGISTRATION_CLOSED", False):
+            # Quick, untested hack ensuring that we don't respond to a POST request
+            # since we no longer want registrations.
+            return redirect(disallowed_url)
         form = form_class(data=request.POST, files=request.FILES)
         validation_successful = True
         # Could register
@@ -283,6 +287,7 @@ def register(request, backend, success_url=None, form_class=None,
             'form': form,
             "org_form" : org_form,
             "subscribe": do_subscribe,
+            "registration_closed": getattr(settings, "KALITE_2020_REGISTRATION_CLOSED", False)
         },
         context_instance=context,
     )
