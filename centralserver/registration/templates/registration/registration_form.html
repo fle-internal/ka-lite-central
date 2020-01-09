@@ -27,6 +27,28 @@
 {% endblock headcss %}
 
 {% block content %}
+
+{% if registration_closed %}
+<h1>Registration closed</h1>
+
+<p>
+    To register a device, please go back and use <strong>One-click registration</strong>.
+</p>
+
+<p>
+    Basing new activities on synchronizing data to KA Lite's Central Server is
+    discouraged, please use
+    <a href="https://learningequality.org/kolibri/" target="_blank">Kolibri</a>
+    instead.
+</p>
+
+<p>
+    Data from KA Lite's Central Server will be unavailable in early 2020, and
+    synchronization between existing devices will likely stop working in 2021.
+</p>
+
+{% else %}
+
   {% if form.non_field_errors %}
   <div class="errorlist">
       Please correct the errors below:
@@ -164,9 +186,14 @@
         <div class="submit"><input class="button--small" type="submit" value="Register &rarr;"></div>
     </div>
   </form>
+
+{% endif %}
+
 {% endblock %}
 
 {% block content-related %}
+
+{% if not registration_closed %}
     <div class="form-section">Fill out the form to the left (all fields are required), and your
     account will be created; you'll be sent an email with instructions on how
     to finish your registration.</div>
@@ -176,4 +203,6 @@
 
     <div class="form-section">This account will let you log into the ticket tracker, claim tickets,
     and be exempt from spam filtering.</div>
+{% endif %}
+
 {% endblock %}
