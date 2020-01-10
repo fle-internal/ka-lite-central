@@ -95,7 +95,7 @@ class Command(BaseCommand):
             body = t_body.render(context)
             subject = t_subject.render(context)
             email1 = mail.EmailMessage(
-                subject,
+                subject.strip(),
                 body,
                 'info@learningequality.org',
                 receiver_list,
