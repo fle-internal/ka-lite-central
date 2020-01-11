@@ -42,7 +42,7 @@ class Organization(ExtendedModel):
     country = models.CharField(max_length=100, blank=True)
     users = models.ManyToManyField(User)
     zones = models.ManyToManyField(Zone)
-    owner = models.ForeignKey(User, related_name="owned_organizations", null=True)
+    owner = models.ForeignKey(User, related_name="owned_organizations", null=True, on_delete=models.SET_NULL)
 
     HEADLESS_ORG_NAME = "Unclaimed Networks"
     HEADLESS_ORG_PK = None  # keep the primary key of the headless org around, for efficiency

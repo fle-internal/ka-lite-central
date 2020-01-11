@@ -56,7 +56,7 @@ class Command(NoArgsCommand):
 
         """
         total_deleted = 0
-        for profile in RegistrationProfile.objects.all():
+        for profile in RegistrationProfile.objects.all().select_related("profile", "profile__user"):
             if profile.activation_key_expired():
                 user = profile.user
                 if not user.is_active:
