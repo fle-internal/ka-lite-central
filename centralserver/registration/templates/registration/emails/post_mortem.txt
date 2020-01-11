@@ -1,0 +1,26 @@
+Dear {{ name }},
+
+We have disconnected the main components of KA Lite's Central Server. It allowed
+users to aggregate data from KA Lite devices, which could operate in an offline
+environment and upon online access sync data "up" and "down" to the
+Central Server:
+
+- Learner and coach data
+- Exercise attempt logs
+- Video logs
+- Device logs
+- Rating logs
+
+
+
+
+--
+Regards,
+The Learning Equality team 
+
+info@learningequality.org
+
+www.learningequality.org
+www.github.com/learningequality
+www.facebook.com/learningequality
+www.twitter.com/learneq
