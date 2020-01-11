@@ -6,11 +6,9 @@ from optparse import make_option
 from django.core import mail
 from django.core.management.base import BaseCommand, CommandError
 
-from django.db.models import Count, Max, Min
 
 from ...models import RegistrationProfile
 
-from centralserver.central.models import Organization
 from django import template
 from django.template.base import TemplateDoesNotExist
 from django.template.context import Context
@@ -74,11 +72,10 @@ class Command(BaseCommand):
             registrations = registrations.exclude(
                 user__last_login__gte=min_date
             ) 
-
+        
         print(
             "Number of emails to send: {}".format(registrations.count())
         )
-
 
         connection = mail.get_connection()
         
@@ -97,7 +94,7 @@ class Command(BaseCommand):
             email1 = mail.EmailMessage(
                 subject.strip(),
                 body,
-                'info@learningequality.org',
+                'kalite@learningequality.org',
                 receiver_list,
                 connection=connection,
             )
