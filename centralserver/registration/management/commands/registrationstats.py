@@ -1,10 +1,6 @@
 """
-A management command which deletes expired accounts (e.g.,
-accounts which signed up but never activated) from the database.
-
-Calls ``RegistrationProfile.objects.delete_expired_users()``, which
-contains the actual logic for determining which accounts are deleted.
-
+Display stats about registrations and usage of the Central Server directly
+in the terminal.
 """
 
 from django.core.management.base import BaseCommand
@@ -18,7 +14,7 @@ from kalite.topic_tools.content_models import get_content_item
 
 
 class Command(BaseCommand):
-    help = "Delete expired user registrations from the database"
+    help = "Displays basic anonymized stats from registrations and usage"
 
     def handle(self, *args, **options):
         
