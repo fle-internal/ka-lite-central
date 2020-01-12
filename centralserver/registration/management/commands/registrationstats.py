@@ -4,13 +4,12 @@ in the terminal.
 """
 
 from django.core.management.base import BaseCommand
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Count
 
 from kalite.main.models import AttemptLog, ExerciseLog
 from ...models import RegistrationProfile
 from securesync.engine.models import SyncSession
 from securesync.devices.models import Device
-from kalite.topic_tools.content_models import get_content_item
 
 
 class Command(BaseCommand):
@@ -58,11 +57,15 @@ class Command(BaseCommand):
         exercises = ExerciseLog.objects.filter(complete=True).values("exercise_id").annotate(
             attempts_avg=Avg("attempts_before_completion"),
             attempts=Sum("attempts_before_completion"),
-        ).order_by("-attempts")[:10]
+            completions=Count("exercise_id"),
+        ).order_by("-completions")[:10]
 
         for exercise in exercises:
-            title = get_content_item(content_id=exercise["exercise_id"])
-            print("{}: {} avg. attempts".format(title, exercise["attempts_avg"]))
+            print("{}: completed {} times with {} avg. attempts".format(
+                exercise["exercise_id"],
+                exercise["completions"],
+                exercise["attempts_avg"],
+            ))
 
         print("------------------------------")
         print(" Exercises, Top 10 hardest")
@@ -74,5 +77,4 @@ class Command(BaseCommand):
         ).order_by("-attempts_avg")[:10]
 
         for exercise in exercises:
-            title = get_content_item(content_id=exercise["exercise_id"])
-            print("{}: {} attempts".format(title, exercise["attempts"]))
+            print("{}: {} avg. attempts".format(exercise["exercise_id"], exercise["attempts_avg"]))
