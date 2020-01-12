@@ -209,7 +209,7 @@ class RegistrationModelTests(TestCase):
         self.assertEqual(RegistrationProfile.objects.count(), 1)
         self.assertRaises(User.DoesNotExist, User.objects.get, username='bob')
 
-    def test_management_command(self):
+    def test_command_cleanupregistration(self):
         """
         The ``cleanupregistration`` management command properly
         deletes expired accounts.
@@ -227,3 +227,11 @@ class RegistrationModelTests(TestCase):
         management.call_command('cleanupregistration')
         self.assertEqual(RegistrationProfile.objects.count(), 1)
         self.assertRaises(User.DoesNotExist, User.objects.get, username='bob')
+
+    def test_command_registrationstats(self):
+        """
+        The ``cleanupregistration`` management command properly
+        deletes expired accounts.
+
+        """
+        management.call_command('registrationstats')
