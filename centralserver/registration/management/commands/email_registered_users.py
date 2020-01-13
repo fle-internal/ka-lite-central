@@ -12,6 +12,7 @@ from ...models import RegistrationProfile
 from django import template
 from django.template.base import TemplateDoesNotExist
 from django.template.context import Context
+from django.contrib.auth.models import User
 
 
 class Command(BaseCommand):
@@ -66,28 +67,31 @@ class Command(BaseCommand):
             user__email=None
         ).order_by(
             "-id"
-        )
+        ).select_related("user")
         
         if min_date:
             registrations = registrations.exclude(
                 user__last_login__gte=min_date
             ) 
         
+        emails = set([reg.user.email for reg in registrations])
+        
         print(
-            "Number of emails to send: {}".format(registrations.count())
+            "Number of emails to send: {}".format(len(emails))
         )
 
         connection = mail.get_connection()
         
         connection.open()
 
-        for reg in registrations:
+        for email in emails:
+            user = User.objects.filter(email__iexact=email)[0]
             receiver_list = [
-                reg.user.email if not test_email else test_email
+                email if not test_email else test_email
             ]
             context = Context({
-                'name': reg.user.get_full_name(),
-                'email': reg.user.email
+                'name': user.get_full_name(),
+                'email': email
             })
             body = t_body.render(context)
             subject = t_subject.render(context)
@@ -100,7 +104,7 @@ class Command(BaseCommand):
             )
             try:
                 email1.send(fail_silently=False)
-                email_log.write("{}\n".format(reg.user.email))
+                email_log.write("{}\n".format(email))
             except:
                 print("Failed sending to: {}".format(receiver_list[0]))
                 raise
