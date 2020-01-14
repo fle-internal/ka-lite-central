@@ -66,7 +66,9 @@ def org_management(request, org_id=None):
 
     zones = {}
     
-    zones_qs = org.get_zones()
+    zones_qs = Zone.objects.filter(
+        organization__pk__in=[org.pk for org in organizations.values()]
+    ).order_by("name")
     zones_paginator = Paginator(zones_qs, 20)
     
     page_query = request.GET.get("zones_page", "1")
