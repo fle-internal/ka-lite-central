@@ -37,6 +37,11 @@ class Command(BaseCommand):
 
         print("Syncs per device: {}".format(float(sync_sessions) / devices))
         
+        for year in range(2014, 2021):
+            last_login = RegistrationProfile.objects.filter(user__last_login__year=year).count()
+            print("Last login {}: {}".format(year, last_login))
+
+        print("")
         print("------------------------------")
         print(" Exercises, attempts")
         print("------------------------------")
