@@ -24,8 +24,8 @@ class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('-y', '--yes',
-            action='store',
-            dest='store_true',
+            action='store_true',
+            dest='confirm',
             help='Sends emails, otherwise just prints a test email and a count.',
         ),
         make_option('-l', '--last-login-gte',
@@ -40,6 +40,12 @@ class Command(BaseCommand):
             default=None,
             help='Send one email here and exit',
         ),
+        make_option('-s', '--skip',
+            action='store',
+            dest='skip_log',
+            default=None,
+            help='A file full of emails to skip',
+        ),
     )
 
     def handle(self, *args, **options):
@@ -49,7 +55,17 @@ class Command(BaseCommand):
         template_name = args[0]
         min_date = options.get("min_date", None)
         test_email = options.get("test_email", None)
+        confirm = options.get("confirm", False)
+        skip_log = options.get("skip_log", None)
         
+        assert test_email or confirm
+        
+        if skip_log:
+            skip_log = open(skip_log, "r").read().strip().split("\n")
+            print("Skipping {} emails".format(len(skip_log)))
+        else:
+            skip_log = []
+
         email_log = open(
             "email_log_{}_{}.log".format(template_name, datetime.now().strftime("%Y%m%d_%H%M%s")),
             "w"
@@ -89,6 +105,10 @@ class Command(BaseCommand):
             receiver_list = [
                 email if not test_email else test_email
             ]
+            if receiver_list[0] in skip_log:
+                print("Skipping {}".format(receiver_list[0]))
+                continue
+
             context = Context({
                 'name': user.get_full_name(),
                 'email': email
