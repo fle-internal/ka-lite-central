@@ -42,7 +42,7 @@ class Organization(ExtendedModel):
     country = models.CharField(max_length=100, blank=True)
     users = models.ManyToManyField(User)
     zones = models.ManyToManyField(Zone)
-    owner = models.ForeignKey(User, related_name="owned_organizations", null=True)
+    owner = models.ForeignKey(User, related_name="owned_organizations", null=True, on_delete=models.SET_NULL)
 
     HEADLESS_ORG_NAME = "Unclaimed Networks"
     HEADLESS_ORG_PK = None  # keep the primary key of the headless org around, for efficiency
@@ -158,21 +158,21 @@ class UserProfile(ExtendedModel):
 
         return orgs
 
-    def has_permission_for_object(self, object):
+    def has_permission_for_object(self, obj):
 
         # super users have access to every object
         if self.user.is_superuser:
             return True
 
         # we can only grant permissions for syncable models (might be good to raise an exception here instead)
-        if not hasattr(object, "get_zone"):
+        if not hasattr(obj, "get_zone"):
             return False
 
         # allow access if the object's zone belongs to an org of which the user is a member
-        if isinstance(object, Zone):
+        if isinstance(obj, Zone):
             zone = object
         else:
-            zone = object.get_zone()
+            zone = obj.get_zone()
         for org in Organization.from_zone(zone):
             if org.is_member(self.user):
                 return True

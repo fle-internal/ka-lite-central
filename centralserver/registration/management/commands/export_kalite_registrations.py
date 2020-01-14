@@ -12,7 +12,7 @@ from django.db import connection
 
 from ...models import RegistrationProfile
 
-from securesync.models import Zone, SyncSession, Device, UnregisteredDevice
+from securesync.models import Zone, Device, UnregisteredDevice
 from centralserver.central.models import Organization
 
 

@@ -13,6 +13,7 @@ from django.core import management
 from django.test import TestCase
 
 from ..models import RegistrationProfile
+from django.core.management import call_command
 
 
 class RegistrationModelTests(TestCase):
@@ -195,8 +196,8 @@ class RegistrationModelTests(TestCase):
         deletes inactive users whose activation window has expired.
 
         """
-        new_user = RegistrationProfile.objects.create_inactive_user(site=Site.objects.get_current(),
-                                                                    **self.user_info)
+        RegistrationProfile.objects.create_inactive_user(site=Site.objects.get_current(),
+                                                         **self.user_info)
         expired_user = RegistrationProfile.objects.create_inactive_user(site=Site.objects.get_current(),
                                                                         username='bob',
                                                                         password='secret',
@@ -204,11 +205,11 @@ class RegistrationModelTests(TestCase):
         expired_user.date_joined -= datetime.timedelta(days=settings.ACCOUNT_ACTIVATION_DAYS + 1)
         expired_user.save()
 
-        RegistrationProfile.objects.delete_expired_users()
+        call_command("cleanupregistration")
         self.assertEqual(RegistrationProfile.objects.count(), 1)
         self.assertRaises(User.DoesNotExist, User.objects.get, username='bob')
 
-    def test_management_command(self):
+    def test_command_cleanupregistration(self):
         """
         The ``cleanupregistration`` management command properly
         deletes expired accounts.
@@ -226,3 +227,11 @@ class RegistrationModelTests(TestCase):
         management.call_command('cleanupregistration')
         self.assertEqual(RegistrationProfile.objects.count(), 1)
         self.assertRaises(User.DoesNotExist, User.objects.get, username='bob')
+
+    def test_command_registrationstats(self):
+        """
+        The ``cleanupregistration`` management command properly
+        deletes expired accounts.
+
+        """
+        management.call_command('registrationstats')

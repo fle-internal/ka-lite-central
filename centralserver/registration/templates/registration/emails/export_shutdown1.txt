@@ -1,0 +1,74 @@
+Dear {{ name }},
+
+You are receiving this email because you have a registered account on
+KA Lite Central Server or "Online Hub".
+
+Since the launch of our second generation platform, Kolibri, in
+December 2017, Learning Equality has stopped actively developing
+KA Lite. While the platform is still available for use, we will be
+discontinuing the ability to sync data to the KA Lite Central Server.
+This means that any data you have on the KA Lite Central Server will no
+longer be retrievable as of March 1, 2020.  
+
+If you want access to this data, we strongly encourage you to
+*retrieve and export* any data from your synced deployments
+*by March 1, 2020*. It will not be available after this date, and we
+will not be able to support you in accessing your data. You can login
+and download your data. Instructions are available here:
+
+https://kalite.learningequality.org/
+
+
+We would like to hear about your experiences with KA Lite so please:
+
+ - Share your story on the Community Forum:
+   https://community.learningequality.org/c/success-stories
+
+ - Add yourself to the KA Lite map:
+   https://learningequality.org/ka-lite/map/
+
+
+This will also help the continued evolution of our work to support our
+learners. As part of this change, we also recommend that you start to
+consider and plan your transition from KA Lite to Kolibri. Kolibri is
+built on years of lessons and feedback from KA Lite. Beyond having
+feature parity and Khan Academy videos and exercises, it also has a
+larger library of content, additional pedagogical support to educators
+to support just-in-time pedagogy, and tools for differentiated
+learning. And like KA Lite, it is free, Open Source and available for
+use offline.
+
+Learn more about Kolibri:
+
+ - On the main Kolibri website:
+   https://learningequality.org/kolibri/
+
+ - Starting with Kolibri for KA Lite users:
+   https://blog.learningequality.org/startwithkolibri-58227e98dde
+ 
+To get started with Kolibri:
+
+ - Explore the Kolibri demo site: 
+   https://kolibridemo.learningequality.org/
+
+ - Download Kolibri:
+   https://learningequality.org/download
+
+
+Again, we strongly encourage you to download your data from the KA Lite
+Central Server as it will no longer be available after March 1, 2020.
+If you do require a similar central data syncing service, please
+contact us via info@learningequality.org, so we can best assess your
+needs and how we can support.
+
+We apologize for any inconvenience caused as a result of this change,
+but we strongly believe that the shift to Kolibri will better support
+learners in the long-run. If you have any questions, we encourage you
+to post in the relevant discussion pages on our Community Forum about
+KA Lite and/or Kolibri:
+
+https://community.learningequality.org/
+
+
+With our warmest regards,
+The Learning Equality team
