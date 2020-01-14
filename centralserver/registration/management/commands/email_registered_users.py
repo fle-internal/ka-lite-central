@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('-y', '--yes',
-            action='store',
+            action='store_true',
             dest='confirm',
             help='Sends emails, otherwise just prints a test email and a count.',
         ),
