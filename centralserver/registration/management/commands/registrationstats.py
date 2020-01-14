@@ -77,4 +77,7 @@ class Command(BaseCommand):
         ).order_by("-attempts_avg")[:10]
 
         for exercise in exercises:
-            print("{}: {} avg. attempts".format(exercise["exercise_id"], exercise["attempts_avg"]))
+            print("{}: {} avg. attempts before completion".format(
+                exercise["exercise_id"],
+                exercise["attempts_avg"]
+            ))
