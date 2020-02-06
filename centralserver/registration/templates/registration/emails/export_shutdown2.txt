@@ -67,7 +67,8 @@ learners in the long-run. If you have any questions, we encourage you to
 post in the relevant discussion pages on our Community Forum about
 KA Lite and/or Kolibri:
 
- - Community Forums: https://community.learningequality.org/
+ - Community Forum:
+   https://community.learningequality.org/
 
 
 With our warmest regards,
