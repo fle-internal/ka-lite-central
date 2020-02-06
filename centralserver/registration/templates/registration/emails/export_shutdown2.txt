@@ -21,8 +21,8 @@ data. Instructions are available here:
 https://kalite.learningequality.org/
 
 
-* Please note that Kolibri will continue to make Khan Academy videos *
-* and exercises available. *
+Please note that *Kolibri* will continue to make Khan Academy videos and
+exercises available.
 
 As a reminder, KA Lite Central Server is the aggregated data from
 multiple installations can be synced and stored and is being
