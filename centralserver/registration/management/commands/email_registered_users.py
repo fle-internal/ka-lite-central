@@ -53,7 +53,7 @@ class Command(BaseCommand):
             raise CommandError("Need to supply a template name")
         
         template_name = args[0]
-        min_date = options.get("min_date", None)
+        min_date = options.get("last_login_gte", None)
         test_email = options.get("test_email", None)
         confirm = options.get("confirm", False)
         skip_log = options.get("skip_log", None)
