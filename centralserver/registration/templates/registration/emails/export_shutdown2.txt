@@ -1,7 +1,7 @@
 Dear {{ name }},
 
 You are receiving this reminder email, because you have a registered
-account on KA Lite’s  "Central Server" or "Hub", a data syncing service
+account on KA Lite's "Central Server" or "Hub", a data syncing service
 that is about to be discontinued. Please read on:
 
 Since the launch of our second generation platform, Kolibri, in
