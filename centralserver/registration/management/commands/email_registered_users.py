@@ -28,11 +28,11 @@ class Command(BaseCommand):
             dest='confirm',
             help='Sends emails, otherwise just prints a test email and a count.',
         ),
-        make_option('-l', '--last-login-gte',
+        make_option('-l', '--last-login-lte',
             action='store',
-            dest='last_login_gte',
+            dest='last_login_lte',
             default=None,
-            help='Lower bound on last_login date "greater than or equal to" (midnight, so includes that date)',
+            help='Upper bound on last_login date "smaller than or equal to" (midnight, so includes that date)',
         ),
         make_option('-t', '--test-email',
             action='store',
@@ -53,7 +53,7 @@ class Command(BaseCommand):
             raise CommandError("Need to supply a template name")
         
         template_name = args[0]
-        min_date = options.get("min_date", None)
+        max_date = options.get("last_login_lte", None)
         test_email = options.get("test_email", None)
         confirm = options.get("confirm", False)
         skip_log = options.get("skip_log", None)
@@ -85,11 +85,11 @@ class Command(BaseCommand):
             "-id"
         ).select_related("user")
         
-        if min_date:
+        if max_date:
             registrations = registrations.exclude(
-                user__last_login__gte=min_date
+                user__last_login__gte=max_date
             ) 
-        
+
         emails = set([reg.user.email for reg in registrations])
         
         print(

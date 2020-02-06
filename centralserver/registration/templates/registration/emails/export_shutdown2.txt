@@ -1,7 +1,7 @@
 Dear {{ name }},
 
 You are receiving this reminder email, because you have a registered
-account on KA Lite’s  "Central Server" or "Hub", a data syncing service
+account on KA Lite's "Central Server" or "Hub", a data syncing service
 that is about to be discontinued. Please read on:
 
 Since the launch of our second generation platform, Kolibri, in
@@ -21,8 +21,8 @@ data. Instructions are available here:
 https://kalite.learningequality.org/
 
 
-* Please note that Kolibri will continue to make Khan Academy videos *
-* and exercises available. *
+Please note that *Kolibri* will continue to make Khan Academy videos and
+exercises available.
 
 As a reminder, KA Lite Central Server is the aggregated data from
 multiple installations can be synced and stored and is being
