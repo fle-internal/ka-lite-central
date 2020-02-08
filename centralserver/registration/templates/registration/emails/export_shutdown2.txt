@@ -4,30 +4,26 @@ You are receiving this reminder email, because you have a registered
 account on KA Lite's "Central Server" or "Hub", a data syncing service
 that is about to be discontinued. Please read on:
 
-Since the launch of our second generation platform, Kolibri, in
+Since the launch of our second generation platform, *Kolibri*, in
 December 2017, Learning Equality has stopped actively developing
 KA Lite. While KA Lite is still available for use, we will be
 discontinuing the ability to sync data to the KA Lite Central Server,
 and are encouraging users to start the transition to Kolibri. This means
 that any data you have on the KA Lite Central Server will no longer be
-retrievable as of March 1, 2020.  
+retrievable *as of March 1, 2020*.  
 
-If you want access to this data, we strongly encourage you to retrieve
-and export any data from your synced deployments by March 1, 2020. It
-will not be available after this date, and we will not be able to
-support you in accessing your data. You can login and download your
-data. Instructions are available here:
+If you want access to this data, we strongly encourage you to export any
+data from your synced deployments by March 1, 2020. It will not be
+available after this date, and we will not be able to support you in
+accessing your data.
+
+You can login and download your data. Instructions are available here:
 
 https://kalite.learningequality.org/
 
 
 Please note that *Kolibri* will continue to make Khan Academy videos and
 exercises available.
-
-As a reminder, KA Lite Central Server is the aggregated data from
-multiple installations can be synced and stored and is being
-discontinued. Please note that Kolibri will continue to make Khan
-Academy videos and exercises available.
 
 We hope that you will start considering and planning your transition to
 Kolibri as well. Kolibri is built on years of lessons and feedback from
@@ -36,7 +32,6 @@ exercises, it also has a larger library of content, additional
 pedagogical support to educators to support just-in-time pedagogy, and
 tools for differentiated learning. And like KA Lite, it is free, Open
 Source and available for use offline.
-
 
 Learn more about Kolibri:
 
