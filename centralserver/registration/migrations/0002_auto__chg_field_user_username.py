@@ -1,3 +1,7 @@
+# THIS MIGRATION MIGRATES A COMPLETELY DIFFERENT APP!!!
+# WHY???
+# THIS IS SO MEAN!!
+
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
