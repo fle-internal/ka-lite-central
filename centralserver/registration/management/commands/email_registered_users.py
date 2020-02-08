@@ -13,6 +13,7 @@ from django import template
 from django.template.base import TemplateDoesNotExist
 from django.template.context import Context
 from django.contrib.auth.models import User
+from postmark.backends import PostmarkMailUnprocessableEntityException
 
 
 class Command(BaseCommand):
@@ -78,7 +79,8 @@ class Command(BaseCommand):
             raise CommandError("Use the file name of something in registration/emails/")
         
         registrations = RegistrationProfile.objects.filter(
-            activation_key=RegistrationProfile.ACTIVATED
+            activation_key=RegistrationProfile.ACTIVATED,
+            unsubscribe_decomissioning_emails=False,
         ).exclude(
             user__email=None
         ).order_by(
@@ -125,6 +127,13 @@ class Command(BaseCommand):
             try:
                 email1.send(fail_silently=False)
                 email_log.write("{}\n".format(email))
+            except PostmarkMailUnprocessableEntityException:
+                RegistrationProfile.objects.filter(
+                    user__email__iexact=email
+                ).update(
+                    unsubscribe_decomissioning_emails=True
+                )
+                print("Email previously unsubscribed/bounced: {}".format(email))
             except:
                 print("Failed sending to: {}".format(receiver_list[0]))
                 raise
