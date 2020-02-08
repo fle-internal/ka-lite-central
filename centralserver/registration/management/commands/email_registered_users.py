@@ -133,6 +133,7 @@ class Command(BaseCommand):
                 ).update(
                     unsubscribe_decomissioning_emails=True
                 )
+                print("Email previously unsubscribed/bounced: {}".format(email))
             except:
                 print("Failed sending to: {}".format(receiver_list[0]))
                 raise
