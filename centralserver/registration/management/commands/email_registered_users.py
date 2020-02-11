@@ -1,6 +1,9 @@
 """
 A command that mass-mails people.
 """
+import socket
+import time
+
 from datetime import datetime
 from optparse import make_option
 from django.core import mail
@@ -124,19 +127,27 @@ class Command(BaseCommand):
                 receiver_list,
                 connection=connection,
             )
-            try:
-                email1.send(fail_silently=False)
-                email_log.write("{}\n".format(email))
-            except PostmarkMailUnprocessableEntityException:
-                RegistrationProfile.objects.filter(
-                    user__email__iexact=email
-                ).update(
-                    unsubscribe_decomissioning_emails=True
-                )
-                print("Email previously unsubscribed/bounced: {}".format(email))
-            except:
-                print("Failed sending to: {}".format(receiver_list[0]))
-                raise
+            
+            for __ in range(5):
+                try:
+                    email1.send(fail_silently=False)
+                    email_log.write("{}\n".format(email))
+                    break
+                except socket.timeout:
+                    print("Timed out sending to {}, sleeping 1 second".format(email))
+                    time.sleep(1)
+                    continue
+                except PostmarkMailUnprocessableEntityException:
+                    RegistrationProfile.objects.filter(
+                        user__email__iexact=email
+                    ).update(
+                        unsubscribe_decomissioning_emails=True
+                    )
+                    print("Email previously unsubscribed/bounced: {}".format(email))
+                    break
+                except:
+                    print("Failed sending to: {}".format(receiver_list[0]))
+                    raise
                 
             if test_email:
                 print("Exiting test, check that {} received an email".format(test_email))
