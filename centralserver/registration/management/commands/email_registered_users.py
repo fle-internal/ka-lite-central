@@ -1,6 +1,9 @@
 """
 A command that mass-mails people.
 """
+import socket
+import time
+
 from datetime import datetime
 from optparse import make_option
 from django.core import mail
@@ -13,6 +16,7 @@ from django import template
 from django.template.base import TemplateDoesNotExist
 from django.template.context import Context
 from django.contrib.auth.models import User
+from postmark.backends import PostmarkMailUnprocessableEntityException
 
 
 class Command(BaseCommand):
@@ -28,11 +32,11 @@ class Command(BaseCommand):
             dest='confirm',
             help='Sends emails, otherwise just prints a test email and a count.',
         ),
-        make_option('-l', '--last-login-gte',
+        make_option('-l', '--last-login-lte',
             action='store',
-            dest='last_login_gte',
+            dest='last_login_lte',
             default=None,
-            help='Lower bound on last_login date "greater than or equal to" (midnight, so includes that date)',
+            help='Upper bound on last_login date "smaller than or equal to" (midnight, so includes that date)',
         ),
         make_option('-t', '--test-email',
             action='store',
@@ -53,7 +57,7 @@ class Command(BaseCommand):
             raise CommandError("Need to supply a template name")
         
         template_name = args[0]
-        min_date = options.get("min_date", None)
+        max_date = options.get("last_login_lte", None)
         test_email = options.get("test_email", None)
         confirm = options.get("confirm", False)
         skip_log = options.get("skip_log", None)
@@ -78,18 +82,19 @@ class Command(BaseCommand):
             raise CommandError("Use the file name of something in registration/emails/")
         
         registrations = RegistrationProfile.objects.filter(
-            activation_key=RegistrationProfile.ACTIVATED
+            activation_key=RegistrationProfile.ACTIVATED,
+            unsubscribe_decomissioning_emails=False,
         ).exclude(
             user__email=None
         ).order_by(
             "-id"
         ).select_related("user")
         
-        if min_date:
+        if max_date:
             registrations = registrations.exclude(
-                user__last_login__gte=min_date
+                user__last_login__gte=max_date
             ) 
-        
+
         emails = set([reg.user.email for reg in registrations])
         
         print(
@@ -122,12 +127,27 @@ class Command(BaseCommand):
                 receiver_list,
                 connection=connection,
             )
-            try:
-                email1.send(fail_silently=False)
-                email_log.write("{}\n".format(email))
-            except:
-                print("Failed sending to: {}".format(receiver_list[0]))
-                raise
+            
+            for __ in range(5):
+                try:
+                    email1.send(fail_silently=False)
+                    email_log.write("{}\n".format(email))
+                    break
+                except socket.timeout:
+                    print("Timed out sending to {}, sleeping 1 second".format(email))
+                    time.sleep(1)
+                    continue
+                except PostmarkMailUnprocessableEntityException:
+                    RegistrationProfile.objects.filter(
+                        user__email__iexact=email
+                    ).update(
+                        unsubscribe_decomissioning_emails=True
+                    )
+                    print("Email previously unsubscribed/bounced: {}".format(email))
+                    break
+                except:
+                    print("Failed sending to: {}".format(receiver_list[0]))
+                    raise
                 
             if test_email:
                 print("Exiting test, check that {} received an email".format(test_email))
