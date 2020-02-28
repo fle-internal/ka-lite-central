@@ -1,3 +1,7 @@
+# Email log files generated from management command
+*.log
+
+# Old stuff, uncommented
 centralserver/csv_exports
 .coverage
 geckodriver.log
