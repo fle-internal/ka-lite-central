@@ -26,33 +26,6 @@
             </div>
         {% endif %}
 
-        <div class="row-fluid">
-            <div class="span12">
-                <div class="ka-quote">
-                    <div class="max-width-container">
-                        <h2>Welcome to the <strong>Hub</strong></h2>
-                        {% if not user.is_authenticated %}
-                            <form class="form-inline" method="post" action="{% url 'auth_login' %}">
-                                {% csrf_token %}
-                                <input class="form-control" id="id_username" type="text" name="username" placeholder="Email" maxlength="75">
-                                <input class="form-control" type="password" name="password" placeholder="Password" id="id_password">
-                                <input type="hidden" name="{{ redirect.name }}" value="{{ redirect.url }}" />
-                                <input type="hidden" name="prev" value="{{ prev }}" />
-                                <input type="submit" class="button--small" value="{% trans 'Log in' %}" />
-                            </form>
-                            <p></p>
-                            <p>
-                                Login to <strong><em>view synced usage data from your offline deployments</em></strong>.</br><small>You can also <a href="{% url 'registration_register' %}">sign up</a> if you don't have an account, or <a href="{% url 'auth_password_reset' %}">reset your password</a>.</small>
-                            </p>
-                        {% else %}
-                            <p>
-                                You are currently logged in.
-                            </p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="row-fluid" id="about-hub">
@@ -69,7 +42,7 @@
                 </div>
                 <p></p>
                 <div class="col-md-6" id="data-hub-info">
-                    <h2>With the <a href="http://learningequality.org/ka-lite/">KA Lite</a> Hub, you can:</h2>
+                    <h2>With the <a href="http://learningequality.org/ka-lite/">KA Lite</a> Hub, you <strike>can</strike> could:</h2>
                     <ul>
                         <li><i class="glyphicon glyphicon-check"></i>&nbsp;Manage organizations, sharing networks, facilities, and devices.</li>
                         <li><i class="glyphicon glyphicon-check"></i>&nbsp;Review usage and engagement data from your deployments.</li>

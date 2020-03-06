@@ -108,21 +108,15 @@
                             <ul class="nav navbar-nav navbar-right nav-tabs header__horizontal-menu" role="tablist">
                                 <li>
                                   <a href="https://learningequality.org/ka-lite/" target="_blank">
-                                    {% trans "About" %}
+                                    {% trans "About KA Lite" %}
                                   </a>
                                 </li>
-                                {% if not user.is_authenticated %}
-                                  <li>
-                                    <a href="{% url 'auth_login' %}" id="login" class="{% block login_active %}{% endblock login_active %}">
-                                      {% trans "Login" %}
-                                    </a>
-                                  </li>
-                                  <li>
-                                    <a href="{% url 'registration_register' %}" id="sign_up" class="{% block signup_active %}{% endblock signup_active %}">
-                                      {% trans "Sign Up" %}
-                                    </a>
-                                  </li>
-                                {% else %}
+                                <li>
+                                  <a href="https://learningequality.org/kolibri/" target="_blank">
+                                    {% trans "About Kolibri" %}
+                                  </a>
+                                </li>
+                                {% if user.is_authenticated %}
                                   <li>
                                     <a href="{% url 'org_management' %}" class="{% block control_panel_active %}{% endblock control_panel_active %}">
                                       {% trans "Home" %}
@@ -159,17 +153,17 @@
           </div>
 
         <div id="closing">
-            <div class="alert alert-warning">
+            <div class="alert alert-danger">
                 <div class="max-width-container">
                     <div id="announcement-text-container">
                     
-                    <h3>Important announcement: KA Lite Central Server deprecation</h3>
+                    <h3>KA Lite Central Server: Closed access since March 1st 2020</h3>
                     
-                    <p>The KA Lite Central Server is in the process of being deprecated.</p>
+                    <p>The server infrastructure behind KA Lite's online sync'ing is in "legacy mode".</p>
                     
                     <p>
-                        <strong>You have until March 1st, 2020 to export your data.</strong>
-                        After that date, the service will be completely taken down.
+                        <strong>Devices can still synchronize.</strong>
+                        If you connect a new device, you can still use One-Click registration.
                     </p>
                     <p>
                         KA Lite is no longer being actively developed, and it's being replaced by
