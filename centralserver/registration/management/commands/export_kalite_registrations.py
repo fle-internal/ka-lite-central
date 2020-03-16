@@ -14,6 +14,7 @@ from ...models import RegistrationProfile
 
 from securesync.models import Zone, Device, UnregisteredDevice
 from centralserver.central.models import Organization
+from securesync.engine.models import SyncSession
 
 
 def registrations_per_day(csv_file):
@@ -67,6 +68,60 @@ def registrations_per_day(csv_file):
                 break
         
         csv_file.write("{},{},{},{}\n".format(registration["date"], registration["date"].strftime("%B %Y"), registration["date"].strftime("%Y-%m"), registration["regs"]))
+
+    csv_file.close()
+
+
+def sessions_per_day(csv_file):
+    """
+    Creates a CSV file with registrations per day. It's intended for creating a
+    graph from a pivot table in a spreadsheet.
+    
+    <date>,<year-month-humanized>,<year-month-sorted>,<registrations>
+    
+    Example:
+    
+    2019-05-05,May 2019,2019-05,2
+    2019-05-05,May 2019,2019-05,4
+    2019-06-01,June 2019,2019-06,1
+    """
+    
+    total_days = 365 * 5
+    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    sessions_per_day_from = now - timedelta(days=total_days)
+
+    truncate_date = connection.ops.date_trunc_sql('day', 'timestamp')
+
+    # Note the empty order_by(), that's on purpose to delete any ordering
+    # specified on Models, such that we don't mess up GROUP BY.
+    syncs_per_day = SyncSession.objects.filter(
+        timestamp__gte=sessions_per_day_from
+    ).order_by()
+    
+    syncs_per_day = syncs_per_day.extra({'date': truncate_date}).values(
+        'date'
+    ).annotate(
+        syncs=Count("pk")
+    ).values("date", "syncs").order_by("date")
+
+    all_days = [now - timedelta(days=sub) for sub in range(0, total_days)]
+    
+    if not syncs_per_day.exists():
+        print("No syncs found for summary")
+    
+    print("Looking into registrations per day. Found {} days with registrations.".format(syncs_per_day.count()))
+    
+    for sync in syncs_per_day:
+
+        while True and all_days:
+            day = all_days.pop()
+            if day < sync["date"]:
+                csv_file.write(
+                    "{},{},{},{}\n".format(day, day.strftime("%B %Y"), day.strftime("%Y-%m"), 0))
+            else:
+                break
+        
+        csv_file.write("{},{},{},{}\n".format(sync["date"], sync["date"].strftime("%B %Y"), sync["date"].strftime("%Y-%m"), sync["syncs"]))
 
     csv_file.close()
 
@@ -201,6 +256,12 @@ class Command(BaseCommand):
             "w"
         )
         registrations_per_day(f)
+
+        f = open(
+            os.path.join(root_folder, "{}_sessions_per_day.csv".format(now_prefix)),
+            "w"
+        )
+        sessions_per_day(f)
 
         min_date = options.get("min_date", None)
  
